@@ -1,5 +1,5 @@
 
-# CS2910 — Master's Project
+# CS2910: Master's Project
 
 **University of Pittsburgh**  
 **School of Computing and Information**  

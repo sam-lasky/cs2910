@@ -615,21 +615,8 @@ void Usage(int argc, char **argv)
       num_clients_to_emulate = tmp;
       argc--; argv++;
     }
-    /* -LS used for outputting purposes to print the link speed of the test*/
-    else if((argc > 1) && !strcmp(*argv, "-LS")) 
-    {
-      link_speed = atoi(argv[1]);
-      argc--; argv++;
-    }
-    /* -trialnum records the trial num of the test*/
-    else if((argc > 1) && !strcmp(*argv, "-trialnum")) 
-    {
-        trial_num = atoi(argv[1]);
-        argc--; argv++;
-    }
-
-
-   else {
+   else 
+   {
       Print_Usage();
     }
   }

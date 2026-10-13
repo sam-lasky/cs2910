@@ -1,0 +1,7 @@
+# Add the IP address of each container being used, one per line. Lines starting with # indicate comments and are ignored. 
+172.20.0.2
+172.20.0.3
+172.20.0.4
+172.20.0.5
+172.20.0.6
+172.20.0.7

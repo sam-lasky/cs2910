@@ -132,9 +132,11 @@ def main():
     machine_id = int(socket.gethostname().split('.')[0][5:])
     print(f'Now running on Aster {machine_id}')
 
-    # should be in cs2910/aster - run the config to update files accordingly using config_setup.py
+    # should be in cs2910/aster - run the config to update files accordingly using config.py
+    # located in '../configure' using the command line argument "aster"
     subprocess.run(
-        ["python", "config_setup.py","d"],
+        ["python", "config.py","aster"],
+        cwd='../configure',
         text=True)
 
     # update repo and only remake/setup in the event of an update

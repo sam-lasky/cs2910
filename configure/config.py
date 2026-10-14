@@ -20,7 +20,6 @@ import sys, subprocess, os, ipaddress; from pathlib import Path
 # the maximum number of benign faults. An error is reported & the program is exited
 #  if this requirement is not satisfied, otherwise it returns to the calling function. 
 def validate_config(replica_list):
-
     # open def.h
     with open('../prime/src/def.h','r') as f:
         NUM_F = None
@@ -150,7 +149,7 @@ def update_files(replica_list,config):
 # <aster>: builds the configuration using the aster machine ip addresses located in config_files/aster_machines_used.txt
 # <skip>: this entire process is skipped & assumes the configuration information is correct.   
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in ['docker', 'aster','existing_fresh','existing_preserve','skip']:
+    if len(sys.argv) != 2 or sys.argv[1] not in ['docker', 'aster','skip']:
         print("Usage: python config.py <docker|aster|skip>")
         sys.exit(1)
     

@@ -11,6 +11,13 @@ if len(sys.argv) != 2:
     print("Valid args: base, spines, prime")
     sys.exit(1)
 
+# subprocess.run(
+#     ["git", "pull"],
+#     cwd='../',
+#     text=True)
+# exit(1)
+
+
 build_type = sys.argv[1]
 
 # subprocess

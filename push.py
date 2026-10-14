@@ -15,8 +15,8 @@ def check_out(p:subprocess.CompletedProcess):
 
 def main():
     print("\n\n")
-    for command in ["git add .",f"git commit -m {datetime.now()}", "git push origin main"]:
-        p=subprocess.run(command, shell=True,capture_output=True)    
+    for command in ['git add .',f'git commit -m "{datetime.now()}"' , "git push origin main"]:
+        p=subprocess.run(command, shell=True,capture_output=True,text=True)    
         check_out(p)
 
 

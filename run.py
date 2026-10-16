@@ -126,7 +126,7 @@ def aster_start(runtime_config):
         ['py', '-3', 'push.py'],
         check=True
     )
-    subprocess.run(['py', '-3', 'aster.py'],cwd='aster' ,check=True)
+    subprocess.run(['py', '-3', 'startup_controller_windows.py'],cwd='aster' ,check=True)
 
 
 

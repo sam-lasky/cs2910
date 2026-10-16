@@ -86,7 +86,7 @@ def hash_files(docker_files):
 def process_build_request(image_type,highest_modified):
     # tracks all new images created to update hash values
     new_images=[]
-
+    print('test1')
     match image_type:
         # Build the base image using Dockerfile.base
         case "base":
@@ -104,6 +104,7 @@ def process_build_request(image_type,highest_modified):
             # get the current hashes of all docker files 
             current = hash_files(['base', 'spines', 'prime'])
 
+            print('test2')
             # Required rebuild
             rebuild = None
             # Check if prime has changed 
@@ -112,10 +113,10 @@ def process_build_request(image_type,highest_modified):
             if highest_modified==2 or stored['spines']!=current['spines'] :rebuild='spines'
             # check if base has changed. If it has then all other images must also be rebuilt
             if stored['base']!=current['base'] :rebuild='base'
+            print('test3')
 
             # Initiate rebuilds & Update hash values
             if rebuild is not None: 
-                print('we are here now!')
                 build_image(rebuild, new_images)
                 update_hashes(new_images)
     

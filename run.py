@@ -1,4 +1,5 @@
 import sys, subprocess, time, os, platform, json
+from datetime import datetime
 
 # Update the CS2910 repo & return the directories involved in the update
 # if changes were made otherwise return none. 
@@ -98,6 +99,7 @@ def parse_cli(args):
     print(f"  {'Environment':<22} {startup_config['environment']}")
     print(f"  {'Encryption':<22} {'Enabled' if startup_config['encryption'] else 'Disabled'}")
     print(f"  {'MAX_PO_IN_FLIGHT':<22} {startup_config['max_po']}")
+    print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
     print("═" * 46 + "\n")
 
     # return startup_config
@@ -121,7 +123,7 @@ def docker_start(runtime_config):
 # Start aster
 def aster_start(max_po, encryption_status):
     subprocess.run(
-        ["py", "-3", "run_controller.py", str(max_po), str(encryption_status)],
+        ["py", "-3", "aster/run_controller.py", str(max_po), str(encryption_status)],
         check=True
     )
 

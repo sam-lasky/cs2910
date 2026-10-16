@@ -113,7 +113,7 @@ def main():
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         id+=1
-    next_step = input('Next Choice: Kill all Sessions | Run tests')
+    next_step = input('\nNext Choice: Kill all Sessions | Run tests:\n>>')
     # stops all the processes on the aster machines and closes all the terminal windows locally
     if next_step=='kill':
         kill_all(sessions)

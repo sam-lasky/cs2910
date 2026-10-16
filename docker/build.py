@@ -86,7 +86,6 @@ def hash_files(docker_files):
 def process_build_request(image_type,highest_modified):
     # tracks all new images created to update hash values
     new_images=[]
-    print('test1')
     match image_type:
         # Build the base image using Dockerfile.base
         case "base":

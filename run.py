@@ -118,8 +118,9 @@ def docker_start(runtime_config):
         capture_output=True,
         text=True
     )
-    print('in docker?')
-
+    print("STDOUT:", repr(p.stdout))
+    print("STDERR:", repr(p.stderr))
+    print("RETURN CODE:", p.returncode)
 
 # Start aster
 def aster_start(runtime_config):

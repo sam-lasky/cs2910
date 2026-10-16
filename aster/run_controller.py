@@ -34,25 +34,16 @@ def kill_all(sessions):
     sessions.clear()
 
 
-def run_tests(sessions):
+def run_tests(sessions,max_po):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = ['no_limit']
     # total updates sent from the driver program to prime
-    total_updates = 1000
+    total_updates = 25000
     # number of clients the driver program emulates 
-    # num_emulated = [20, 30, 50, 75, 100, 150, 200, 300, 500, 750]
-    num_emulated = [ 100]
-
+    num_emulated = [20, 30, 50, 75, 100, 150, 200, 300, 500, 750]
     # num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
     num_trials = 3
-    max_po=None
-    # get max po (HACKY FIX THIS)
-    with open("../prime/src/def.h") as f:
-        for line in f:
-            if line.strip().startswith("#define MAX_PO_IN_FLIGHT "):
-                max_po = int(line.split()[2])
-                break
 
     # clear previous terminal output b4 displaying results
     print("\033[2J\033[H", end="", flush=True)
@@ -133,7 +124,7 @@ def main():
     print("Waiting 60 seconds for replicas to initialize...", flush=True)
     time.sleep(60)
     # run tests
-    run_tests(sessions)
+    run_tests(sessions, max_po)
     # wait 10 secs 
     print("Waiting 10 seconds before cleanup...", flush=True)
     time.sleep(10)

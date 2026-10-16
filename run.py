@@ -137,6 +137,8 @@ def main():
     # update the list of updated directories in runtime_config
     runtime_config['update']= list(set(updated_dirs+runtime_config['update']))
 
+    print('test test test')
+
     # Hand off control to the startup scripts 
     if runtime_config['environment']=='docker': docker_start(runtime_config)
     else: aster_start(runtime_config)

@@ -178,7 +178,7 @@ def modify_max_po(MAX_PO_IN_FLIGHT):
             check_line = line.split()
             if len(check_line)==3 and check_line[1] == 'MAX_PO_IN_FLIGHT':
                 # check if max_po vals are not the same & update line accordingly if it is the case
-                if check_line[2]!=MAX_PO_IN_FLIGHT:
+                if int(check_line[2])!=MAX_PO_IN_FLIGHT:
                     updated=1
                     line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'
             file_content+=line

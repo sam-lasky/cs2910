@@ -123,7 +123,7 @@ def main():
     print("Waiting 60 seconds for replicas to initialize...", flush=True)
     time.sleep(60)
     # run tests
-    run_tests(sessions, max_po)
+    run_tests(sessions, max_po, encrypted)
     # wait 10 secs 
     print("Waiting 10 seconds before cleanup...", flush=True)
     time.sleep(10)

@@ -128,7 +128,9 @@ def startup(aster_id, replica_id):
     spines.communicate()    
 
 def main():
-    max_po = sys.argv[1]
+    replica_id = sys.argv[1]
+    max_po = sys.argv[2]
+    
     # get the aster id 
     machine_id = int(socket.gethostname().split('.')[0][5:])
     print(f'Now running on Aster {machine_id}')
@@ -148,7 +150,6 @@ def main():
     setup_spines(machine_id)
     setup_prime(machine_id)
     # else:
-    replica_id = sys.argv[1]
     startup(machine_id,replica_id)
     
 if __name__ == "__main__":

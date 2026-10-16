@@ -2,7 +2,7 @@ import sys, subprocess, time, os, platform, json
 
 # Update the CS2910 repo & return the directories involved in the update
 # if changes were made otherwise return none. 
-def update_repo():
+def update_repo(runtime_config):
     # update the git repo, cwd should already be CS2910
     print("Checking for updates in CS2910 repository...")
     p = subprocess.run(
@@ -26,18 +26,19 @@ def update_repo():
     )
 
     # used to store directories that were updated
-    updated_dirs = None
+    updated_dirs = set()
     # report update status 
     update_status = changes.stdout.splitlines()
     # no change detected 
-    if len(update_status)==0:print("No repository updates detected.")
+    if len(update_status)==0:print("No repository updates detected.\n")
     # change detected, record updated directories & report update
     else:
         updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
-        print("Repository has been successfully updated.")
-    # return the dirs in the update
-    return updated_dirs
+        print("Repository has been successfully updated.\n")
 
+    # add update info to runtime_config (convert to list for eventual JSON serialization)
+    runtime_config['update']= list(updated_dirs)
+    
 # Usage
 def usage():
     print("Usage:")
@@ -49,7 +50,7 @@ def usage():
 def parse_cli(args):
     # startup configuration, default: docker, unencrypted, MAX_PO_IN_FLIGHT = 20
     startup_config = {'environment':'docker', 'encryption':0, 'max_po':20} 
-    
+
     # too many args (either 0 or 3)
     if len(args) not in [1,4]:
         print(f"Error: Expected <0|3> arguments, received {len(sys.argv) - 1}.")
@@ -79,26 +80,65 @@ def parse_cli(args):
     print(f"  {'MAX_PO_IN_FLIGHT':<22} {startup_config['max_po']}")
     print("═" * 46 + "\n")
 
-    # Write to startup_config.json so subsequent scripts can refer to this information
-    with open('startup_config.json', 'w') as f:
-        json.dump(startup_config, f, indent=4)
+    # return startup_config
+    return startup_config
 
-# [Personalized Startup Config]
-#       Usage: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>
-# [Default Startup Config] (environment = docker, unencrypted, MAX_PO_IN_FLIGHT=20)
-#       Usage: python3 run.py 
+# Start Docker
+def docker_start(runtime_config):
+    # tracks all the directories who's files have been modified in order
+    # to update images accordingly. 
+    modified_directories = runtime_config['update']
+    # build the images on auto mode
+    # update the configuration files in prime and spines
+    p = subprocess.run(
+        f"python3 build.py auto {len(modified_directories)}",
+        shell=True,
+        cwd='docker/',
+        capture_output=True,
+        text=True
+    )
+
+# Start aster
+def aster_start(runtime_config):
+    pass
+
+
+# [Personalized Startup Config]: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>
+# [Default Startup Config]: python3 run.py 
+# (default values: environment = docker, unencrypted, MAX_PO_IN_FLIGHT=20)
 def main():
     # clear terminal for easier readabilityd
     clear_cmd = 'cls' if platform.system()=='Windows' else 'clear'
     subprocess.run(clear_cmd, shell=True)
 
-    # get the environment, which gets passed as a CLI arg
-    parse_cli(sys.argv)
+    # get the environment, which gets passed as a CLI arg, returns the runtime_config as a dict that holds
+    # environment, encryption type, MAX_PO_IN_FLIGHT
+    runtime_config=parse_cli(sys.argv)
 
-    # update the repo & get the directories associated with the update (or none if up to date)
-    updated_dirs = update_repo()
- 
+    # update the repo & get the directories associated with the update (or none if up to date) and store in runtime_config
+    update_repo(runtime_config)
 
+    # update the configuration files in prime and spines
+    p = subprocess.run(
+        f"python3 config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
+        shell=True,
+        cwd='configure/',
+        capture_output=True,
+        text=True
+    )
+
+    # get the names of the dirs w/ modified files from config.py (if any)
+    print("Updating the configuration files for prime & spines...")
+    updated_dirs = p.stdout.strip().splitlines()[-1].split(',') if p.stdout.strip() else []
+    if p.returncode==0:
+        print("Configuration files successfully updated!\n")
+
+    # update the list of updated directories in runtime_config
+    runtime_config['update']= list(set(updated_dirs+runtime_config['update']))
+
+    # Hand off control to the startup scripts 
+    if runtime_config['environment']=='docker': docker_start(runtime_config)
+    else: aster_start(runtime_config)
 
 if __name__=="__main__":
     main()

@@ -1,9 +1,0 @@
-=================================================================================================
-Test Start Time:                             10/10/2026 01:23:39 AM
-Total updates per trial run:                 25000
-Bandwidth limitations used:                  [None, 100, 250, 500, 750]
-Number of Trials per Test Configuration:     5
-Maximum Outstanding Preorder Requests:       20
-Test Environment used:                       Aster
-Number of Prime Replicas used:               6
-=================================================================================================

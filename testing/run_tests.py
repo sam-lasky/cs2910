@@ -47,9 +47,6 @@ def alter_bandwidth_limit(action, test_environment, limits):
     if action=='init':
         pass
 
-    
-
-
 
 def run_tests(test_environment):
     test_parameters = {

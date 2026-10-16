@@ -9,7 +9,7 @@
 # requirement for the M.S. in Computer Science.
 # ============================================================
 
-import sys, subprocess, os, ipaddress; from pathlib import Path
+import sys, subprocess, os, ipaddress, json; from pathlib import Path
 
 # Inputs the list of candidate replicas (replica_list) which consists
 # of the replicas being used where each entry is a tuple in the form 
@@ -78,7 +78,7 @@ def load_replica_configuration(config):
                 # get line as a list, separated by whitespace 
                 line= line.split()
                 # skip comments and empty lines
-                if line[0]=='#' or len(line)==0:continue
+                if len(line)==0 or line[0]=='#': continue                
                 # checks if line is a valid ip address, if not raises an exception
                 ipaddress.IPv4Address(line[0])
                 # valid line, increment number of replicas 
@@ -99,73 +99,117 @@ def load_replica_configuration(config):
 # 1. prime/bin/address.config
 # 2. prime/bin/spines_address.config
 # 3. prime/spines/daemon/spines.conf
-def update_files(replica_list,config):
-    # write to prime/bin/address.config then prime/bin/spines_address.config
-    # both share the same line structure <replica_id> <replica_ip>
+def update_files(replica_list,encrypted):
+    # records the directory of a file that has changed
+    updated_directories=[]
+    # Create the output to both files. It is identical for both cases.
+    out=''
+    for replica in replica_list:
+        replica_id = replica[0]
+        replica_ip = replica[1]
+        # write line in form <replica_id> <replica_ip>
+        out+=f'{replica_id} {replica_ip}\n'
+
+    # first read in the file, compare it with out, and if it has changed replace it 
+    # and record the directory otherwise do nothing
     for config_path in ['../prime/bin/address.config', '../prime/bin/spines_address.config']:
-        with open(config_path, "w") as f:
-            for replica in replica_list:
-                replica_id = replica[0]
-                replica_ip = replica[1]
-                # write line in form <replica_id> <replica_ip>
-                f.write(f'{replica_id} {replica_ip}')
+        with open(config_path, "r") as f:
+            old_file = f.read()
+        # files are not the same, update & record
+        if old_file!=out:
+            with open(config_path, 'w') as f:
+                f.write(out)
+            updated_directories.append('prime')
 
     # create spines.conf by appending the replica configuration 
     # information to examples_spines.conf 
-    example_spines_lines = None
+    new_spines_conf=''
     with open('../prime/spines/daemon/example_spines.conf','r') as f:
-        example_spines_lines=f.readlines()
-    # create & write or overwrite '../prime/spines/daemon/example_spines.conf'
-    with open('../prime/spines/daemon/spines.conf','w') as f:
-        for line in example_spines_lines:
-            check_line = line.split()
-            # check if we are at the line where to start writing the replica information
-            # or edge information
+        for line in f:
+            # split the line
+            check_line= line.split()
+            # line nonempty & on the Hosts or Edges line 
             if check_line and check_line[0] in ['Hosts{','Edges{']:
-                # we are, write the current line and then write all the replica info 
-                f.write(line)
-                hosts=[]
+                # Add the Hosts{ or Edges{ line to new_spines_conf 
+                new_spines_conf+=line
                 # writing Hosts{...}
-                if check_line[0]=='Hosts{':      
+                if check_line[0]=='Hosts{':
                     for replica in replica_list:
-                        replica_id = replica[0]
-                        replica_ip = replica[1]
-                        # write <replica_id> <replica_ip> in Hosts{...}
-                        hosts.append(f'\t{replica_id} {replica_ip}')
-                    f.write('\n'.join(hosts))
+                        # Add <replica_id> <replica_ip> in Hosts{...}
+                        new_spines_conf += f'\t{replica[0]} {replica[1]}\n'
                 # writing Edges{...}
                 else:
-                    edges=[]
                     for i in range(0,len(replica_list)):
                         for j in range(i+1,len(replica_list)):
                             # write edge <replica_id replica_list[i]> <replica_id replica_list[j]> <cost>
-                            edges.append(f'\t{replica_list[i][0]} {replica_list[j][0]} 1')
-                    f.write('\n'.join(edges))
-            # we're not, write whatever is in the current line 
+                            new_spines_conf+= f'\t{replica_list[i][0]} {replica_list[j][0]} 1\n'
+            # neither case applies, add line as is
             else:
-                f.write(line)
+                new_spines_conf+=line
 
-# <docker>: builds the configuration using the container ip addresses located in config_files/docker_containers_used.txt
-# <aster>: builds the configuration using the aster machine ip addresses located in config_files/aster_machines_used.txt
-# <skip>: this entire process is skipped & assumes the configuration information is correct.   
+        if encrypted=='encrypted':
+            new_spines_conf = new_spines_conf.replace('IT_LinkCrypto = False', 'IT_LinkCrypto = True')
+            new_spines_conf = new_spines_conf.replace('IT_LinkEncrypt = False', 'IT_LinkEncrypt = True')
+
+    # Get the contents of the old spines.conf
+    old_spines_conf = ''
+    if os.path.exists('../prime/spines/daemon/spines.conf'):
+        with open('../prime/spines/daemon/spines.conf','r') as f:
+            old_spines_conf=f.read()
+
+    # If files dont not match, replace spines.conf and record 
+    # the directory in which this update occurred.
+    if new_spines_conf!=old_spines_conf:
+        with open('../prime/spines/daemon/spines.conf','w') as f:
+            f.write(new_spines_conf)
+            updated_directories.append('spines')
+
+    # return all the dirs that were changed
+    return updated_directories
+
+
+# modifies MAX_PO_IN_FLIGHT based off the CLI argument provided 
+def modify_max_po(MAX_PO_IN_FLIGHT):
+    file_content = ''
+    updated = 0
+
+    with open('../prime/src/def.h','r') as f:
+        for line in f.readlines():
+            check_line = line.split()
+            if len(check_line)==3 and check_line[1] == 'MAX_PO_IN_FLIGHT':
+                # check if max_po vals are not the same & update line accordingly if it is the case
+                if check_line[2]!=MAX_PO_IN_FLIGHT:
+                    updated=1
+                    line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'
+            file_content+=line
+
+    if updated:
+        with open('../prime/src/def.h','w') as f:
+            f.write(file_content)
+    return updated
+
+# Usage: python config.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT>
 def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in ['docker', 'aster','skip']:
-        print("Usage: python config.py <docker|aster|skip>")
-        sys.exit(1)
-    
+
     # get the config type 
-    config = sys.argv[1]
-    
-    # check if we are skipping the configuration process
-    if config=='skip':
-        print("Skipping the configuration process")
-        return
- 
+    environment = sys.argv[1]
+    encrypted = sys.argv[2]
+    max_po = sys.argv[3]
+
     # load the replica config from the text files
-    replica_list = load_replica_configuration(config)
+    replica_list = load_replica_configuration(environment)
    
-    # update prime/spines configuration files
-    update_files(replica_list, config)
+    # Update prime/spines configuration files, any 
+    # directories w/ files that have been modified
+    # are returned
+    updated_dirs = update_files(replica_list,encrypted)
+
+    # Modify MAX_PO_IN_FLIGHT in prime/src/def.h
+    if modify_max_po(max_po) and 'prime' not in updated_dirs:
+        updated_dirs.append('prime')
+
+    print(','.join(updated_dirs))
+
 
 if __name__=="__main__":
     main()

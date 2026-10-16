@@ -96,10 +96,6 @@
 
 /* Number of outstanding PO_requests that have not yet been executed */
 #define MAX_PO_IN_FLIGHT 20 
-// #define MAX_PO_IN_FLIGHT 50 ~1242
-// #define MAX_PO_IN_FLIGHT 75 ~1800
-// #define MAX_PO_IN_FLIGHT 20 ~1047
-
 
 
 /* How often to print that Prime is making progress - based on number of

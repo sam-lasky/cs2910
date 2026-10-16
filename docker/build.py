@@ -1,21 +1,5 @@
 import sys, subprocess, os, hashlib
 
-# Type of image you are trying to build:
-#   [1] base   ==>  create the image using Dockerfile.base
-#   [2] spines ==>  create the image using Dockerfile.spines, the previous image is required.
-#   [3] prime  ==>  create the image using Dockerfile.prime, the previous images are required.
-#   [4] auto   ==>  evaluates the hash values of the Dockerfiles used for the most recent 
-#                   image builds (stored in docker_hashes.txt) & if these vary with the current 
-#                   hash values rebuild the image to keep the most up to date version.  
-#                   
-
-def main():
-    # confirm correct input
-    if len(sys.argv) != 2:
-        print("Usage: python build.py <arg>")
-        print("Valid args: base, spines, prime, auto")
-        sys.exit(1)
-
 # Build a Docker image using the specified Dockerfile and image name.
 def build_image(docker_file, image_name):
     # report build start
@@ -97,16 +81,21 @@ def process_build_request(image_type):
     p.wait()
     # check for any issues
 
+# Type of image you are trying to build:
+#   [1] base   ==>  create the image using Dockerfile.base
+#   [2] spines ==>  create the image using Dockerfile.spines, the previous image is required.
+#   [3] prime  ==>  create the image using Dockerfile.prime, the previous images are required.
+#   [4] auto   ==>  evaluates the hash values of the Dockerfiles used for the most recent 
+#                   image builds (stored in docker_hashes.txt) & if these vary with the current 
+#                   hash values rebuild the image to keep the most up to date version.  
+#                   
 
-        
-
-
-
-
-
-
-
-
+def main():
+    # confirm correct input
+    if len(sys.argv) != 2:
+        print("Usage: python build.py <arg>")
+        print("Valid args: base, spines, prime, auto")
+        sys.exit(1)
 
 
 

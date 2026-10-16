@@ -109,28 +109,24 @@ def docker_start(runtime_config):
     # tracks all the directories who's files have been modified in order
     # to update images accordingly. 
     modified_directories = runtime_config['update']
-    # build the images on auto mode
-    # update the configuration files in prime and spines
-    # p = subprocess.run(
-    #     f"py -3 build.py auto {len(modified_directories)}",
-    #     shell=True,
-    #     cwd='docker/',
-    #     capture_output=True,
-    #     text=True
-    # )
 
+    # build the docker images 
     p = subprocess.run(
-    f"py -3 build.py auto {len(modified_directories)}",
-    shell=True,
-    cwd='docker/'
+        f"py -3 build.py auto {len(modified_directories)}",
+        shell=True,
+        cwd='docker/',
+        capture_output=True,
+        text=True
     )
-    print("STDOUT:", repr(p.stdout))
-    print("STDERR:", repr(p.stderr))
-    print("RETURN CODE:", p.returncode)
 
 # Start aster
 def aster_start(runtime_config):
-    pass
+    # pushes changes to github so aster machines pull the most up to date 
+    # version 
+    subprocess.run(
+        ['py', '-3', 'push.py'],
+        check=True
+    )
 
 
 # [Personalized Startup Config]: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>

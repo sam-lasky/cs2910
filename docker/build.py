@@ -3,7 +3,7 @@ import sys, subprocess, os, hashlib, json
 # Build a Docker image using the specified Dockerfile and image name.
 def build_image(docker_file, new_images: list[str]):  
     # report build start
-    print(f"Building {docker_file}-img using Dockerfile.{docker_file}")
+    print(f"Building {docker_file}-img using Dockerfile.{docker_file}...")
     # build the docker build command the subprocess will use 
     cmd = f"docker build --no-cache -f Dockerfile.{docker_file} -t {docker_file}-img ."
     # spawn a subprocess that builds the base image
@@ -105,7 +105,6 @@ def process_build_request(image_type,highest_modified):
             # get the current hashes of all docker files 
             current = hash_files(['base', 'spines', 'prime'])
 
-            print('test2')
             # Required rebuild
             rebuild = None
             # Check if prime has changed 
@@ -114,7 +113,6 @@ def process_build_request(image_type,highest_modified):
             if highest_modified==2 or stored['spines']!=current['spines'] :rebuild='spines'
             # check if base has changed. If it has then all other images must also be rebuilt
             if stored['base']!=current['base'] :rebuild='base'
-            print('test3')
 
             # Initiate rebuilds & Update hash values
             if rebuild is not None: 

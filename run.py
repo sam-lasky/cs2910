@@ -112,6 +112,7 @@ def docker_start(runtime_config):
     modified_directories = runtime_config['update']
     # build the images on auto mode
     # update the configuration files in prime and spines
+    print('in docker1')
     p = subprocess.run(
         f"py -3 build.py auto {len(modified_directories)}",
         shell=True,

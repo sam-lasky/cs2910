@@ -34,21 +34,22 @@ def kill_all(sessions):
     sessions.clear()
 
 
-def run_tests(sessions,max_po):
+def run_tests(sessions,max_po,encrypted):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = ['no_limit']
     # total updates sent from the driver program to prime
-    total_updates = 25000
+    total_updates = 60000
     # number of clients the driver program emulates 
     num_emulated = [20, 30, 50, 75, 100, 150, 200, 300, 500, 750]
     # num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
     num_trials = 3
+    hosts = ['aster13','aster14','aster15','aster16','aster17','aster18']
 
     # clear previous terminal output b4 displaying results
     print("\033[2J\033[H", end="", flush=True)
     for speed in bandwidth:
-        results_file = f"{speed}mbps_MAX_PO_{max_po}.txt"
+        results_file = f"{speed}mbps_MAX_PO_{max_po}_ENCRYPTED_{encrypted}.txt"
         if speed!='no_limit':
             # can't modify link speeds on aster w/o sudo
             for i in range(13, 19):
@@ -64,11 +65,6 @@ def run_tests(sessions,max_po):
                     ],
                     check=True
                 )
-            #     processes.append(p)
-
-            # for p in processes:
-            #     if p.wait() !=0:
-            #         raise RuntimeError(f"Failed setting up bandwidth of {speed} Mbps")
 
         for clients in num_emulated:
             for i in range(1,num_trials+1):
@@ -97,6 +93,9 @@ def run_tests(sessions,max_po):
 def main():
     # get max po
     max_po = sys.argv[1]
+    # get encrypted status
+    encrypted = sys.argv[2]
+    
     # clear terminal for easier readabilityd
     clear_cmd = 'cls' if platform.system()=='Windows' else 'clear'
     subprocess.run(clear_cmd, shell=True)
@@ -115,7 +114,7 @@ def main():
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'echo \\"$output\\"; '
             f'cd cs2910/aster && '
-            f'python3 -u startup_replica.py {id} {max_po} \\"$output\\""',
+            f'python3 -u startup_replica.py {id} {max_po} {encrypted} \\"$output\\""',
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         id+=1

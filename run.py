@@ -142,9 +142,8 @@ def main():
     # update the repo & get the directories associated with the update (or none if up to date) and store in runtime_config
     update_repo(runtime_config)
 
-
+    # start aster
     aster_start(runtime_config)
-    sleep(15)
     exit(0)
 
     # # # EVERYTHING BELOW IS CUT OFF CUS THIS APPROACH ISNT WORKING # # # 

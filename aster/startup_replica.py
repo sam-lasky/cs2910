@@ -26,6 +26,7 @@ def setup_spines(machine_id):
             check=True
         )
 
+        # TO DO: KEY GEN LOGIC!!!! 
         
         # if machine_id==13:
         #     print('Generating Spines keys...', flush=True)
@@ -78,6 +79,10 @@ def setup_prime(machine_id):
             check=True
         )
 
+
+        # TO DO: KEY GEN LOGIC!!!! 
+
+
         # if machine_id==13:
         #     print('Generating Prime keys...', flush=True)
         #     subprocess.run(
@@ -129,8 +134,12 @@ def startup(aster_id, replica_id):
     spines.communicate()    
 
 def main():
+    # unique identifier of this replica instance
     replica_id = sys.argv[1]
+    # max_po for def.h configuration
     max_po = sys.argv[2]
+    # encrypted (encrypted|plain) for spines config
+    encrypted = sys.argv[3]
     
     # get the aster id 
     machine_id = int(socket.gethostname().split('.')[0][5:])
@@ -139,18 +148,20 @@ def main():
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure' using the command line argument "aster"
     subprocess.run(
-        ["python", "config.py","aster","plain",max_po],
+        ["python", "config.py","aster",encrypted,max_po],
         cwd='../configure',
         text=True)
 
-
-
-    # update repo and only remake/setup in the event of an update
-    # git_pull_msg = sys.argv[2]
-    # if "Already up to date." not in git_pull_msg:
+    
+    # Set up spines
+    # >> Configure Spines
+    # >> Build Parser
+    # >> Build Spines
+    # >> Copy Keys ((TO DO: FIX KEY LOGIC))
     setup_spines(machine_id)
     setup_prime(machine_id)
-    # else:
+
+
     startup(machine_id,replica_id)
     
 if __name__ == "__main__":

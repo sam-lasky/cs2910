@@ -79,7 +79,7 @@ def parse_cli(args):
     # correct num received 
     if len(args)==4:
         # check if env is correct AND encryption choice is correct AND MAX_PO_IN_FLIGHT val correct
-        if (args[1] not in ["docker", "aster"]) or (args[2] not in ["encrypted","plain"]) or (args[3]<1):
+        if (args[1] not in ["docker", "aster"]) or (args[2] not in ["encrypted","plain"]) or (int(args[3])<1):
             print("Error: Invalid input")
             usage()
             exit(1)
@@ -90,8 +90,8 @@ def parse_cli(args):
             # update encryption type 
             startup_config['encryption']=args[2]
             # update MAX_PO
-            startup_config['max_po']=args[3]
-
+            startup_config['max_po']=int(args[3]
+)
     # Display startup configuration
     print("\n" + "═" * 46)
     print("           STARTUP CONFIGURATION")

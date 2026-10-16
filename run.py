@@ -143,7 +143,7 @@ def main():
 
     # update the configuration files in prime and spines
     p = subprocess.run(
-        f"python3 config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
+        f"python config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
         shell=True,
         cwd='configure/',
         capture_output=True,

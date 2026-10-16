@@ -9,7 +9,9 @@ def build_image(docker_file, new_images: list[str]):
     # spawn a subprocess that builds the base image
     p = subprocess.Popen(
         cmd,
-        shell=True
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
     )
     # wait for execution to finish
     p.wait()

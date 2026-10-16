@@ -3,11 +3,12 @@ import sys, subprocess, time, os, socket
 def kill_all(sessions):
     if sessions is None:
         for i in range(13, 19):
+            print(f"Cleaning Aster{i}...", flush=True)
             subprocess.run(
                 [
                     "ssh",
                     f"sjl79@aster{i}.cs.pitt.edu",
-                    "pkill -x prime; pkill -x spines; pkill -f '[s]tartup_replica.py'"
+                    "pkill -x prime; pkill -x spines"
                 ],
                 check=False
             )        

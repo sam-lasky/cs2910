@@ -106,6 +106,7 @@ def parse_cli(args):
 
 # Start Docker
 def docker_start(runtime_config):
+    print('in docker')
     # tracks all the directories who's files have been modified in order
     # to update images accordingly. 
     modified_directories = runtime_config['update']

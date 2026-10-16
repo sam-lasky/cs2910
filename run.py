@@ -121,8 +121,7 @@ def docker_start(runtime_config):
 # Start aster
 def aster_start(max_po, encryption_status):
     subprocess.run(
-        ['py', '-3', 'run_controller.py',max_po, encryption_status],
-        cwd='aster',
+        ["py", "-3", "run_controller.py", str(max_po), str(encryption_status)],
         check=True
     )
 

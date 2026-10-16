@@ -93,13 +93,16 @@ def run_tests(sessions):
 
 
 def main():
+    print("In the Windows Aster Controller...")
     # Kill any existing replica startup scripts
+    print("Terminating any existing Prime and Spines processes on Aster machines...", flush=True)    
     kill_all(None)
 
     # Start new sessions
     sessions = {}
     id =1
     for i in range(13, 19):
+        print(f'Starting session with Aster {i}')
         sessions[i] = subprocess.Popen(
             f'ssh sjl79@aster{i}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '

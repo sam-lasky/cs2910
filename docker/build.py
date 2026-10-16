@@ -115,6 +115,7 @@ def process_build_request(image_type,highest_modified):
 
             # Initiate rebuilds & Update hash values
             if rebuild is not None: 
+                print('we are here now!')
                 build_image(rebuild, new_images)
                 update_hashes(new_images)
     

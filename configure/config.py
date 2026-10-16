@@ -194,7 +194,7 @@ def main():
     # get the config type 
     environment = sys.argv[1]
     encrypted = sys.argv[2]
-    max_po = sys.argv[3]
+    max_po = int(sys.argv[3])
 
     # load the replica config from the text files
     replica_list = load_replica_configuration(environment)

@@ -56,7 +56,7 @@ def run_tests(sessions):
     print("\033[2J\033[H", end="", flush=True)
     for speed in bandwidth:
         results_file = f"{speed}mbps_MAX_PO_{max_po}.txt"
-        if speed!='no_limit_':
+        if speed!='no_limit':
             # can't modify link speeds on aster w/o sudo
             for i in range(13, 19):
                 print(f"Configuring Aster{i} to {speed} Mbps...", flush=True)

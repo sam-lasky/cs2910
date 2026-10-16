@@ -52,10 +52,15 @@ def update_repo(runtime_config):
     # change detected, record updated directories & report update (this is a test)
     else:
         updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
-        print("Update detected & applied, rebooting in 5 seconds.....\n")
         with open("reboot.txt", "w") as f:
             f.write(",".join(updated_dirs))
-        time.sleep(5)
+
+        for i in range(5, 0, -1):
+            print(f"\rUpdate detected & applied, rebooting in {i} seconds...", end="", flush=True)
+            time.sleep(1)
+
+        print("\rRebooting now!                                      ")
+                
         os.execv(sys.executable, [sys.executable] + sys.argv)
     
     # add update info to runtime_config (convert to list for eventual JSON serialization)

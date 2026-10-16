@@ -1,0 +1,442 @@
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:52:34.298895 Reading server addrs from ./address.config
+10/16/26 05:52:34.298921 read line args=5
+10/16/26 05:52:34.298928 read line args=5
+10/16/26 05:52:34.299002 Client 32 ready to send to server 1
+10/16/26 05:52:34.299064 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:52:34.301990 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 20 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 15.05
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 1000.09
+Actual throughput (updates/sec):		 996.66
+Min/Max/Avg Latency (milliseconds):		 18.120 / 29.203 / 19.998 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:52:49.755194 Reading server addrs from ./address.config
+10/16/26 05:52:49.755220 read line args=5
+10/16/26 05:52:49.755227 read line args=5
+10/16/26 05:52:49.755306 Client 32 ready to send to server 1
+10/16/26 05:52:49.755377 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:52:49.758286 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 20 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 15.06
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 999.74
+Actual throughput (updates/sec):		 996.31
+Min/Max/Avg Latency (milliseconds):		 16.944 / 34.499 / 20.005 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:05.168946 Reading server addrs from ./address.config
+10/16/26 05:53:05.168972 read line args=5
+10/16/26 05:53:05.168979 read line args=5
+10/16/26 05:53:05.169060 Client 32 ready to send to server 1
+10/16/26 05:53:05.169131 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:05.172042 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 20 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 15.06
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 999.22
+Actual throughput (updates/sec):		 995.79
+Min/Max/Avg Latency (milliseconds):		 17.618 / 40.107 / 20.016 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:20.583548 Reading server addrs from ./address.config
+10/16/26 05:53:20.583574 read line args=5
+10/16/26 05:53:20.583581 read line args=5
+10/16/26 05:53:20.583678 Client 32 ready to send to server 1
+10/16/26 05:53:20.583749 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:20.587305 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 30 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 10.04
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 1499.71
+Actual throughput (updates/sec):		 1494.46
+Min/Max/Avg Latency (milliseconds):		 18.057 / 29.226 / 20.004 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:31.007428 Reading server addrs from ./address.config
+10/16/26 05:53:31.007456 read line args=5
+10/16/26 05:53:31.007463 read line args=5
+10/16/26 05:53:31.007546 Client 32 ready to send to server 1
+10/16/26 05:53:31.007615 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:31.011192 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 30 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 10.04
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 1500.88
+Actual throughput (updates/sec):		 1493.71
+Min/Max/Avg Latency (milliseconds):		 13.615 / 38.358 / 19.988 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:41.427148 Reading server addrs from ./address.config
+10/16/26 05:53:41.427175 read line args=5
+10/16/26 05:53:41.427182 read line args=5
+10/16/26 05:53:41.427261 Client 32 ready to send to server 1
+10/16/26 05:53:41.427329 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:41.430920 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 30 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 10.05
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 1497.73
+Actual throughput (updates/sec):		 1492.44
+Min/Max/Avg Latency (milliseconds):		 18.070 / 33.690 / 20.030 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:51.832151 Reading server addrs from ./address.config
+10/16/26 05:53:51.832178 read line args=5
+10/16/26 05:53:51.832185 read line args=5
+10/16/26 05:53:51.832267 Client 32 ready to send to server 1
+10/16/26 05:53:51.832337 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:51.837309 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 50 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.22
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2420.35
+Actual throughput (updates/sec):		 2410.40
+Min/Max/Avg Latency (milliseconds):		 17.329 / 40.151 / 20.658 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:53:58.410561 Reading server addrs from ./address.config
+10/16/26 05:53:58.410587 read line args=5
+10/16/26 05:53:58.410594 read line args=5
+10/16/26 05:53:58.410679 Client 32 ready to send to server 1
+10/16/26 05:53:58.410749 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:53:58.415663 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 50 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.16
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2450.38
+Actual throughput (updates/sec):		 2434.09
+Min/Max/Avg Latency (milliseconds):		 16.907 / 40.519 / 20.405 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:04.957459 Reading server addrs from ./address.config
+10/16/26 05:54:04.957485 read line args=5
+10/16/26 05:54:04.957492 read line args=5
+10/16/26 05:54:04.957573 Client 32 ready to send to server 1
+10/16/26 05:54:04.957656 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:04.962569 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 50 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.19
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2434.69
+Actual throughput (updates/sec):		 2423.51
+Min/Max/Avg Latency (milliseconds):		 17.836 / 56.226 / 20.536 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:11.524012 Reading server addrs from ./address.config
+10/16/26 05:54:11.524038 read line args=5
+10/16/26 05:54:11.524046 read line args=5
+10/16/26 05:54:11.524125 Client 32 ready to send to server 1
+10/16/26 05:54:11.524194 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:11.530801 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 75 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.04
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2492.73
+Actual throughput (updates/sec):		 2483.42
+Min/Max/Avg Latency (milliseconds):		 18.360 / 58.534 / 30.088 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:17.946088 Reading server addrs from ./address.config
+10/16/26 05:54:17.946114 read line args=5
+10/16/26 05:54:17.946121 read line args=5
+10/16/26 05:54:17.946530 Client 32 ready to send to server 1
+10/16/26 05:54:17.946599 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:17.953342 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 75 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.07
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2479.39
+Actual throughput (updates/sec):		 2470.13
+Min/Max/Avg Latency (milliseconds):		 17.898 / 96.326 / 30.249 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:24.434885 Reading server addrs from ./address.config
+10/16/26 05:54:24.434913 read line args=5
+10/16/26 05:54:24.434919 read line args=5
+10/16/26 05:54:24.435001 Client 32 ready to send to server 1
+10/16/26 05:54:24.435071 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:24.441674 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 75 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.04
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2500.40
+Actual throughput (updates/sec):		 2482.99
+Min/Max/Avg Latency (milliseconds):		 18.455 / 41.006 / 29.995 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:30.834325 Reading server addrs from ./address.config
+10/16/26 05:54:30.834353 read line args=5
+10/16/26 05:54:30.834360 read line args=5
+10/16/26 05:54:30.834443 Client 32 ready to send to server 1
+10/16/26 05:54:30.834513 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:30.842789 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 100 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2502.17
+Actual throughput (updates/sec):		 2492.17
+Min/Max/Avg Latency (milliseconds):		 21.957 / 42.218 / 39.965 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:37.262641 Reading server addrs from ./address.config
+10/16/26 05:54:37.262668 read line args=5
+10/16/26 05:54:37.262675 read line args=5
+10/16/26 05:54:37.262748 Client 32 ready to send to server 1
+10/16/26 05:54:37.262817 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:37.271121 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 100 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.05
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2497.07
+Actual throughput (updates/sec):		 2480.31
+Min/Max/Avg Latency (milliseconds):		 30.974 / 57.748 / 40.047 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:43.670848 Reading server addrs from ./address.config
+10/16/26 05:54:43.670875 read line args=5
+10/16/26 05:54:43.670881 read line args=5
+10/16/26 05:54:43.670958 Client 32 ready to send to server 1
+10/16/26 05:54:43.671027 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:43.679306 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 100 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.04
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2494.82
+Actual throughput (updates/sec):		 2484.88
+Min/Max/Avg Latency (milliseconds):		 19.710 / 60.138 / 40.083 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:50.144833 Reading server addrs from ./address.config
+10/16/26 05:54:50.144860 read line args=5
+10/16/26 05:54:50.144867 read line args=5
+10/16/26 05:54:50.144949 Client 32 ready to send to server 1
+10/16/26 05:54:50.145018 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:50.156619 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 150 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2505.31
+Actual throughput (updates/sec):		 2491.84
+Min/Max/Avg Latency (milliseconds):		 22.993 / 62.091 / 59.873 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:54:56.521269 Reading server addrs from ./address.config
+10/16/26 05:54:56.521294 read line args=5
+10/16/26 05:54:56.521301 read line args=5
+10/16/26 05:54:56.521379 Client 32 ready to send to server 1
+10/16/26 05:54:56.521448 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:54:56.532998 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 150 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2504.89
+Actual throughput (updates/sec):		 2491.58
+Min/Max/Avg Latency (milliseconds):		 23.495 / 61.410 / 59.883 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:02.918366 Reading server addrs from ./address.config
+10/16/26 05:55:02.918419 read line args=5
+10/16/26 05:55:02.918427 read line args=5
+10/16/26 05:55:02.918510 Client 32 ready to send to server 1
+10/16/26 05:55:02.918580 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:02.930166 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 150 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2505.15
+Actual throughput (updates/sec):		 2491.69
+Min/Max/Avg Latency (milliseconds):		 23.383 / 61.358 / 59.877 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:09.349627 Reading server addrs from ./address.config
+10/16/26 05:55:09.349655 read line args=5
+10/16/26 05:55:09.349662 read line args=5
+10/16/26 05:55:09.349741 Client 32 ready to send to server 1
+10/16/26 05:55:09.349810 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:09.364933 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 200 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.05
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2498.22
+Actual throughput (updates/sec):		 2481.11
+Min/Max/Avg Latency (milliseconds):		 29.177 / 102.545 / 80.057 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:15.803874 Reading server addrs from ./address.config
+10/16/26 05:55:15.803902 read line args=5
+10/16/26 05:55:15.803909 read line args=5
+10/16/26 05:55:15.803993 Client 32 ready to send to server 1
+10/16/26 05:55:15.804061 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:15.818994 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 200 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.05
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2502.78
+Actual throughput (updates/sec):		 2480.04
+Min/Max/Avg Latency (milliseconds):		 31.841 / 98.105 / 79.911 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:22.248222 Reading server addrs from ./address.config
+10/16/26 05:55:22.248250 read line args=5
+10/16/26 05:55:22.248257 read line args=5
+10/16/26 05:55:22.248337 Client 32 ready to send to server 1
+10/16/26 05:55:22.248406 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:22.263319 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 200 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2508.96
+Actual throughput (updates/sec):		 2491.31
+Min/Max/Avg Latency (milliseconds):		 24.289 / 82.041 / 79.714 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:28.643273 Reading server addrs from ./address.config
+10/16/26 05:55:28.643299 read line args=5
+10/16/26 05:55:28.643307 read line args=5
+10/16/26 05:55:28.643393 Client 32 ready to send to server 1
+10/16/26 05:55:28.643465 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:28.665023 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 300 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.10
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2491.25
+Actual throughput (updates/sec):		 2457.79
+Min/Max/Avg Latency (milliseconds):		 26.166 / 197.558 / 120.421 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:35.097844 Reading server addrs from ./address.config
+10/16/26 05:55:35.097870 read line args=5
+10/16/26 05:55:35.097877 read line args=5
+10/16/26 05:55:35.097956 Client 32 ready to send to server 1
+10/16/26 05:55:35.098025 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:35.119601 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 300 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.03
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2516.17
+Actual throughput (updates/sec):		 2489.42
+Min/Max/Avg Latency (milliseconds):		 28.787 / 121.291 / 119.229 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:41.524123 Reading server addrs from ./address.config
+10/16/26 05:55:41.524150 read line args=5
+10/16/26 05:55:41.524157 read line args=5
+10/16/26 05:55:41.524237 Client 32 ready to send to server 1
+10/16/26 05:55:41.524307 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:41.545935 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 300 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.06
+Total stalled sends:				 0
+Expected throughput (updates/sec):		 2510.16
+Actual throughput (updates/sec):		 2476.71
+Min/Max/Avg Latency (milliseconds):		 19.956 / 139.347 / 119.514 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:47.998243 Reading server addrs from ./address.config
+10/16/26 05:55:47.998270 read line args=5
+10/16/26 05:55:47.998277 read line args=5
+10/16/26 05:55:47.998351 Client 32 ready to send to server 1
+10/16/26 05:55:47.998421 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:48.030038 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 500 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 1337166
+Expected throughput (updates/sec):		 2538.58
+Actual throughput (updates/sec):		 2491.93
+Min/Max/Avg Latency (milliseconds):		 29.941 / 203.909 / 196.961 
+
+Client 32, IP = 192.168.53.22, Port = 7432
+Sending updates to server 1 only.
+10/16/26 05:55:54.394215 Reading server addrs from ./address.config
+10/16/26 05:55:54.394242 read line args=5
+10/16/26 05:55:54.394248 read line args=5
+10/16/26 05:55:54.394328 Client 32 ready to send to server 1
+10/16/26 05:55:54.394396 CA Driver IPC  (path: /tmp/ca_driver_ipc1)setup done
+10/16/26 05:55:54.425955 32 entering event system.
+
+
+*** Test Results [Number of Emulated Clients: 500 | Total Updates: 15000 | Link Speed: 0 Mbps | Trial Num: 0 ] ***
+Total time elapsed (seconds):			 6.02
+Total stalled sends:				 1337216
+Expected throughput (updates/sec):		 2538.00
+Actual throughput (updates/sec):		 2491.38
+Min/Max/Avg Latency (milliseconds):		 29.870 / 202.430 / 197.006 
+

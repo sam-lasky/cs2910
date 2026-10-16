@@ -44,9 +44,10 @@ def create_results_file(test_parameters):
 # action 2: 'replace'    --> change the link speed    
 def alter_bandwidth_limit(action, test_environment, limits):
     # initialize
-    if action=='init'
+    if action=='init':
+        pass
 
-    pass
+    
 
 
 

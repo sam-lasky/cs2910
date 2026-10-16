@@ -1,4 +1,4 @@
-FROM spines-base
+FROM spines-img
 
 # the spines img clones the repo, get the most up to date version since
 # we will ideally only rebuild the img when we change spines 

@@ -17,7 +17,7 @@ def update_repo(runtime_config):
             f.seek(0)
             f.write('none')
             f.truncate()
-            print("System reboot completed successfully. Using most up to date repository1!\n")
+            print("System reboot completed successfully. Using most up to date repository!\n")
             return
 
     # update the git repo, cwd should already be CS2910
@@ -51,7 +51,7 @@ def update_repo(runtime_config):
     # change detected, record updated directories & report update
     else:
         updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
-        print("Repository has been successfully updated, rebooting in 5 seconds.....\n")
+        print("Update detected & applied, rebooting in 5 seconds.....\n")
         with open("reboot.txt", "w") as f:
             f.write(",".join(updated_dirs))
         time.sleep(5)
@@ -148,7 +148,6 @@ def main():
         text=True
     )
 
-    print('barnacles!!!!')
 
     # get the names of the dirs w/ modified files from config.py (if any)
     print("Updating the configuration files for prime & spines...")
@@ -158,7 +157,7 @@ def main():
 
     # update the list of updated directories in runtime_config
     runtime_config['update']= list(set(updated_dirs+runtime_config['update']))
-
+    print('we are here now')
     # Hand off control to the startup scripts 
     if runtime_config['environment']=='docker': docker_start(runtime_config)
     else: aster_start(runtime_config)

@@ -1,4 +1,6 @@
-#DO NOT ALTER
-base none
-spines none
-prime none
+# Each time a Docker image is created using Dockerfile.base/prime/spines, the hash value 
+# of the Dockerfile used is taken and stored in this file.  
+
+base NONE
+spines NONE
+prime NONE

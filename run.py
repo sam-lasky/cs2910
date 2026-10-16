@@ -2,7 +2,7 @@ import sys, subprocess, time, os
 
 def main():
 
-    # update the git repo, cwd=cs2910
+    # update the git repo, cwd is cs2910
     p = subprocess.run(
         ["git","pull"],
         text=True

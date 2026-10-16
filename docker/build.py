@@ -8,7 +8,7 @@ import sys, subprocess, os
 
 if len(sys.argv) != 2:
     print("Usage: python build.py <arg>")
-    print("Valid args: base, spines, prime")
+    print("Valid args: base, spines, prime, auto")
     sys.exit(1)
 
 # subprocess.run(

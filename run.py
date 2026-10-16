@@ -120,12 +120,6 @@ def docker_start(runtime_config):
 
 # Start aster
 def aster_start(runtime_config):
-    # pushes changes to github so aster machines pull the most up to date 
-    # versions 
-    subprocess.run(
-        ['py', '-3', 'push.py'],
-        check=True
-    )
     subprocess.run(
         ['py', '-3', 'startup_controller_windows.py'],
         cwd='aster',
@@ -147,6 +141,13 @@ def main():
 
     # update the repo & get the directories associated with the update (or none if up to date) and store in runtime_config
     update_repo(runtime_config)
+
+
+    aster_start(runtime_config)
+    sleep(15)
+    exit(0)
+
+    # # # EVERYTHING BELOW IS CUT OFF CUS THIS APPROACH ISNT WORKING # # # 
 
     # update the configuration files in prime and spines
     p = subprocess.run(

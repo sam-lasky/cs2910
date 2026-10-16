@@ -27,10 +27,14 @@ def main():
     capture_output=True,
     text=True
     )
-    
-    print(changes.stdout.splitlines())
 
-    
+    # report update status 
+    update_status = changes.stdout.splitlines()
+    # no change detected 
+    if len(update_status)==0:print("No repository updates detected.")
+    # change detected, record updated directories & report update
+    else:
+        pass
 
 if __name__=="__main__":
     main()

@@ -4,6 +4,6 @@
 # will recreate the image using the most up to date version & update the hash here as well. 
 # ****DO NOT ALTER THIS FILE****
 
-base f3011c38de7bcc9879d3225bd224ae077f8d970433ee2500d7a0c5819d07f0ea
-spines 032b229047924ef8a0783382cf28952f6429e73fd4041f502ef3fb69eb477f7e
-prime ee05d2acb8183624a0ed8701eedcda8e24f3d8f1132381d775ed7442479716f9
+base NONE
+spines NONE
+prime NONE

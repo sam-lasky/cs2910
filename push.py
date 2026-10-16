@@ -7,9 +7,10 @@ def check_out(p:subprocess.CompletedProcess):
         print(p.stdout)
     # failure
     else:
-        print(p.stderr)
-        # terminate
-        print("Updates were not pushed\n\n")
+        print("STDOUT:", p.stdout)
+        print("STDERR:", p.stderr)
+        print("Return code:", p.returncode)
+        print("Updates were not pushed")
         exit(1)
 
 

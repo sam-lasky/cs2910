@@ -49,7 +49,7 @@ def update_repo(runtime_config):
     update_status = changes.stdout.splitlines()
     # no change detected 
     if len(update_status)==0:print("No repository updates detected.\n")
-    # change detected, record updated directories & report update
+    # change detected, record updated directories & report update (this is a test)
     else:
         updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
         print("Update detected & applied, rebooting in 5 seconds.....\n")

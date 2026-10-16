@@ -109,7 +109,7 @@ def main():
     # clear terminal for easier readabilityd
     clear_cmd = 'cls' if platform.system()=='Windows' else 'clear'
     subprocess.run(clear_cmd, shell=True)
-    print("In the Windows Aster Controller...")
+    print(f"In the Windows Aster Controller, using MAX_PO_IN_FLIGHT {max_po}...")
     # Kill any existing replica startup scripts
     print("Terminating any existing Prime and Spines processes on Aster machines...", flush=True)    
     kill_all(None)

@@ -48,6 +48,7 @@ def setup_spines(machine_id):
     
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
+        exit(1)
 
     finally:
         print("Spines successfully setup!", flush=True)

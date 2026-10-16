@@ -134,10 +134,10 @@ def main():
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure' using the command line argument "aster"
-    subprocess.run(
-        ["python", "config.py","aster"],
-        cwd='../configure',
-        text=True)
+    # subprocess.run(
+    #     ["python", "config.py","aster"],
+    #     cwd='../configure',
+    #     text=True)
 
     # update repo and only remake/setup in the event of an update
     # git_pull_msg = sys.argv[2]

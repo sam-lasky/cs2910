@@ -121,11 +121,14 @@ def docker_start(runtime_config):
 # Start aster
 def aster_start(runtime_config):
     # pushes changes to github so aster machines pull the most up to date 
-    # version 
+    # versions 
     subprocess.run(
         ['py', '-3', 'push.py'],
         check=True
     )
+    subprocess.run(['py', '-3', 'aster.py'],cwd='/aster' ,check=True)
+
+
 
 
 # [Personalized Startup Config]: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>

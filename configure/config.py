@@ -78,7 +78,7 @@ def load_replica_configuration(config):
                 # get line as a list, separated by whitespace 
                 line= line.split()
                 # skip comments and empty lines
-                if len(line)==0 or line[0]=='#': continue                
+                if len(line)==0 or line[0].startswith('#'): continue                
                 # checks if line is a valid ip address, if not raises an exception
                 ipaddress.IPv4Address(line[0])
                 # valid line, increment number of replicas 

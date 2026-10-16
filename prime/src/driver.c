@@ -165,9 +165,6 @@ util_stopwatch throughput_sw;
 //Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
 int32u num_clients_to_emulate = 1;
 
-// input for easier testing parsing
-int32u trial_num=0;
-int32u link_speed=0;
 
 
 
@@ -342,7 +339,7 @@ void Print_And_Exit(void)
 
     // HUMAN VERSION
     printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u | Link Speed: %u Mbps | Trial Num: %u ] ***\n", 
-      num_clients_to_emulate, total_required_updates,link_speed, trial_num);
+      num_clients_to_emulate, total_required_updates);
     printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
     printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
     printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);

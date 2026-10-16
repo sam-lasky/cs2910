@@ -80,7 +80,7 @@ def run_tests(sessions):
         for clients in num_emulated:
             for i in range(1,num_trials+1):
                 results = None
-                print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}')
+                print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}, Max_PO {max_po}')
                 # driver only running on replica 13
                 results = subprocess.run(
                     [
@@ -94,8 +94,8 @@ def run_tests(sessions):
                     capture_output=True,
                     text=True
                 )
-                # print(results.stdout, flush=True)
-                print(f"MAX_PO_IN_FLIGHT: {max_po}\n{results.stdout}", flush=True)
+                filtered = results.stdout.split("*** Test Results", 1)[-1]
+                print(f"MAX_PO_IN_FLIGHT: {max_po}")
 
                 with open(results_file, "a") as f:
                     f.write(f"MAX_PO_IN_FLIGHT: {max_po}\n{results.stdout}\n")

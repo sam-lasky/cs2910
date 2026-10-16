@@ -40,7 +40,7 @@ def run_tests(sessions):
     # total updates sent from the driver program to prime
     total_updates = 15000
     # number of clients the driver program emulates 
-    num_emulated = [20,25,30,50,100]
+    num_emulated = [20, 30, 50, 75, 100, 150, 200, 300, 500, 750]
     # num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
     num_trials = 3
@@ -121,10 +121,11 @@ def main():
         id+=1
     next_step = input('\nNext Choice: Kill all Sessions (kill) | Run tests (test):\n>>')
     # stops all the processes on the aster machines and closes all the terminal windows locally
-    if next_step=='kill':
-        kill_all(sessions)
-    elif next_step=='test':
-        run_tests(sessions)
+    # if next_step=='kill':
+    #     kill_all(sessions)
+    # elif next_step=='test':
+    #     run_tests(sessions)
+
 
 if __name__=='__main__':
     main()

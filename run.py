@@ -3,6 +3,23 @@ import sys, subprocess, time, os, platform, json
 # Update the CS2910 repo & return the directories involved in the update
 # if changes were made otherwise return none. 
 def update_repo(runtime_config):
+    # Check a reboot occurred. If so store the
+    # info and skip another pull
+    with open('reboot.txt', 'r+') as f:
+        # get reboot file 
+        file_contents = f.read().strip()
+        # Check if a reboot has occurred, indicated by the reboot.txt file 
+        # containing text other than 'none'. If one has, get the file conents
+        # and fill in the update info, reset the reboot.txt file to none and
+        # leave the update_repo func 
+        if file_contents!='none':
+            runtime_config['update']= file_contents.split(',')
+            f.seek(0)
+            f.write('none')
+            f.truncate()
+            print("System reboot completed successfully. Using most up to date repo!.\n")
+            return
+
     # update the git repo, cwd should already be CS2910
     print("Checking for updates in CS2910 repository...")
     p = subprocess.run(
@@ -34,8 +51,12 @@ def update_repo(runtime_config):
     # change detected, record updated directories & report update
     else:
         updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
-        print("Repository has been successfully updated.\n")
-
+        print("Repository has been successfully updated, rebooting in 5 seconds.....\n")
+        with open("reboot.txt", "w") as f:
+            f.write(",".join(updated_dirs))
+        time.sleep(5)
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    
     # add update info to runtime_config (convert to list for eventual JSON serialization)
     runtime_config['update']= list(updated_dirs)
     

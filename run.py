@@ -111,7 +111,6 @@ def docker_start(runtime_config):
     modified_directories = runtime_config['update']
     # build the images on auto mode
     # update the configuration files in prime and spines
-    print('in docker')
     p = subprocess.run(
         f"python3 build.py auto {len(modified_directories)}",
         shell=True,
@@ -119,6 +118,8 @@ def docker_start(runtime_config):
         capture_output=True,
         text=True
     )
+    print('in docker?')
+
 
 # Start aster
 def aster_start(runtime_config):

@@ -128,6 +128,7 @@ def startup(aster_id, replica_id):
     spines.communicate()    
 
 def main():
+    max_po = sys.argv[1]
     # get the aster id 
     machine_id = int(socket.gethostname().split('.')[0][5:])
     print(f'Now running on Aster {machine_id}')
@@ -135,9 +136,11 @@ def main():
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure' using the command line argument "aster"
     subprocess.run(
-        ["python", "config.py","aster"],
+        ["python", "config.py","aster","plain",max_po],
         cwd='../configure',
         text=True)
+
+
 
     # update repo and only remake/setup in the event of an update
     # git_pull_msg = sys.argv[2]

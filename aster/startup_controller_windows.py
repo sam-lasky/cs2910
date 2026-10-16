@@ -1,4 +1,4 @@
-import sys, subprocess, time, os, socket
+import sys, subprocess, time, os, socket, platform
 
 def kill_all(sessions):
     if sessions is None:
@@ -102,6 +102,11 @@ def run_tests(sessions):
                     f.write(filtered + "\n")
 
 def main():
+    # get max po
+    max_po = sys.argv[1]
+    # clear terminal for easier readabilityd
+    clear_cmd = 'cls' if platform.system()=='Windows' else 'clear'
+    subprocess.run(clear_cmd, shell=True)
     print("In the Windows Aster Controller...")
     # Kill any existing replica startup scripts
     print("Terminating any existing Prime and Spines processes on Aster machines...", flush=True)    
@@ -117,7 +122,7 @@ def main():
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'echo \\"$output\\"; '
             f'cd cs2910/aster && '
-            f'python3 -u startup_replica.py {id} \\"$output\\""',
+            f'python3 -u startup_replica.py {id} {max_po} \\"$output\\""',
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         id+=1

@@ -94,10 +94,11 @@ def run_tests(sessions):
                     capture_output=True,
                     text=True
                 )
-                print(results.stdout, flush=True)
+                # print(results.stdout, flush=True)
+                print(f"MAX_PO_IN_FLIGHT: {max_po}\n{results.stdout}", flush=True)
 
                 with open(results_file, "a") as f:
-                    f.write(results.stdout)
+                    f.write(f"MAX_PO_IN_FLIGHT: {max_po}\n{results.stdout}\n")
 
 def main():
     print("In the Windows Aster Controller...")

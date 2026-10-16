@@ -60,15 +60,14 @@ def update_hashes(new_images):
 #
 #   A value of 'NONE' indicates that no hash is currently stored.
 def read_stored_hash():
-    # returned dictionary {'base':}
     hashes = {}
-    # open the file
-    with open('docker_hashes.txt','r') as f:
-        for line in f.readlines():
+
+    with open('docker_hashes.txt', 'r') as f:
+        for line in f:
             line = line.split()
-        if len(line)>0 and (hash_type:= line[0]) in ['base', 'spines', 'prime']:
-            hashes[hash_type]=line[1]
-    # return dict holding the stored hashes
+            if len(line) > 1 and (hash_type := line[0]) in ['base', 'spines', 'prime']:
+                hashes[hash_type] = line[1]
+
     return hashes
     
 # Generates a SHA-256 hash of the specified Docker file

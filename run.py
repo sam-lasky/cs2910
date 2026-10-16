@@ -119,9 +119,9 @@ def docker_start(runtime_config):
     )
 
 # Start aster
-def aster_start(runtime_config):
+def aster_start(max_po, encryption_status):
     subprocess.run(
-        ['py', '-3', 'run_controller.py'],
+        ['py', '-3', 'run_controller.py',max_po, encryption_status],
         cwd='aster',
         check=True
     )
@@ -143,7 +143,7 @@ def main():
     update_repo(runtime_config)
 
     # start aster
-    aster_start(runtime_config)
+    aster_start(runtime_config['max_po'], runtime_config['encryption'])
     exit(0)
 
     # # # EVERYTHING BELOW IS CUT OFF CUS THIS APPROACH ISNT WORKING # # # 

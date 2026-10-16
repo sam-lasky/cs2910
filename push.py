@@ -5,6 +5,10 @@ def check_out(p:subprocess.CompletedProcess):
     # success
     if p.returncode==0:
         print(p.stdout)
+    # no new updates
+    elif "nothing to commit" in p.stdout:
+        print("No new updates.")
+        sys.exit(0)
     # failure
     else:
         print("STDOUT:", p.stdout)

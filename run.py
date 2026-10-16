@@ -17,7 +17,7 @@ def update_repo(runtime_config):
             f.seek(0)
             f.write('none')
             f.truncate()
-            print("System reboot completed successfully. Using most up to date repo!.\n")
+            print("System reboot completed successfully. Using most up to date repository!.\n")
             return
 
     # update the git repo, cwd should already be CS2910

@@ -126,9 +126,11 @@ def aster_start(runtime_config):
         ['py', '-3', 'push.py'],
         check=True
     )
-    subprocess.run(['py', '-3', 'startup_controller_windows.py'],cwd='aster' ,check=True)
-
-
+    subprocess.run(
+        ['py', '-3', 'startup_controller_windows.py'],
+        cwd='aster',
+        check=True
+    )
 
 
 # [Personalized Startup Config]: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>

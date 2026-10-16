@@ -145,6 +145,7 @@ def main():
     update_repo(runtime_config)
 
     # update the configuration files in prime and spines
+    print(runtime_config['max_po'])
     p = subprocess.run(
         f"python config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
         shell=True,

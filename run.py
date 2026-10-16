@@ -29,6 +29,8 @@ def update_repo(runtime_config):
         capture_output=True
     )
 
+    # DELETE ME ! ! ! 
+
     # check if repo update attempt successful, otherwise report failure and terminate
     if p.returncode!=0:
         print("Error: Issue updating repo in CS2910/run.py")

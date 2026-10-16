@@ -85,7 +85,6 @@ def parse_cli(args):
 
 # Start Docker
 def docker_start(runtime_config):
-    print('test')
     # tracks all the directories who's files have been modified in order
     # to update images accordingly. 
     modified_directories = runtime_config['update']
@@ -128,6 +127,8 @@ def main():
         text=True
     )
 
+    print('you should see me!')
+
     # get the names of the dirs w/ modified files from config.py (if any)
     print("Updating the configuration files for prime & spines...")
     updated_dirs = p.stdout.strip().splitlines()[-1].split(',') if p.stdout.strip() else []
@@ -136,8 +137,6 @@ def main():
 
     # update the list of updated directories in runtime_config
     runtime_config['update']= list(set(updated_dirs+runtime_config['update']))
-
-    print('test test test')
 
     # Hand off control to the startup scripts 
     if runtime_config['environment']=='docker': docker_start(runtime_config)

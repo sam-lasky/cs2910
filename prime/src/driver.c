@@ -338,7 +338,7 @@ void Print_And_Exit(void)
     */
 
     // HUMAN VERSION
-    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u | Link Speed: %u Mbps | Trial Num: %u ] ***\n", 
+    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", 
       num_clients_to_emulate, total_required_updates);
     printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
     printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);

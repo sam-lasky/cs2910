@@ -126,20 +126,16 @@ def main():
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         id+=1
-    # next_step = input('\nNext Choice: Kill all Sessions (kill) | Run tests (test):\n>>')
-    # stops all the processes on the aster machines and closes all the terminal windows locally
-    # if next_step=='kill':
-    #     kill_all(sessions)
-    # elif next_step=='test':
-    #     run_tests(sessions)
+
+    # wait for replicas to initialize
     print("Waiting 60 seconds for replicas to initialize...", flush=True)
     time.sleep(60)
-
+    # run tests
     run_tests(sessions)
-
+    # wait 10 secs 
     print("Waiting 10 seconds before cleanup...", flush=True)
     time.sleep(10)
-
+    # terminate all sessions 
     kill_all(sessions)
 
 

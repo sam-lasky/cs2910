@@ -127,7 +127,7 @@ def main():
         text=True
     )
 
-    print('you should see me!')
+    print('barnacles!!!!')
 
     # get the names of the dirs w/ modified files from config.py (if any)
     print("Updating the configuration files for prime & spines...")

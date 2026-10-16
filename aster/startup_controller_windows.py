@@ -46,7 +46,7 @@ def run_tests(sessions):
     num_trials = 3
     max_po=None
     # get max po (HACKY FIX THIS)
-    with open("prime/src/def.h") as f:
+    with open("../prime/src/def.h") as f:
         for line in f:
             if line.strip().startswith("#define MAX_PO_IN_FLIGHT "):
                 max_po = int(line.split()[2])

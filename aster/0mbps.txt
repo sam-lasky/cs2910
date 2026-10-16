@@ -1,0 +1,264 @@
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]
+Usage: ./client
+	 -l IP (A.B.C.D) 
+	 -c count_of_transactions_to_benchmark 
+	 -i client_id, indexed base 1
+	[-s server_id, indexed base 1]
+ 	[-c num_cliens_to_emulate]

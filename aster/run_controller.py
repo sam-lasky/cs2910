@@ -69,7 +69,7 @@ def run_tests(sessions,max_po,encrypted):
         for clients in num_emulated:
             for i in range(1,num_trials+1):
                 results = None
-                print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}, Max_PO {max_po}')
+                print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}, Max_PO {max_po}, Encrypted {encrypted}')
                 # driver only running on replica 13
                 results = subprocess.run(
                     [

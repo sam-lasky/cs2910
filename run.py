@@ -106,19 +106,23 @@ def parse_cli(args):
 
 # Start Docker
 def docker_start(runtime_config):
-    print('in docker')
     # tracks all the directories who's files have been modified in order
     # to update images accordingly. 
     modified_directories = runtime_config['update']
     # build the images on auto mode
     # update the configuration files in prime and spines
-    print('in docker1')
+    # p = subprocess.run(
+    #     f"py -3 build.py auto {len(modified_directories)}",
+    #     shell=True,
+    #     cwd='docker/',
+    #     capture_output=True,
+    #     text=True
+    # )
+
     p = subprocess.run(
-        f"py -3 build.py auto {len(modified_directories)}",
-        shell=True,
-        cwd='docker/',
-        capture_output=True,
-        text=True
+    f"py -3 build.py auto {len(modified_directories)}",
+    shell=True,
+    cwd='docker/'
     )
     print("STDOUT:", repr(p.stdout))
     print("STDERR:", repr(p.stderr))

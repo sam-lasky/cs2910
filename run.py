@@ -121,7 +121,7 @@ def docker_start(runtime_config):
 # Start aster
 def aster_start(runtime_config):
     subprocess.run(
-        ['py', '-3', 'startup_controller_windows.py'],
+        ['py', '-3', 'run_controller.py'],
         cwd='aster',
         check=True
     )

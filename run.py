@@ -90,8 +90,7 @@ def parse_cli(args):
             # update encryption type 
             startup_config['encryption']=args[2]
             # update MAX_PO
-            startup_config['max_po']=int(args[3]
-)
+            startup_config['max_po']=int(args[3])
     # Display startup configuration
     print("\n" + "═" * 46)
     print("           STARTUP CONFIGURATION")
@@ -145,7 +144,6 @@ def main():
     update_repo(runtime_config)
 
     # update the configuration files in prime and spines
-    print(runtime_config['max_po'])
     p = subprocess.run(
         f"python config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
         shell=True,

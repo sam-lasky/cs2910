@@ -150,7 +150,8 @@ def main():
     subprocess.run(
         ["python", "config.py","aster",encrypted,max_po],
         cwd='../configure',
-        text=True)
+        text=True,
+        check=True)
 
     
     # Set up spines

@@ -38,7 +38,7 @@ def run_tests(sessions,max_po,encrypted):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = ['no_limit']
     # total updates sent from the driver program to prime
-    total_updates = 60000
+    total_updates = 15000
     # number of clients the driver program emulates 
     num_emulated = [20, 30, 50, 75, 100, 150, 200, 300, 500, 750]
     # num_emulated = [1,5,10,15,20,25,30,50,100]

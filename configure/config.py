@@ -10,6 +10,7 @@
 # ============================================================
 
 import sys, subprocess, os, ipaddress, json; from pathlib import Path
+import time
 
 # Inputs the list of candidate replicas (replica_list) which consists
 # of the replicas being used where each entry is a tuple in the form 
@@ -208,7 +209,28 @@ def main():
     if modify_max_po(max_po) and 'prime' not in updated_dirs:
         updated_dirs.append('prime')
 
-    print(','.join(updated_dirs))
+    # Verify MAX_PO_IN_FLIGHT
+    with open('../prime/src/def.h') as f:
+        assert any(
+            line.strip() == f'#define MAX_PO_IN_FLIGHT {max_po}'
+            for line in f
+        ), "ERROR: MAX_PO_IN_FLIGHT configuration failed"
+
+    # Verify Spines encryption
+    with open('../prime/spines/daemon/spines.conf') as f:
+        contents = f.read()
+
+    expected = 'True' if encrypted == 'encrypted' else 'False'
+
+    assert f'IT_LinkCrypto = {expected}' in contents, "ERROR: IT_LinkCrypto configuration failed"
+    assert f'IT_LinkEncrypt = {expected}' in contents, "ERROR: IT_LinkEncrypt configuration failed"
+
+    print("Configuration successfully verified!", flush=True)
+
+    time.sleep(5)
+
+    # print(','.join(updated_dirs))
+
 
 
 if __name__=="__main__":

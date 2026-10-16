@@ -36,19 +36,26 @@ def kill_all(sessions):
 
 def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
-    bandwidth = [0]
+    bandwidth = ['no_limit_']
     # total updates sent from the driver program to prime
-    total_updates = 25000
+    total_updates = 15000
     # number of clients the driver program emulates 
-    num_emulated = [1,5,10,15,20,25,30,50,100]
+    num_emulated = [20,25,30,50,100]
+    # num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
-    num_trials = 5
+    num_trials = 3
+    max_po=None
+    # get max po (HACKY FIX THIS)
+    with open("prime/src/def.h") as f:
+        for line in f:
+            if line.strip().startswith("#define MAX_PO_IN_FLIGHT "):
+                max_po = int(line.split()[2])
+                break
 
     # clear previous terminal output b4 displaying results
     print("\033[2J\033[H", end="", flush=True)
     for speed in bandwidth:
-        results_file = f"{speed}mbps.txt"
-        processes=[]
+        results_file = f"{speed}mbps_MAX_PO_{max_po}.txt"
         if speed > 0:
             # can't modify link speeds on aster w/o sudo
             for i in range(13, 19):
@@ -81,7 +88,7 @@ def run_tests(sessions):
                         "sjl79@aster13.cs.pitt.edu",
                         f"cd ~/cs2910/prime/bin && "
                         f"./driver -l 192.168.53.22 -i 1 -s 1 "
-                        f"-c {total_updates} -n {clients} -LS {speed} -trialnum {i}"
+                        f"-c {total_updates} -n {clients}"
                     ],
                     check=True,
                     capture_output=True,
@@ -91,7 +98,6 @@ def run_tests(sessions):
 
                 with open(results_file, "a") as f:
                     f.write(results.stdout)
-
 
 def main():
     print("In the Windows Aster Controller...")
@@ -113,7 +119,7 @@ def main():
             creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         id+=1
-    next_step = input('\nNext Choice: Kill all Sessions | Run tests:\n>>')
+    next_step = input('\nNext Choice: Kill all Sessions (kill) | Run tests (test):\n>>')
     # stops all the processes on the aster machines and closes all the terminal windows locally
     if next_step=='kill':
         kill_all(sessions)

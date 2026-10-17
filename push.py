@@ -1,4 +1,5 @@
-import sys, subprocess; from datetime import datetime
+import sys, subprocess; 
+from datetime import datetime, timedelta
 
 def check_out(p:subprocess.CompletedProcess):
     # success
@@ -13,11 +14,14 @@ def check_out(p:subprocess.CompletedProcess):
         print("STDOUT:", p.stdout)
         print("STDERR:", p.stderr)
         print("Return code:", p.returncode)
-        print("Updates were not pushed")
+        print("Updates were not pushed.")
         exit(1)
 
 
 def main():
+    # TO DO: handle timezones correctly
+    time = datetime.now() - timedelta(hours=4)
+
     for command in ['git add .',f'git commit -m "{datetime.now().strftime("%B %d, %Y %I:%M %p")}"' , "git push origin main"]:
         p=subprocess.run(command, shell=True,capture_output=True,text=True)    
         check_out(p)

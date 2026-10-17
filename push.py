@@ -1,5 +1,4 @@
-import sys, subprocess, time, os
-from datetime import datetime
+import sys, subprocess; from datetime import datetime
 
 def check_out(p:subprocess.CompletedProcess):
     # success
@@ -19,7 +18,7 @@ def check_out(p:subprocess.CompletedProcess):
 
 
 def main():
-    for command in ['git add .',f'git commit -m "{datetime.now()}"' , "git push origin main"]:
+    for command in ['git add .',f'git commit -m "{datetime.now().strftime("%B %d, %Y %I:%M %p")}"' , "git push origin main"]:
         p=subprocess.run(command, shell=True,capture_output=True,text=True)    
         check_out(p)
     print("Updates successfully pushed\n\n")

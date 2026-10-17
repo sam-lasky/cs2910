@@ -22,7 +22,7 @@ def main():
     # TO DO: handle timezones correctly
     time = datetime.now() - timedelta(hours=4)
 
-    for command in ['git add .',f'git commit -m "{datetime.now().strftime("%B %d, %Y %I:%M %p")}"' , "git push origin main"]:
+    for command in ['git add .',f'git commit -m "{time.strftime("%B %d, %Y %I:%M %p")}"' , "git push origin main"]:
         p=subprocess.run(command, shell=True,capture_output=True,text=True)    
         check_out(p)
     print("Updates successfully pushed\n\n")

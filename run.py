@@ -1,27 +1,22 @@
 import sys, subprocess, time, os, platform, json
 from datetime import datetime
 
-# Update the CS2910 repo & return the directories involved in the update
-# if changes were made otherwise return none. 
-def update_repo(runtime_config):
-    # Check a reboot occurred. If so store the
-    # info and skip another pull
-    with open('reboot.txt', 'r+') as f:
-        # get reboot file 
-        file_contents = f.read().strip()
-        # Check if a reboot has occurred, indicated by the reboot.txt file 
-        # containing text other than 'none'. If one has, get the file conents
-        # and fill in the update info, reset the reboot.txt file to none and
-        # leave the update_repo func 
-        if file_contents!='none':
-            runtime_config['update']= file_contents.split(',')
-            f.seek(0)
-            f.write('none')
-            f.truncate()
+# Update the CS2910 repo & record the 
+# directories impacted in the env var
+# UPDATES for subsequent makes/image builds.
+# If an update has occurred, reboot the script 
+# in order to use the most current version.  
+def update_repo():
+
+    # Check to see if a reboot has occurred, indicated 
+    # by the environment variable REBOOT == 1. If it has,
+    # report the reboot, reset the variable and return. 
+    if os.environ['REBOOT']:
+            os.environ['REBOOT']=0
             print("System reboot completed successfully. Using most up to date repository!\n")
             return
 
-    # update the git repo, cwd should already be CS2910
+    # Update the git repo, cwd should already be CS2910
     print("Checking for updates in CS2910 repository...")
     p = subprocess.run(
         ["git","pull"],
@@ -29,154 +24,130 @@ def update_repo(runtime_config):
         capture_output=True
     )
 
-    # DELETE ME ! ! ! 
-
-    # check if repo update attempt successful, otherwise report failure and terminate
+    # Check if repo update attempt successful, otherwise report failure and terminate the script. 
     if p.returncode!=0:
-        print("Error: Issue updating repo in CS2910/run.py")
+        print("Error: Issue updating repo in fn call update_repo in CS2910/run.py")
         print(f"Error Msg: {p.stderr}")
-        print("Terminating program")
+        print("Terminating program...\n")
         exit(1)
 
-    # get the changes (if any) made to the repo
+    # Get the changes (if any) made to the repo
     changes = subprocess.run(
     ["git", "diff", "--name-only", "ORIG_HEAD", "HEAD"],
     capture_output=True,
     text=True
     )
-
-    # used to store directories that were updated
-    updated_dirs = set()
-    # report update status 
+    # Split the list of changed files into distinct entries
     update_status = changes.stdout.splitlines()
-    # no change detected 
+    # No change detected 
     if len(update_status)==0:print("No repository updates detected.\n")
-    # change detected, record updated directories & report update (this is a test)
+    # Change detected, record affected directories & report update. Store the 
+    # directories in the environment variable UPDATES and then reboot the 
+    # script. 
     else:
-        updated_dirs={d for update in update_status for d in ['docker/','prime/','spines/'] if d in update}
-        with open("reboot.txt", "w") as f:
-            f.write(",".join(updated_dirs))
+        # Modify the UPDATED environment variable accordingly 
+        os.environ['UPDATED']+=' '.join(d for update in update_status for d in ['docker/','prime/','spines/'] if (d in update and d not in os.environ['UPDATED']))
 
+        # Reboot
+        os.environ['REBOOT']=='1'
         for i in range(5, 0, -1):
             print(f"\rUpdate detected & applied, rebooting in {i} seconds...", end="", flush=True)
             time.sleep(1)
-
         print("\rRebooting now!                                      ")
                 
         os.execv(sys.executable, [sys.executable] + sys.argv)
     
-    # add update info to runtime_config (convert to list for eventual JSON serialization)
-    runtime_config['update']= list(updated_dirs)
-    
-# Usage
+# Prints Usage
 def usage():
     print("Usage:")
-    print("  Custom:  python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>")
-    print("  Default: python3 run.py")
-    print("           (docker, plain, MAX_PO_IN_FLIGHT=20)")
+    print("python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT (must be >= 1) <NUM_REPLICAS> (must be >=6)")
 
-# Parse CLI passed to the program
+# Parse CLI passed to the program, check if correct
+# values used, store those values as environment variables, initialize
+# 'UPDATED' environment variable, print startup config
 def parse_cli(args):
-    # startup configuration, default: docker, unencrypted, MAX_PO_IN_FLIGHT = 20
-    startup_config = {'environment':'docker', 'encryption':0, 'max_po':20} 
-
-    # too many args (either 0 or 3)
-    if len(args) not in [1,4]:
-        print(f"Error: Expected <0|3> arguments, received {len(sys.argv) - 1}.")
+    # Invalid # of args
+    if len(args) <4 or len(args)>4:
+        print('Error: Invalid # of args')
+        usage()
         sys.exit(1)      
-    # correct num received 
-    if len(args)==4:
-        # check if env is correct AND encryption choice is correct AND MAX_PO_IN_FLIGHT val correct
-        if (args[1] not in ["docker", "aster"]) or (args[2] not in ["encrypted","plain"]) or (int(args[3])<1):
+    # Correct number of args received 
+    else:
+        # Check if env/encryption/MAX_PO/NUM_REPLICAS choices are correct
+        if (args[1] not in ["docker", "aster"]) or (args[2] not in ['encrypted','plain']) or (int(args[3])<1) or (int(args[4])<6):
             print("Error: Invalid input")
             usage()
             exit(1)
-        # CLI args correct, add to dict
+        # CLI args correct, create & set the environment variables for each. 
+        # Additionally create the UPDATED environment var. 
         else:
-            # update environment
-            startup_config['environment']=args[1]
-            # update encryption type 
-            startup_config['encryption']=args[2]
-            # update MAX_PO
-            startup_config['max_po']=int(args[3])
+            # Create & set environment var for environment <'aster'|'docker'>
+            os.environ['ENVIRONMENT']=args[1]
+            # Create & set environment var for encryption <'plain'|'encrypted'>
+            # Store as 'plain'= '0' & 'encrypted'='1' for convience 
+            os.environ['ENCRYPTION']='0' if args[2]=='plain' else '1'
+            # Create & set environment var for MAX_PO
+            os.environ['MAX_PO']= args[3]
+            # Create & set environment var for NUM_REPLICAS
+            os.environ['NUM_REPLICAS']= args[3]
+            # Create & initialize environment variable for UPDATED to ''
+            os.environ['UPDATED']=''
+
     # Display startup configuration
     print("\n" + "═" * 46)
     print("           STARTUP CONFIGURATION")
     print("═" * 46)
-    print(f"  {'Environment':<22} {startup_config['environment']}")
-    print(f"  {'Encryption':<22} {'Enabled' if startup_config['encryption'] else 'Disabled'}")
-    print(f"  {'MAX_PO_IN_FLIGHT':<22} {startup_config['max_po']}")
     print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
+    print(f"  {'Environment':<22}       {os.environ['ENVIRONMENT']}")
+    print(f"  {'Encryption':<22}        {'Enabled' if int(os.environ['ENCRYPTED']) else 'Disabled'}")
+    print(f"  {'MAX_PO_IN_FLIGHT':<22}  {os.environ['MAX_PO']}")
     print("═" * 46 + "\n")
 
-    # return startup_config
-    return startup_config
-
-# Start Docker
-def docker_start(runtime_config):
-    # tracks all the directories who's files have been modified in order
-    # to update images accordingly. 
-    modified_directories = runtime_config['update']
-
-    # build the docker images 
-    p = subprocess.run(
-        f"py -3 build.py auto {len(modified_directories)}",
+# Start <Docker|Aster> based off the environment variable ENVIRONMENT.
+def start():
+    # Docker
+    if os.environ['ENVIRONMENT']=='docker':
+        # Create a subprocess that 
+        p = subprocess.run(
+        "py -3 build.py auto",
         shell=True,
         cwd='docker/',
         capture_output=True,
-        text=True
-    )
+        text=True)
+        # TO DO: check for subprocess success & run docker compose. Maybe a docker compose down first.  
 
-# Start aster
-def aster_start(max_po, encryption_status):
-    subprocess.run(
-        ["py", "-3", "aster/run_controller.py", str(max_po), str(encryption_status)],
-        check=True
-    )
+    # Aster
+    else:
+        pass
 
 
-# [Personalized Startup Config]: python3 run.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT >= 1>
-# [Default Startup Config]: python3 run.py 
-# (default values: environment = docker, unencrypted, MAX_PO_IN_FLIGHT=20)
+# python3 run.py <docker|aster> <0|1> <MAX_PO_IN_FLIGHT> <NUM_REPLICAS>
+#   <docker|aster>        :     Environment selection
+#   <encrypted|plain>     :     Encrypted or unecrypted (spines)
+#   <MAX_PO_IN_FLIGHT>    :     Max number of pre-order requests allowed in flight across Prime (must be >=1)
+#   <NUM_REPLICAS>        :     Total number of replicas participating in Prime (must be >=6)
+#
+#
+# environment variable ENVIRONMENT stores environment selection <docker|aster> as type str
+# environment variable ENCRYPTED stores encryption selection  <0|1> as type str
+# environment variable MAX_PO stores MAX_PO_IN_FLIGHT selection as type str
+# environment variable NUM_REPLICAS stores NUM_REPLICAS selection as type str
 def main():
-    # clear terminal for easier readabilityd
-    clear_cmd = 'cls' if platform.system()=='Windows' else 'clear'
-    subprocess.run(clear_cmd, shell=True)
+    # clear terminal for readability
+    subprocess.run('cls' if platform.system()=='Windows' else 'clear', shell=True)
 
-    # get the environment, which gets passed as a CLI arg, returns the runtime_config as a dict that holds
-    # environment, encryption type, MAX_PO_IN_FLIGHT
-    runtime_config=parse_cli(sys.argv)
+    # get CLI arguments, confirm valid, store as environment variables & initialize UPDATED env var
+    parse_cli(sys.argv)
 
-    # update the repo & get the directories associated with the update (or none if up to date) and store in runtime_config
-    update_repo(runtime_config)
+    # Update the repo & store affected directories (if any) in environment variable 'UPDATED' for subsequent
+    # rebuilds/remakes. Reboot the script in case of an update in order to use the most up to date version.
+    
+    # This only effects the local build. In the case of Aster, the remote machines execute their own 
+    # updates IFF the UPDATE environment variable contains any directories. 
+    update_repo()
 
-    # start aster
-    aster_start(runtime_config['max_po'], runtime_config['encryption'])
-    exit(0)
-
-    # # # EVERYTHING BELOW IS CUT OFF CUS THIS APPROACH ISNT WORKING # # # 
-
-    # update the configuration files in prime and spines
-    p = subprocess.run(
-        f"python config.py {runtime_config['environment']} {runtime_config['encryption']} {runtime_config['max_po']} ",
-        shell=True,
-        cwd='configure/',
-        capture_output=True,
-        text=True
-    )
-
-
-    # get the names of the dirs w/ modified files from config.py (if any)
-    print("Updating the configuration files for prime & spines...")
-    updated_dirs = p.stdout.strip().splitlines()[-1].split(',') if p.stdout.strip() else []
-    if p.returncode==0:
-        print("Configuration files successfully updated!\n")
-
-    # update the list of updated directories in runtime_config
-    runtime_config['update']= list(set(updated_dirs+runtime_config['update']))
-    # Hand off control to the startup scripts 
-    if runtime_config['environment']=='docker': docker_start(runtime_config)
-    else: aster_start(runtime_config)
+    # Start either Docker or Aster based on process environment variable "ENVIRONMENT"
+    start()
 
 if __name__=="__main__":
     main()

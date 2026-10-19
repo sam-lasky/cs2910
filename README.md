@@ -14,7 +14,7 @@
 (placeholder)
 ## License and Attribution
 
-This work was developed by Samuel Lasky as part of CS2910 — Master's Project, within the Master of Science in Computer Science program at the University of Pittsburgh.
+This work was developed by Samuel Lasky as part of CS2910 -Master's Project, within the Master of Science in Computer Science program at the University of Pittsburgh.
 
 ### Original Software
 

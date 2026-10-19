@@ -1,0 +1,7 @@
+bug notes: 
+
+when doing aster sometimes it spawns a BUNCH of windows (more than Usual)
+
+update the terminal so it does not clear everything (following a reboot?) 
+
+make it so that instead of waiting 60 seconds in the controller you instead check each container for resume normal ops msg 

@@ -30,7 +30,7 @@ def kill_all(sessions):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-    # //closes terminal windows
+    # closes terminal windows
     sessions.clear()
 
 

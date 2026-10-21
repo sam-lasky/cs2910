@@ -12,7 +12,8 @@
 (placeholder)
 ## Prime and Spines Configuration
 (placeholder)
-## Dependencies
+<!-- TODO: Add a brief description of each dependency and its purpose. -->
+## Dependencies 
 - `build-essential`
 - `gcc`
 - `g++`

@@ -189,7 +189,9 @@ def modify_max_po(MAX_PO_IN_FLIGHT):
             f.write(file_content)
     return updated
 
-# Usage: python config.py <docker|aster> <encrypted|plain> <MAX_PO_IN_FLIGHT>
+# Usage: python config.py
+# All configuration information is stored as environment 
+# variables & will be retrieved as needed.  
 def main():
 
     # get the config type 

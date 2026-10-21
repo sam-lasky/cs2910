@@ -12,6 +12,20 @@
 (placeholder)
 ## Prime and Spines Configuration
 (placeholder)
+## Dependencies
+- `build-essential`
+- `gcc`
+- `g++`
+- `make`
+- `libssl-dev`
+- `flex`
+- `bison`
+- `git`
+- `groff`
+- `python3`
+- `iproute2`
+- `iputils-ping`
+
 ## License and Attribution
 
 This work was developed by Samuel Lasky as part of CS2910 -Master's Project, within the Master of Science in Computer Science program at the University of Pittsburgh.

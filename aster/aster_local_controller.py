@@ -104,9 +104,10 @@ def start_replicas():
         id += 1
 
     for machine_id, session in sessions.items():
+        print(f"\n--- ASTER {machine_id} CONFIGURATION ---")
         for line in session.stdout:
-            print(f"\n{'=' * 12} ASTER {machine_id} CONFIGURATION {'=' * 12}")
             print(line, end="", flush=True)
+
     return sessions
 
 def run():

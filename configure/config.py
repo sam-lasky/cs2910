@@ -167,8 +167,8 @@ def update_def_h():
     # new def_h
     new_def = ''
 
-    with open('../prime/src/def.h','r') as f:
-        for line in f.readlines():
+    with open('../prime/src/def.h','r') as file:
+        for line in file.readlines():
             # update max po in flight
             if line.startswith('#define MAX_PO_IN_FLIGHT'):
                 line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'

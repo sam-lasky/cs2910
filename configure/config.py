@@ -218,34 +218,6 @@ def main():
     # modify num replicas
     modify_fault_tolerance(len(replica_list))
 
-    # DELETE THIS MONSTROSITY # # 
-
-    # Verify and print MAX_PO_IN_FLIGHT
-    with open('../prime/src/def.h') as f:
-        for line in f:
-            if line.startswith('#define MAX_PO_IN_FLIGHT '):
-                print(line.strip(), flush=True)
-                assert int(line.split()[2]) == get_env('MAX_PO')
-                break
-        else:
-            raise AssertionError("MAX_PO_IN_FLIGHT not found")
-
-    # Verify and print Spines encryption
-    with open('../prime/spines/daemon/spines.conf') as f:
-        contents = f.read()
-
-    encrypted = os.environ['ENCRYPTED']
-    expected = 'True' if encrypted == 'encrypted' else 'False'
-
-    for setting in ['IT_LinkCrypto', 'IT_LinkEncrypt']:
-        line = next(
-            (line.strip() for line in contents.splitlines()
-            if line.strip().startswith(setting + ' =')),
-            None
-        )
-        print(line, flush=True)
-        assert line == f'{setting} = {expected}'
-
 
 
 if __name__=="__main__":

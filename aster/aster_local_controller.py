@@ -119,32 +119,7 @@ def run():
         if status != 0:
             print(output, flush=True)
 
-#     # Start new sessions
-#     sessions = {}
-#     id =1
-#     for i in range(13, 19):
-#         print(f'Starting session with Aster {i}')
-#         sessions[i] = subprocess.Popen(
-#             f'ssh sjl79@aster{i}.cs.pitt.edu '
-#             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
-#             f'echo \\"$output\\"; '
-#             f'cd cs2910/aster && '
-#             f'python3 -u startup_replica.py {id} {max_po} {encrypted} \\"$output\\""',
-#             creationflags=subprocess.CREATE_NEW_CONSOLE
-#         )
-#         id+=1
+def tests():
+    emulated_clients = [20,30,50,75,100,150,200,300,500,750]
+    num_trials = 5
 
-#     # wait for replicas to initialize
-#     print("Waiting 60 seconds for replicas to initialize...", flush=True)
-#     time.sleep(60)
-#     # run tests
-#     run_tests(sessions, max_po, encrypted)
-#     # wait 10 secs 
-#     print("Waiting 10 seconds before cleanup...", flush=True)
-#     time.sleep(10)
-#     # terminate all sessions 
-#     kill_all(sessions)
-
-
-# if __name__=='__main__':
-#     main()

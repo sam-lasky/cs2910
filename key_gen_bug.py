@@ -2,7 +2,7 @@ import subprocess
 import shutil
 
 def check_configs():
-    # configs[i] = (f,k) where f = max num byzantine replicas, k = max num benign replicas
+    # configs[TOTAL_REPLICAS] = (f,k) where f = max num byzantine replicas, k = max num benign replicas
     configs = {
         6: (1, 1),
         7: (2, 0),
@@ -19,7 +19,20 @@ def check_configs():
         18: (5, 1),
         19: (6, 0),
         20: (5, 2),
+        21: (6, 1),
+        22: (7, 0),
+        23: (6, 2),
+        24: (7, 1),
+        25: (8, 0),
+        26: (7, 2),
+        27: (8, 1),
+        28: (9, 0),
+        29: (8, 2),
+        30: (9, 1),
     }
+
+
+
     bugged_configs=[]
     for i in range(6,11):
         f = configs[i][0]

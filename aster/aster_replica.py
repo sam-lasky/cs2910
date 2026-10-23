@@ -12,15 +12,9 @@ def setup_spines():
         subprocess.run(["chmod", "+x", "libspread-util/configure"], cwd=spines_path, check=True)
         subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
 
-        print("Configuring Spines...", flush=True)
-        subprocess.run(["./configure"], cwd=spines_path, check=True)
-
-        print("Building parser...", flush=True)
-        subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
-
-        print("Building Spines...", flush=True)
-        subprocess.run(["make"], cwd=spines_path, check=True)
-
+        subprocess.run(["./configure"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)  
+        subprocess.run(["make"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)
         # Copy Spines keys
         subprocess.run(
             ["cp", "-a", "../saved_keys/spines_keys/.", spines_path + "/daemon/keys/"],
@@ -31,7 +25,6 @@ def setup_spines():
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
-    print("Spines successfully setup!", flush=True)
 
 
 # set up prime
@@ -51,18 +44,19 @@ def setup_prime():
             check=True
         )
 
-        print("Cleaning Prime...", flush=True)
         subprocess.run(
             ["make", "clean"],
             cwd=prime_path + "/src",
-            check=True
+            check=True,
+            stdout=subprocess.DEVNULL
         )
 
-        print("Building Prime...", flush=True)
+
         subprocess.run(
             ["make"],
             cwd=prime_path + "/src",
-            check=True
+            check=True,
+            stdout=subprocess.DEVNULL
         )
 
         # Copy Prime keys
@@ -75,7 +69,6 @@ def setup_prime():
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
-    print("Prime successfully setup!", flush=True)
 
 
 # start spines and prime

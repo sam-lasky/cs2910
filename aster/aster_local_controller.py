@@ -38,6 +38,8 @@ def select_replica_machines():
     else:
         store_env('ASTER_MACHINES_USED', ','.join(final_list))
 
+    print(final_list)
+
 # Gets all the selected aster machines indicated by the file, where
 # file = <aster_machines_used | barred_machines>. Returns a list. 
 def get_machines(file_path):

@@ -78,9 +78,7 @@ def start_replicas():
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'echo \\"$output\\"; '
             f'cd cs2910/aster && '
-            f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            f'python3 -u aster_replica.py {id} {machine} \\"$output\\""'
         )
         id += 1
 

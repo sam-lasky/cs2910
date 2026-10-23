@@ -199,7 +199,7 @@ int main(int argc, char** argv)
     replaced it to 6 for testing purposes. TODO: remove all together. 
   */
   // VAR.Num_Servers=18;
-  VAR.Num_Servers=6;
+  VAR.Num_Servers=8;
   
   
   

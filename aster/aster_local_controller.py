@@ -63,12 +63,35 @@ def error_handler(err_msg:str):
     exit(1)
 
 
+# For all aster machines in final_list:
+#   (1) Connect to the machine
+#   (2) Clone or update cs2910 repo
+#   (3) Launch aster_replica.py
+def start_replicas():
+    # unique id of the replica
+    id=1
+    for machine in final_list:
+        print(f'Starting session with Aster {machine}')
+
+        subprocess.Popen(
+            f'ssh sjl79@aster{machine}.cs.pitt.edu '
+            f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
+            f'echo \\"$output\\"; '
+            f'cd cs2910/aster && '
+            f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
+        )
+        id += 1
+
 def run():
     print('[Aster Controller Local]')
+    # finalize list of aster machines that will be used
     select_replica_machines()
     print(f'Using machines:{','.join(final_list)}')
 
-
+    # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
+    start_replicas()
 
 
 #     # Start new sessions

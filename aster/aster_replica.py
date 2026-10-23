@@ -1,7 +1,10 @@
 import sys, subprocess, time, os, socket
 
+replica_id=None
+aster_id=None
+
 # set up spines 
-def setup_spines(machine_id):
+def setup_spines():
     spines_path = "../prime/spines"
     try:
 
@@ -26,27 +29,6 @@ def setup_spines(machine_id):
             check=True
         )
 
-        # TO DO: KEY GEN LOGIC!!!! 
-        
-        # if machine_id==13:
-        #     print('Generating Spines keys...', flush=True)
-        #     subprocess.run(
-        #         "chmod +x gen_keys.sh && ./gen_keys.sh",
-        #         cwd=spines_path + "/daemon",
-        #         shell=True,
-        #         check=True
-        #     )
-
-        #     # Save keys outside the cs2910 repository
-        #     backup_dir = os.path.expanduser("~/spines_keys")
-
-        #     subprocess.run(
-        #         ["cp", "-a", spines_path + "/daemon/keys", backup_dir],
-        #         check=True
-        #     )
-        # else:
-        #     exit(1)
-    
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
         exit(1)
@@ -55,7 +37,7 @@ def setup_spines(machine_id):
         print("Spines successfully setup!", flush=True)
 
 # set up prime 
-def setup_prime(machine_id):
+def setup_prime():
     prime_path = "../prime"
     try:
         subprocess.run(
@@ -78,28 +60,6 @@ def setup_prime(machine_id):
             ["cp", "-a", "../prime_keys/.", prime_path + "/bin/keys/"],
             check=True
         )
-
-
-        # TO DO: KEY GEN LOGIC!!!! 
-
-
-        # if machine_id==13:
-        #     print('Generating Prime keys...', flush=True)
-        #     subprocess.run(
-        #         ["./gen_keys"],
-        #         cwd=prime_path + "/bin",
-        #         check=True
-        #         )
-
-        #     # Save keys outside the cs2910 repository
-        #     backup_dir = os.path.expanduser("~/prime_keys")
-
-        #     subprocess.run(
-        #         ["cp", "-a", prime_path + "/bin/keys", backup_dir],
-        #         check=True
-        #     )
-        # else:exit(1)
-        # exit(1)
 
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
@@ -134,33 +94,25 @@ def startup(aster_id, replica_id):
     spines.communicate()    
 
 def main():
+    global replica_id, aster_id
     # unique identifier of this replica instance
     replica_id = sys.argv[1]
-    # max_po for def.h configuration
-    max_po = sys.argv[2]
-    # encrypted (encrypted|plain) for spines config
-    encrypted = sys.argv[3]
-    
-    # get the aster id 
-    machine_id = int(socket.gethostname().split('.')[0][5:])
-    print(f'Now running on Aster {machine_id}')
+    # aster machine id
+    aster_id = sys.argv[2]
+
+    print('hello!')
+    return
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure' using the command line argument "aster"
     subprocess.run(
-        ["python", "config.py","aster",encrypted,max_po],
+        ["python", "config.py"],
         cwd='../configure',
         text=True,
         check=True)
 
-    
-    # Set up spines
-    # >> Configure Spines
-    # >> Build Parser
-    # >> Build Spines
-    # >> Copy Keys ((TO DO: FIX KEY LOGIC))
-    setup_spines(machine_id)
-    setup_prime(machine_id)
+    setup_spines(aster_id)
+    setup_prime(aster_id)
 
 
     startup(machine_id,replica_id)

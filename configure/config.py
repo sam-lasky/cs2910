@@ -178,31 +178,33 @@ def main():
     # modify MAX_PO_IN_FLIGHT
     modify_max_po(get_env('MAX_PO'))
 
-    # Modify MAX_PO_IN_FLIGHT in prime/src/def.h
-    # if modify_max_po(max_po) and 'prime' not in updated_dirs:
-    #     updated_dirs.append('prime')
+    # DELETE THIS MONSTROSITY # # 
 
-    # # Verify MAX_PO_IN_FLIGHT
-    # with open('../prime/src/def.h') as f:
-    #     assert any(
-    #         line.strip() == f'#define MAX_PO_IN_FLIGHT {max_po}'
-    #         for line in f
-    #     ), "ERROR: MAX_PO_IN_FLIGHT configuration failed"
+    # Verify and print MAX_PO_IN_FLIGHT
+    with open('../prime/src/def.h') as f:
+        for line in f:
+            if line.startswith('#define MAX_PO_IN_FLIGHT '):
+                print(line.strip(), flush=True)
+                assert int(line.split()[2]) == get_env('MAX_PO')
+                break
+        else:
+            raise AssertionError("MAX_PO_IN_FLIGHT not found")
 
-    # # Verify Spines encryption
-    # with open('../prime/spines/daemon/spines.conf') as f:
-    #     contents = f.read()
+    # Verify and print Spines encryption
+    with open('../prime/spines/daemon/spines.conf') as f:
+        contents = f.read()
 
-    # expected = 'True' if encrypted == 'encrypted' else 'False'
+    encrypted = os.environ['ENCRYPTED']
+    expected = 'True' if encrypted == 'encrypted' else 'False'
 
-    # assert f'IT_LinkCrypto = {expected}' in contents, "ERROR: IT_LinkCrypto configuration failed"
-    # assert f'IT_LinkEncrypt = {expected}' in contents, "ERROR: IT_LinkEncrypt configuration failed"
-
-    # print("Configuration successfully verified!", flush=True)
-
-    # time.sleep(5)
-
-    # print(','.join(updated_dirs))
+    for setting in ['IT_LinkCrypto', 'IT_LinkEncrypt']:
+        line = next(
+            (line.strip() for line in contents.splitlines()
+            if line.strip().startswith(setting + ' =')),
+            None
+        )
+        print(line, flush=True)
+        assert line == f'{setting} = {expected}'
 
 
 

@@ -23,7 +23,7 @@ def setup_spines():
 
         # Copy Spines keys
         subprocess.run(
-            ["cp", "-a", "../spines_keys/.", spines_path + "/daemon/keys/"],
+            ["cp", "-a", "../saved_keys/spines_keys/.", spines_path + "/daemon/keys/"],
             check=True
         )
 
@@ -67,7 +67,7 @@ def setup_prime():
 
         # Copy Prime keys
         subprocess.run(
-            ["cp", "-a", "../prime_keys/.", prime_path + "/bin/keys/"],
+            ["cp", "-a", f'../saved_keys/prime_keys/{os.environ["NUM_REPLICAS"]}_total_reps/.', prime_path + "/bin/keys/"],
             check=True
         )
 
@@ -79,7 +79,10 @@ def setup_prime():
 
 
 # start spines and prime
-def startup(aster_id, replica_id):
+def startup():
+    aster_id = int(os.environ["ASTER_MACHINE_ID"])
+    replica_id = int(os.environ["REPLICA_ID"])
+
     LAN = '53' if os.environ['ENVIRONMENT'] == 'aster1' else '54'
     base_ip = f'192.168.{LAN}.{aster_id+9}'
 
@@ -124,6 +127,7 @@ def startup(aster_id, replica_id):
 
     print(f"Replica {replica_id} on Aster {aster_id} started successfully!", flush=True)
 
+
 # Args: aster_replica.py <replica_id> <machine_id> ASTER_MACHINES_USED=<value> ENVIRONMENT=<value> MAX_PO=<value> ENCRYPTED=<value>
 def main():
     # <--- Set up environment variables --->
@@ -139,6 +143,8 @@ def main():
     # Sanity check: print all configured environment variables
     for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"):
         print(f"{key}={os.environ[key]}", flush=True)
+
+    exit(0)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'
@@ -159,7 +165,7 @@ def main():
     setup_spines()
     setup_prime()
 
-    startup(aster_id, replica_id)
+    startup()
 
     # All setup and startup checks passed
     sys.exit(0)

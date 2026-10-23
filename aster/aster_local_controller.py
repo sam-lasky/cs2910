@@ -110,12 +110,12 @@ def run():
         output, _ = process.communicate()
         status = process.returncode
 
-        if status == 0:
-            print(f'Aster {machine}: SUCCESS')
-        else:
-            print(f'Aster {machine}: FAILED ({status})')
-            print(output, flush=True)
+    if status == 0:
+        print(f'Aster {machine}: SUCCESS')
+    else:
+        print(f'Aster {machine}: FAILED ({status})')
 
+    print(output, flush=True)
 
 #     # Start new sessions
 #     sessions = {}

@@ -50,7 +50,8 @@ def main():
         print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
         print("═" * 46 + "\n")
 
-        # update the CS2910 github repository. 
+        # update the CS2910 github repository.
+        print('[CS2910 Git Repo Synchronization]')
         update_repo()
 
     # A reboot has occurred. The reboot func os.execv() preserves environment variables. 

@@ -12,22 +12,20 @@ from aster import aster_local_controller
 
 
 # Usage:
-# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off> -d <UPDATE_DISTRIBUTION>
+# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off> >
 #
 #   -e  Environment       : docker, aster_LAN_1, or aster_LAN_2
 #   -x  Encryption        : encrypted or plain (Spines)
 #   -p  MAX_PO_IN_FLIGHT  : Maximum number of pre-order requests in flight (integer > 0)
 #   -r  NUM_REPLICAS      : Total number of Prime replicas (integer > 0)
 #   -f  Patch             : on or off
-#   -d  Update Distribution : Number of machines distributing updates (integer > 0)
 #
-# Environment Variables:
+#   Environment Variables:
 #   ENVIRONMENT          : Environment selection (docker|aster_LAN_1|aster_LAN_2), stored as str
 #   ENCRYPTED            : Encryption selection (encrypted|plain), stored as str
 #   MAX_PO               : MAX_PO_IN_FLIGHT value, stored as str
 #   NUM_REPLICAS         : Replica count, stored as str
 #   PATCH_APPLIED        : Patch selection (on|off), stored as str
-#   UPDATE_DISTRIBUTION  : Number of machines distributing updates, stored as str
 #
 # All six flags and associated values are required for this script to execute. 
 
@@ -50,7 +48,6 @@ def main():
         print(f"  {'Environment':<22} {os.environ['ENVIRONMENT']}")
         print(f"  {'Spines Encrypted':<22} {'Yes' if get_encryption_status() else 'No'}")
         print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
-        print(f"  {'Update Distribution':<22} {os.environ['UPDATE_DISTRIBUTION']}")
         print("═" * 46 + "\n")
 
         # update the CS2910 github repository.

@@ -9,7 +9,6 @@ import os
 # MAX_PO                int    Maximum number of pre-order requests in flight (> 0)
 # NUM_REPLICAS          int    Number of Prime replicas (> 0)
 # PATCH_APPLIED         str    Whether the patch in order.c is enabled (on | off)
-# UPDATE_DISTRIBUTION   int    Number of machines distributing updates (> 0)
 # REBOOT                int    Set to 1 when a git update restarts the calling script, otherwise 0.
 #
 # Aster-Specific Environment Variables

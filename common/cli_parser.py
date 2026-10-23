@@ -98,27 +98,27 @@ def cli_parse_args(args:list[str], calling_script_name:str):
             # Environment flag: Should be either <docker|aster>
             case '-e':
                 if args[i+1] in ['docker','aster']:
-                    store_env(env_var_name=args[i+1],env_val='ENVIRONMENT')
+                    store_env(env_var_name='ENVIRONMENT',env_val=args[i+1])
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # Encryption flag: Should be either <encrypted|plain>
             case '-x':
                 if args[i+1] in ['encrypted','plain']:
-                    store_env(env_var_name=args[i+1],env_val='ENCRYPTED')
+                    store_env(env_var_name='ENCRYPTED',env_val=args[i+1])
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # MAX_PO_IN_FLIGHT flag: Should be an integer > 0
             case '-p':
                 if args[i+1].isdecimal() and int(args[i+1])>0:
-                    store_env(env_var_name=args[i+1],env_val='MAX_PO')
+                    store_env(env_var_name='MAX_PO',env_val=args[i+1])
                 else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'
             # NUM_REPLICAS flag: Should be an integer > 0
             case '-r':
                 if args[i+1].isdecimal() and int(args[i+1])>0:
-                    store_env(env_var_name=args[i+1],env_val='NUM_REPLICAS')
+                    store_env(env_var_name='NUM_REPLICAS',env_val=args[i+1])
                 else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'
-            # Patch: Should be <on|off> 
+            # Patch: Should be <on|off>
             case '-f':
                 if args[i+1] in ['on','off']:
-                    store_env(env_var_name=args[i+1],env_val='PATCH_APPLIED')
+                    store_env(env_var_name='PATCH_APPLIED',env_val=args[i+1])
         # check if there is an error.
         if err_msg is not None: cli_error(err_msg)
 

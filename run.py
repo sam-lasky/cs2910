@@ -65,6 +65,7 @@ def main():
     if os.environ['ENVIRONMENT']=='aster':
         aster_local_controller()
     else:
+        print('TODO: INCORPORATE DOCKER SUPPORT')
         exit(0)
 
 

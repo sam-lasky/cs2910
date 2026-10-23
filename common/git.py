@@ -86,6 +86,8 @@ def reboot():
         time.sleep(1)
     # additional spaces
     print("\rUpdate applied. Restarting script...                 ", flush=True)    
+    # On Windows use subprocess to resolve console formatting bug - child reboots and 
+    # parent exits, child takes over, fixes powershell output bug
     if os.name == "nt":
         subprocess.run([sys.executable] + sys.argv)
         sys.exit(0)

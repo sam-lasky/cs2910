@@ -125,6 +125,9 @@ def run():
 
     for machine, process in sessions.items():
         output, _ = process.communicate()
+        output, _ = process.communicate()
+        print(f"\n--- ASTER {machine} CONFIGURATION ---")
+        print(output, flush=True)
         status = process.returncode
 
         print(f'Aster {machine}: {"SUCCESS" if status == 0 else "FAILED"}')

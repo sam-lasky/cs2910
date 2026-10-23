@@ -10,17 +10,25 @@ from common.git import update_repo
 from common.env_vars import get_encryption_status
 from aster import aster_local_controller
 
-# python3 run.py <docker|aster> <0|1> <MAX_PO_IN_FLIGHT> <NUM_REPLICAS>
-#   <docker|aster>        :     Environment selection
-#   <encrypted|plain>     :     Encrypted or unecrypted (spines)
-#   <MAX_PO_IN_FLIGHT>    :     Max number of pre-order requests allowed in flight across Prime (must be >=1)
-#   <NUM_REPLICAS>        :     Total number of replicas participating in Prime (must be >=6)
+
+# Usage:
+# python3 run.py -e <docker|aster> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
 #
+#   -e  Environment       : docker or aster
+#   -x  Encryption        : encrypted or plain (Spines)
+#   -p  MAX_PO_IN_FLIGHT  : Maximum number of pre-order requests in flight (integer > 0)
+#   -r  NUM_REPLICAS      : Total number of Prime replicas (integer > 0)
+#   -f  Patch             : on or off
 #
-# environment variable ENVIRONMENT stores environment selection <docker|aster> as type str
-# environment variable ENCRYPTED stores encryption selection  <0|1> as type str
-# environment variable MAX_PO stores MAX_PO_IN_FLIGHT selection as type str
-# environment variable NUM_REPLICAS stores NUM_REPLICAS selection as type str
+# Environment Variables:
+#   ENVIRONMENT    : Environment selection (docker|aster), stored as str
+#   ENCRYPTED      : Encryption selection (encrypted|plain), stored as str
+#   MAX_PO         : MAX_PO_IN_FLIGHT value, stored as str
+#   NUM_REPLICAS   : Replica count, stored as str
+#   PATCH_APPLIED  : Patch selection (on|off), stored as str
+#
+# All five flags and associated values are required for this script to execute. 
+
 def main():
 
     # The environment variable UPDATE does not exist yet. It is only created 
@@ -56,6 +64,8 @@ def main():
     # Start the local controller based on ENVIRONMENT env var value <aster|docker>
     if os.environ['ENVIRONMENT']=='aster':
         aster_local_controller()
+    else:
+        exit(0)
 
 
 

@@ -75,12 +75,15 @@ def cli_parse_args(args:list[str], calling_script_name:str):
     global script_name
     script_name=calling_script_name
 
-    # remove script name from args
+    # remove script name from argument list
     args = args[1:]
 
-    # Expect a non empty list of args && Expect an even number of arguments (each flag should have one associated value)
-    if not args or len(args)%2!=0:
-        cli_error(f'Missing required command line args for {script_name}.py: Expected {len(scripts[script_name])}, received {len(args)}')
+    # the expected number of arguments based on the calling script [length of all the flags multiplied by 2 to account for values]
+    expected_num_args = len(scripts[script_name])*2
+
+    # Check if the expected number of arguments was passed based on the calling script
+    if len(args) != expected_num_args:
+        cli_error(f'Missing required command line args for {script_name}.py: Expected {expected_num_args}, received {len(args)}')
 
     for i in range(0,len(args),2):
         # error msg initialized to None

@@ -27,6 +27,9 @@ def main():
                         "-f", "off",
                         "-d", str(distribution)
                     ], check=True)
+                        # give spines time?
+                        print('\nGiving Spines 60 seconds to setup....\n')
+                        time.sleep(60)
                         elapsed = 0
                         stalls = 0
                         actual = 0
@@ -56,17 +59,16 @@ def main():
                                 
                                 result = subprocess.run(
                                     [
-                                        "ssh", "-T", "sjl79@aster17.cs.pitt.edu",
+                                        "ssh", "-T", "sjl79@aster11.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
-                                        f"./driver -l 192.168.53.26 -i 1 -s 7 "
+                                        f"./driver -l 192.168.53.20 -i 1 -s 1 "
                                         f"-c {updates} -n {emulated_client}"
                                     ],
                                     capture_output=True,
                                     text=True,
-                                    check=False
+                                    check=True
                                 )
-                                # give spines time?
-                                time.sleep(60)
+
                                 
                                 # print("ERROR:", result.stderr)
                                 # print("OUTPUT:", result.stdout)

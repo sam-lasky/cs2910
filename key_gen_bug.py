@@ -33,7 +33,7 @@ def check_configs():
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         p = subprocess.run(
             ["./gen_keys"], cwd="prime/bin",
-            capture_output=True, text=True, check=False
+            text=True, check=False
         )
         if p.returncode!=0:
             print(p.stderr)

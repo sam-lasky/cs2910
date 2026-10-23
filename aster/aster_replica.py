@@ -14,9 +14,29 @@ def setup_spines():
         subprocess.run(["chmod", "+x", "libspread-util/configure"], cwd=spines_path, check=True)
         subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
 
-        subprocess.run(["./configure"], cwd=spines_path, check=True)
-        subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
-        subprocess.run(["make"], cwd=spines_path, check=True)
+        subprocess.run(
+            ["./configure"],
+            cwd=spines_path,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        subprocess.run(
+            ["make", "-C", "daemon", "parser"],
+            cwd=spines_path,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        subprocess.run(
+            ["make"],
+            cwd=spines_path,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
         # Copy Spines keys
         subprocess.run(
@@ -49,13 +69,17 @@ def setup_prime():
         subprocess.run(
             ["make", "clean"],
             cwd=prime_path + "/src",
-            check=True
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
 
         subprocess.run(
             ["make", "-j1"],
             cwd=prime_path + "/src",
-            check=True
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
 
         # Copy Prime keys

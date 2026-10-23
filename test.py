@@ -1,5 +1,5 @@
 
-# python run.py -e aster1 -x plain -p 100 -r 8 -f off -d 1
+# python run.py -e aster_LAN_1 -x plain -p 100 -r 8 -f off -d 1
 
 import sys, subprocess, time, os
 from pathlib import Path
@@ -19,7 +19,7 @@ def main():
                     for max_po in max_po_list:
                         subprocess.run([
                         sys.executable, "run.py",
-                        "-e", "aster1",
+                        "-e", "aster_LAN_1",
                         "-x", encrypted,
                         "-p", str(max_po),
                         "-r", str(num_replicas),
@@ -58,7 +58,7 @@ def main():
 
                                 process = subprocess.Popen(
                                     [
-                                        "ssh", "-T", "sjl79@aster11.cs.pitt.edu",
+                                        "ssh", "-T", "sjl79@aster_LAN_11.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
                                         f"./driver -l 192.168.53.20 -i 1 -s 1 "
                                         f"-c {updates} -n {emulated_client}"

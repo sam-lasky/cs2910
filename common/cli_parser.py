@@ -4,7 +4,7 @@ from .env_vars import store_env
 #
 # Flag  Parameter           Expected Value             Type
 # ---- -----------------    -------------------------- ----
-# -e   Environment          docker | aster1 | aster2    str
+# -e   Environment          docker | aster_LAN_1 | aster_LAN_2    str
 # -x   Encryption           encrypted | plain          str
 # -p   MAX_PO_IN_FLIGHT     integer > 0                int
 # -r   NUM_REPLICAS         integer > 0                int
@@ -19,8 +19,8 @@ scripts = {
 all_flags = {
     # environment
     '-e': {
-        'expected': '<docker|aster1|aster2>',
-        'description': ['-e', 'Environment', 'docker | aster1 | aster2', 'str']
+        'expected': '<docker|aster_LAN_1|aster_LAN_2>',
+        'description': ['-e', 'Environment', 'docker | aster_LAN_1 | aster_LAN_2', 'str']
     },
     # encryption
     '-x': {
@@ -101,9 +101,9 @@ def cli_parse_args(args:list[str], calling_script_name:str):
         # check if the input value is valid. If it is, create an environment variable for
         # it. Otherwise, call the error handler (print error, usage, terminate script)
         match flag:
-            # Environment flag: Should be either <docker|aster1|aster2>
+            # Environment flag: Should be either <docker|aster_LAN_1|aster_LAN_2>
             case '-e':
-                if args[i+1] in ['docker','aster1','aster2']:
+                if args[i+1] in ['docker','aster_LAN_1','aster_LAN_2']:
                     store_env(env_var_name='ENVIRONMENT',env_val=args[i+1])
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # Encryption flag: Should be either <encrypted|plain>

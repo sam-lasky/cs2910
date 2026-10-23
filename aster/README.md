@@ -23,7 +23,7 @@ where x is an integer in the range 1-20.
 
 Example:
 ```bash
-ssh abc12@aster1.cs.pitt.edu
+ssh abc12@aster_LAN_1.cs.pitt.edu
 ```
 
 Use your Pitt password to login to the cluster. I initially had issues  with this and had to contact IT.
@@ -66,7 +66,7 @@ git clone https://github.com/sam444555/cs2910.git
 | Server | Pitt Network | Local Network 1 | Local Network 2 |
 |--------|--------------|-----------------|-----------------|
 | aster1 | 10.27.1.10 | 192.168.53.10 | 192.168.54.10 |
-| aster2 | 10.27.1.11 | 192.168.53.11 | 192.168.54.11 |
+| aster_LAN_2 | 10.27.1.11 | 192.168.53.11 | 192.168.54.11 |
 | aster3 | 10.27.1.12 | 192.168.53.12 | 192.168.54.12 |
 | aster4 | 10.27.1.13 | 192.168.53.13 | 192.168.54.13 |
 | aster5 | 10.27.1.14 | 192.168.53.14 | 192.168.54.14 |
@@ -84,4 +84,4 @@ git clone https://github.com/sam444555/cs2910.git
 | aster17 | 10.27.1.26 | 192.168.53.26 | 192.168.54.26 |
 | aster18 | 10.27.1.27 | 192.168.53.27 | 192.168.54.27 |
 | aster19 | 10.27.1.28 | 192.168.53.28 | 192.168.54.28 |
-| aster20 | 10.27.1.29 | 192.168.53.29 | 192.168.54.29 |
+| aster_LAN_20 | 10.27.1.29 | 192.168.53.29 | 192.168.54.29 |

@@ -98,7 +98,7 @@ def startup():
     aster_id = int(os.environ["ASTER_MACHINE_ID"])
     replica_id = int(os.environ["REPLICA_ID"])
 
-    LAN = '53' if os.environ['ENVIRONMENT'] == 'aster1' else '54'
+    LAN = '53' if os.environ['ENVIRONMENT'] == 'aster_LAN_1' else '54'
     base_ip = f'192.168.{LAN}.{aster_id+9}'
 
     try:

@@ -4,7 +4,7 @@ import os
 #
 # Variable              Type   Description
 # --------------------  -----  -------------------------------------------------------
-# ENVIRONMENT           str    Execution environment (docker | aster1 | aster2)
+# ENVIRONMENT           str    Execution environment (docker | aster_LAN_1 | aster_LAN_2)
 # ENCRYPTED             str    Spines communication encryption mode (encrypted | plain)
 # MAX_PO                int    Maximum number of pre-order requests in flight (> 0)
 # NUM_REPLICAS          int    Number of Prime replicas (> 0)

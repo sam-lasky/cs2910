@@ -55,8 +55,8 @@ def load_replica_configuration():
     # List of tuples holding the candidate replicas where each entry is (<replica_id>,<replica_ip>)
     candidate_replicas=[]
 
-    # <aster1|aster2>
-    if get_env('ENVIRONMENT') in ['aster1','aster2']:
+    # <aster_LAN_1|aster_LAN_2>
+    if get_env('ENVIRONMENT') in ['aster_LAN_1','aster_LAN_2']:
         machines = get_env('ASTER_MACHINES_USED')
         network = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
         id=1

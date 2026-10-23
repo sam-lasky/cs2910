@@ -80,8 +80,14 @@ def start_replicas():
     for machine_id in final_list:
         print(f'Starting session with Aster {machine_id}')
         # Update the remote repository and start the replica with its ID, machine ID, and environment variables
+        # command = (
+        #     f'git -C cs2910 pull && '
+        #     f'cd cs2910/aster && '
+        #     f'python3 -u aster_replica.py {id} {machine_id} {env_list}'
+        # )
+        # suppress git msgs 
         command = (
-            f'git -C cs2910 pull && '
+            f'git -C cs2910 pull > /dev/null 2>&1 && '
             f'cd cs2910/aster && '
             f'python3 -u aster_replica.py {id} {machine_id} {env_list}'
         )

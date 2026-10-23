@@ -142,10 +142,14 @@ def main():
     
     # clear terminal
     print("\033[2J\033[H", end="", flush=True)
+
     # print config for controller
-    print(f"[ASTER {os.environ['ASTER_MACHINE_ID']} CONFIGURATION]", flush=True)
-    for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED", "NUM_REPLICAS"):
-        print(f"{key}={os.environ[key]}", flush=True)
+    print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
+    print("-" * 54)
+
+    for replica_id, machine_id in enumerate(os.environ["ASTER_MACHINES_USED"].split(","), start=1):
+        print(f"{machine_id:<8} {replica_id:<10} {os.environ['ENVIRONMENT']:<14} {os.environ['MAX_PO']:<10} {os.environ['ENCRYPTED']:<12}")
+
     exit(0)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py

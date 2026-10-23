@@ -33,10 +33,13 @@ def check_configs():
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         p = subprocess.run(["./gen_keys"], cwd="prime/bin")
         
-        if p.returncode!=0:
-            print(p.stderr)
+        if p.returncode==11:
+            print(f"Segmentation fault (core dumped) — {i} replicas")
             bugged_configs.append(i)
     print(f'ALL BUGGED CONFIGS:{bugged_configs}')
+
+
+
 
 def change_def(f:int,k:int):
     with open('prime/src/def.h', 'r') as file:

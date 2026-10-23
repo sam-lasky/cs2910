@@ -338,25 +338,25 @@ void Print_And_Exit(void)
     */
 
     // HUMAN VERSION
-    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", 
-      num_clients_to_emulate, total_required_updates);
-    printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
-    printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
-    printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
-    printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
-    printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
+    // printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", 
+    //   num_clients_to_emulate, total_required_updates);
+    // printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
+    // printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
+    // printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
+    // printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
+    // printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
 
     // CSV VERSION 
-    // printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f\n",
-    //    num_clients_to_emulate,
-    //    total_required_updates,
-    //    time_elapsed,
-    //    send_stalls,
-    //    expected_throughput,
-    //    actual_throughput,
-    //    min,
-    //    max,
-    //    avg);
+    printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f\n",
+       num_clients_to_emulate,
+       total_required_updates,
+       time_elapsed,
+       send_stalls,
+       expected_throughput,
+       actual_throughput,
+       min,
+       max,
+       avg);
     exit(0);
 
 }

@@ -44,7 +44,7 @@ def setup_prime():
             "chmod -R +x stdutil/buildtools && "
             "chmod +x libspread-util/configure && "
             "chmod -R +x libspread-util/buildtools && "
-            "chmod +x OpenTC-1.1/TC-lib-1.0/csvonfigure && "
+            "chmod +x OpenTC-1.1/TC-lib-1.0/configure && "
             "chmod +x OpenTC-1.1/TC-lib-1.0/missing",
             cwd=prime_path,
             shell=True,

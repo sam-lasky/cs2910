@@ -16,9 +16,9 @@ def check_configs():
         k = configs[i][1]
 
         change_def(f,k)
-        subprocess.run(["make", "clean"], cwd="src", check=True)
-        subprocess.run(["make"], cwd="src", check=True)
-        p = subprocess.run(["./gen_keys"], cwd="bin", check=True)
+        subprocess.run(["make", "clean"], cwd="prime/src", check=True)
+        subprocess.run(["make"], cwd="prime/src", check=True)
+        p = subprocess.run(["./gen_keys"], cwd="prime/bin", check=False)
         if p.returncode!=0:
             print(p.stderr)
             bugged_configs.append(i)

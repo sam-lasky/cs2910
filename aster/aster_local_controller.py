@@ -32,6 +32,7 @@ def select_replica_machines():
     final_list = sorted(set(selected_machines) - set(barred_machines), key=int)
     # Keep only the number of machines needed
     del final_list[get_env('NUM_REPLICAS'):]
+
     # Check for mismatch between total num of selected machines and num replicas being used
     if len(final_list)!= get_env('NUM_REPLICAS'):
        error_handler(f"Expected {os.environ['NUM_REPLICAS']} total machines, but found {len(final_list)}.")
@@ -70,46 +71,6 @@ def run():
 
 
 
-
-#     import sys, subprocess, time, os, socket, platform
-
-# def kill_all(sessions):
-#     if sessions is None:
-#         for i in range(13, 19):
-#             print(f"Cleaning Aster{i}...", flush=True)
-#             subprocess.run(
-#                 [
-#                     "ssh",
-#                     f"sjl79@aster{i}.cs.pitt.edu",
-#                     "pkill -x prime; pkill -x spines"
-#                 ],
-#                 check=False
-#             )        
-#         return
-#     for i, process in sessions.items():
-#         # Kill Prime, Spines, and startup script on remote machine
-#         subprocess.run(
-#             [
-#                 "ssh",
-#                 f"sjl79@aster{i}.cs.pitt.edu",
-#                 "pkill -x prime; pkill -x spines; pkill -f '[s]tartup_replica.py'"
-#             ],
-#             check=False
-#         )
-
-#         # Close local terminal window
-#         subprocess.run(
-#             ["taskkill", "/F", "/T", "/PID", str(process.pid)],
-#             stdout=subprocess.DEVNULL,
-#             stderr=subprocess.DEVNULL
-#         )
-#     # closes terminal windows
-#     sessions.clear()
-
-
-# def run():
-#     print('[Aster Controller Local]')
-#     exit()
 
 
 # def main():

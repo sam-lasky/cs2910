@@ -9,10 +9,11 @@ from .env_vars import store_env
 # -p   MAX_PO_IN_FLIGHT     integer > 0                int
 # -r   NUM_REPLICAS         integer > 0                int
 # -f   Patch                on | off                   str
+# -d   Update Distribution  integer > 0                int
 # -u   Prints Usage         none                       none
 
 scripts = {
-    'run': ['-e','-x','-p','-r','-f']
+    'run': ['-e','-x','-p','-r','-f','-d']
 }
 
 all_flags = {
@@ -40,6 +41,11 @@ all_flags = {
     '-f': {
         'expected': '<on|off>',
         'description': ['-f', 'Patch', 'on | off', 'str']
+    },
+    # Update Distribution
+    '-d': {
+        'expected': '<UPDATE_DISTRIBUTION>',
+        'description': ['-d', 'Update Distribution', 'integer > 0', 'int']
     }
 }
 
@@ -119,6 +125,11 @@ def cli_parse_args(args:list[str], calling_script_name:str):
             case '-f':
                 if args[i+1] in ['on','off']:
                     store_env(env_var_name='PATCH_APPLIED',env_val=args[i+1])
+            # Update Distribution: Should be an integer > 0
+            case '-d':
+                if args[i+1].isdecimal() and int(args[i+1])>0:
+                    store_env(env_var_name='UPDATE_DISTRIBUTION',env_val=args[i+1])
+                else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'
         # check if there is an error.
         if err_msg is not None: cli_error(err_msg)
 

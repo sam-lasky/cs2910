@@ -142,12 +142,11 @@ def main():
         print("Configuring replica...", flush=True)
 
         subprocess.run(
-            ["python3", "config.py"],
-            cwd='../configure',
+            ["python3", "-m", "configure.config"],
+            cwd='..',
             text=True,
             check=True
         )
-
         print("Replica configuration successful!", flush=True)
 
     except Exception as e:

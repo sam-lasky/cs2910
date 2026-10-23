@@ -108,17 +108,16 @@ def run():
 
     for machine, process in sessions.items():
         output, _ = process.communicate()
+        status = process.returncode
+
+        print(f'Aster {machine}: {"SUCCESS" if status == 0 else "FAILED"}')
+
         for line in output.splitlines():
             if line.startswith(('#define MAX_PO_IN_FLIGHT', 'IT_LinkCrypto', 'IT_LinkEncrypt')):
                 print(f'Aster {machine}: {line}', flush=True)
-        status = process.returncode
 
-    if status == 0:
-        print(f'Aster {machine}: SUCCESS')
-    else:
-        print(f'Aster {machine}: FAILED ({status})')
-
-    print(output, flush=True)
+        if status != 0:
+            print(output, flush=True)
 
 #     # Start new sessions
 #     sessions = {}

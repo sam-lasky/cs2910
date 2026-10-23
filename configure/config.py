@@ -56,7 +56,7 @@ def load_replica_configuration():
 
     # <aster1|aster2>
     if get_env('ENVIRONMENT') in ['aster1','aster2']:
-        machines = get_env('ENVIRONMENT')
+        machines = get_env('ASTER_MACHINES_USED')
         network = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
         id=1
         for m in machines:

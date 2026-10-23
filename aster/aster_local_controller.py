@@ -66,17 +66,10 @@ def error_handler(err_msg:str):
 def run():
     print('[Aster Controller Local]')
     select_replica_machines()
-    print(f'Using machines:{final_list}')
+    print(f'Using machines:{','.join(final_list)}')
 
 
 
-
-
-
-# def main():
-#     # Kill any existing replica startup scripts
-#     print("Terminating any existing Prime and Spines processes on Aster machines...", flush=True)    
-#     kill_all(None)
 
 #     # Start new sessions
 #     sessions = {}

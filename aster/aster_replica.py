@@ -1,7 +1,5 @@
-import sys, subprocess, time, os, socket
-
-replica_id = None
-aster_id = None
+import sys, subprocess, time, os
+from common.env_vars import *
 
 # set up spines
 def setup_spines():
@@ -46,7 +44,7 @@ def setup_prime():
             "chmod -R +x stdutil/buildtools && "
             "chmod +x libspread-util/configure && "
             "chmod -R +x libspread-util/buildtools && "
-            "chmod +x OpenTC-1.1/TC-lib-1.0/configure && "
+            "chmod +x OpenTC-1.1/TC-lib-1.0/csvonfigure && "
             "chmod +x OpenTC-1.1/TC-lib-1.0/missing",
             cwd=prime_path,
             shell=True,
@@ -126,15 +124,21 @@ def startup(aster_id, replica_id):
 
     print(f"Replica {replica_id} on Aster {aster_id} started successfully!", flush=True)
 
-
+# Args: aster_replica.py <replica_id> <machine_id> ASTER_MACHINES_USED=<value> ENVIRONMENT=<value> MAX_PO=<value> ENCRYPTED=<value>
 def main():
-    global replica_id, aster_id
+    # <--- Set up environment variables --->
+    store_env(env_var_name="REPLICA_ID", env_val=sys.argv[1])
+    store_env(env_var_name="ASTER_MACHINE_ID", env_val=sys.argv[2])
+    store_env(env_var_name="ASTER_MACHINES_USED", env_val=sys.argv[3].split("=", 1)[1])
+    store_env(env_var_name="ENVIRONMENT", env_val=sys.argv[4].split("=", 1)[1])
+    store_env(env_var_name="MAX_PO", env_val=sys.argv[5].split("=", 1)[1])
+    store_env(env_var_name="ENCRYPTED", env_val=sys.argv[6].split("=", 1)[1])
+    # derive num replicas from aster machines used
+    store_env(env_var_name="NUM_REPLICAS", env_val=str(len(os.environ["ASTER_MACHINES_USED"].split(","))))
 
-    # unique identifier of this replica instance
-    replica_id = int(sys.argv[1])
-
-    # aster machine id
-    aster_id = int(sys.argv[2])
+    # Sanity check: print all configured environment variables
+    for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"):
+        print(f"{key}={os.environ[key]}", flush=True)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'
@@ -143,13 +147,11 @@ def main():
 
         subprocess.run(
             ["python3", "config.py"],
-            cwd='../configure',
-            env={**os.environ, "PYTHONPATH": os.path.abspath("..")},
-            text=True,
+            cwd="../configure",
             check=True
         )
         print("Replica configuration successful!", flush=True)
-
+    # config failure
     except Exception as e:
         print(f"ERROR: Replica configuration failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)

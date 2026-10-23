@@ -103,7 +103,8 @@ def run():
     select_replica_machines()
     print(f'Using machines:{','.join(final_list)}')
     
-    # kill any old prime/spines/aster_replica.py processes on these machines
+    # kill any old prime/spines/aster_replica.py processes on all aster machines
+    # included in final_list
     kill_all()
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script

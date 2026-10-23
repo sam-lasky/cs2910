@@ -37,8 +37,7 @@ def check_configs():
             print(f"Segmentation fault (core dumped) — {i} replicas")
             bugged_configs.append(i)
         elif p.returncode == 0:
-                shutil.copytree("prime/bin/keys", f"prime_keys/{i}_total_replicas", dirs_exist_ok=True)
-
+            shutil.copytree("prime/bin/keys", f"saved_keys/prime_keys/{i}_total_reps", dirs_exist_ok=True)
     print(f'ALL BUGGED CONFIGS:{bugged_configs}')
         
 

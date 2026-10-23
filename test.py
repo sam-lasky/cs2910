@@ -42,6 +42,18 @@ def main():
                             max_latency = 0
 
                             for trial in range(1, num_trials + 1):
+                                print(
+                                    f"[RUNNING] "
+                                    f"Replicas: {num_replicas} | "
+                                    f"Encryption: {encrypted} | "
+                                    f"Distribution: {distribution} | "
+                                    f"MAX_PO: {max_po} | "
+                                    f"Clients: {emulated_client} | "
+                                    f"Updates: {updates} | "
+                                    f"Trial: {trial}/{num_trials}",
+                                    flush=True
+                                )
+                                
                                 result = subprocess.run(
                                     [
                                         "ssh", "-T", "sjl79@aster17.cs.pitt.edu",
@@ -53,9 +65,11 @@ def main():
                                     text=True,
                                     check=False
                                 )
-
-                                print("ERROR:", result.stderr)
-                                print("OUTPUT:", result.stdout)
+                                # give spines time?
+                                time.sleep(60)
+                                
+                                # print("ERROR:", result.stderr)
+                                # print("OUTPUT:", result.stdout)
                                 fields = next(line.split(",") for line in result.stdout.splitlines()
                                             if line.startswith("RESULT,"))
 

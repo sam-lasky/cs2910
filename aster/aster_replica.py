@@ -122,8 +122,8 @@ def startup():
         prime = subprocess.Popen(
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
-            stdout=None,
-            stderr=None
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
 
         print("Giving Prime time to start...", flush=True)

@@ -103,10 +103,10 @@ def start_replicas():
             )
         id += 1
 
-    for machine_id, session in sessions.items():
-        print(f"\n--- ASTER {machine_id} CONFIGURATION ---")
-        for line in session.stdout:
-            print(line, end="", flush=True)
+    # for machine_id, session in sessions.items():
+    #     print(f"\n--- ASTER {machine_id} CONFIGURATION ---")
+    #     for line in session.stdout:
+    #         print(line, end="", flush=True)
 
     return sessions
 
@@ -124,7 +124,6 @@ def run():
     sessions = start_replicas()
 
     for machine, process in sessions.items():
-        output, _ = process.communicate()
         output, _ = process.communicate()
         print(f"\n--- ASTER {machine} CONFIGURATION ---")
         print(output, flush=True)

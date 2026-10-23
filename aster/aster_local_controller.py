@@ -141,4 +141,3 @@ def run():
     print("\n========== FINAL REPLICA STATUS ==========")
     for machine, process in sessions.items():
         print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")
-    time.sleep(60)

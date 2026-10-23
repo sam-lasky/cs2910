@@ -33,7 +33,7 @@ def check_configs():
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         p = subprocess.run(["./gen_keys"], cwd="prime/bin")
         
-        if p.returncode==11:
+        if p.returncode==-11:
             print(f"Segmentation fault (core dumped) — {i} replicas")
             bugged_configs.append(i)
     print(f'ALL BUGGED CONFIGS:{bugged_configs}')

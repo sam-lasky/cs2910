@@ -7,8 +7,8 @@ final_list = []
 
 # Kills any leftover prime, spines or aster_replica processes contained in 
 # the machine list
-def kill_all(machines):
-    for m in machines:
+def kill_all():
+    for m in final_list:
         print(f"Cleaning Aster{m}...", flush=True)
         subprocess.run(
             [
@@ -89,6 +89,8 @@ def run():
     # finalize list of aster machines that will be used
     select_replica_machines()
     print(f'Using machines:{','.join(final_list)}')
+    # kill any old prime/spines/aster_replica.py processes on these machines
+    kill_all()
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     start_replicas()

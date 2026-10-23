@@ -100,7 +100,7 @@ def main():
     # aster machine id
     aster_id = sys.argv[2]
 
-    print('hello!')
+    print('hello!',flush=True)
     return
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py

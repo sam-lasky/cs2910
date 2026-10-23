@@ -1,6 +1,8 @@
+
 import sys, subprocess, time, os
 sys.path.insert(0, os.path.abspath(".."))
 from common.env_vars import *
+
 # set up spines
 def setup_spines():
     spines_path = "../prime/spines"
@@ -13,8 +15,9 @@ def setup_spines():
         subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
 
         subprocess.run(["./configure"], cwd=spines_path, check=True)
-        subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)  
-        subprocess.run(["make"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
+        subprocess.run(["make"], cwd=spines_path, check=True)
+
         # Copy Spines keys
         subprocess.run(
             ["cp", "-a", "../saved_keys/spines_keys/.", spines_path + "/daemon/keys/"],
@@ -24,7 +27,6 @@ def setup_spines():
     except Exception as e:
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
-
 
 
 # set up prime
@@ -47,16 +49,13 @@ def setup_prime():
         subprocess.run(
             ["make", "clean"],
             cwd=prime_path + "/src",
-            check=True,
-            stdout=subprocess.DEVNULL
+            check=True
         )
 
-
         subprocess.run(
-            ["make"],
+            ["make", "-j1"],
             cwd=prime_path + "/src",
-            check=True,
-            stdout=subprocess.DEVNULL
+            check=True
         )
 
         # Copy Prime keys
@@ -68,7 +67,6 @@ def setup_prime():
     except Exception as e:
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
-
 
 
 # start spines and prime
@@ -84,8 +82,8 @@ def startup():
         spines = subprocess.Popen(
             ["./spines", "-I", base_ip],
             cwd='../prime/spines/daemon',
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            stdout=None,
+            stderr=None
         )
 
         print("Giving Spines time to start...", flush=True)
@@ -101,9 +99,9 @@ def startup():
         prime = subprocess.Popen(
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
-            stdout=subprocess.DEVNULL,
+            stdout=None,
             stderr=None
-)
+        )
 
         print("Giving Prime time to start...", flush=True)
         time.sleep(3)
@@ -130,9 +128,10 @@ def main():
     store_env(env_var_name="ENVIRONMENT", env_val=sys.argv[4].split("=", 1)[1])
     store_env(env_var_name="MAX_PO", env_val=sys.argv[5].split("=", 1)[1])
     store_env(env_var_name="ENCRYPTED", env_val=sys.argv[6].split("=", 1)[1])
+
     # derive num replicas from aster machines used
     store_env(env_var_name="NUM_REPLICAS", env_val=str(len(os.environ["ASTER_MACHINES_USED"].split(","))))
-    
+
     # print config for controller
     print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
     print("-" * 54)
@@ -140,11 +139,11 @@ def main():
     for replica_id, machine_id in enumerate(os.environ["ASTER_MACHINES_USED"].split(","), start=1):
         print(f"{machine_id:<8} {replica_id:<10} {os.environ['ENVIRONMENT']:<14} {os.environ['MAX_PO']:<10} {os.environ['ENCRYPTED']:<12}")
 
-
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'
     try:
         print("Configuring replica...", flush=True)
+
         # env required due to sys.path issue between parent/child process
         subprocess.run(
             ["python3", "config.py"],
@@ -152,7 +151,9 @@ def main():
             env={**os.environ, "PYTHONPATH": os.path.abspath("..")},
             check=True
         )
+
         print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Configuration successful!", flush=True)
+
     # config failure
     except Exception as e:
         print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Replica configuration failed: {type(e).__name__}: {e}", flush=True)

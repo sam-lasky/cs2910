@@ -100,7 +100,6 @@ def main():
     # aster machine id
     aster_id = sys.argv[2]
 
-    print("\033[2J\033[H", end="", flush=True)
     print("hello!", flush=True)
     return
 

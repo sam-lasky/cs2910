@@ -74,11 +74,14 @@ def start_replicas():
         print(f'Starting session with Aster {machine}')
 
         subprocess.Popen(
-            f'ssh -n sjl79@aster{machine}.cs.pitt.edu '
+            f'ssh -n -T sjl79@aster{machine}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'cd cs2910/aster && '
             f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
-            stdin=subprocess.DEVNULL
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=subprocess.CREATE_NO_WINDOW
         )
         id += 1
 

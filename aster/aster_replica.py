@@ -1,6 +1,6 @@
 import sys, subprocess, time, os
+sys.path.insert(0, os.path.abspath(".."))
 from common.env_vars import *
-
 # set up spines
 def setup_spines():
     spines_path = "../prime/spines"

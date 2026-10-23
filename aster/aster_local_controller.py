@@ -30,6 +30,7 @@ def select_replica_machines():
     selected_machines = get_machines('aster/aster_machines_used.txt')
     # Get final list
     final_list = sorted([m for m in selected_machines if m not in barred_machines], key=int)    
+    print(final_list)
 
     # Check for mismatch between total num of selected machines and num replicas being used
     if len(final_list)!= get_env('NUM_REPLICAS'):
@@ -38,7 +39,6 @@ def select_replica_machines():
     else:
         store_env('ASTER_MACHINES_USED', ','.join(final_list))
 
-    print(final_list)
 
 # Gets all the selected aster machines indicated by the file, where
 # file = <aster_machines_used | barred_machines>. Returns a list. 

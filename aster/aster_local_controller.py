@@ -75,7 +75,7 @@ def start_replicas():
     for machine in final_list:
         print(f'Starting session with Aster {machine}')
 
-        sessions[machine] =subprocess.Popen(
+        sessions[machine] = subprocess.Popen(
             f'ssh -n -T sjl79@aster{machine}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'cd cs2910/aster && '
@@ -85,8 +85,9 @@ def start_replicas():
             f'ENCRYPTED={os.environ["ENCRYPTED"]} '
             f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
             creationflags=subprocess.CREATE_NO_WINDOW
         )
         id += 1
@@ -106,15 +107,14 @@ def run():
     sessions = start_replicas()
 
     for machine, process in sessions.items():
-        status = process.wait()
+        output, _ = process.communicate()
+        status = process.returncode
 
-        if status is None:
-            print(f'Aster {machine}: SSH still running')
-        elif status == 0:
-            print(f'Aster {machine}: SSH exited successfully')
+        if status == 0:
+            print(f'Aster {machine}: SUCCESS')
         else:
-            print(f'Aster {machine}: SSH failed ({status})')
-
+            print(f'Aster {machine}: FAILED ({status})')
+            print(output, flush=True)
 
 
 #     # Start new sessions

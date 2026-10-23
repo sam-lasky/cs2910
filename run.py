@@ -64,7 +64,7 @@ def main():
 
     # Start the local controller based on ENVIRONMENT env var value <aster|docker>
     if os.environ['ENVIRONMENT']=='aster':
-        aster_local_controller()
+        aster_local_controller.main()
     else:
         print('TODO: INCORPORATE DOCKER SUPPORT')
         exit(0)

@@ -34,12 +34,12 @@ def kill_all(sessions):
     sessions.clear()
 
 
+def run():
+    print('[Aster Controller Local]')
+    exit()
+
 
 def main():
-    print('[Aster Controller Local]')
-    exit(0)
-    subprocess.run(clear_cmd, shell=True)
-    print(f"In the Windows Aster Controller, using MAX_PO_IN_FLIGHT {max_po}...")
     # Kill any existing replica startup scripts
     print("Terminating any existing Prime and Spines processes on Aster machines...", flush=True)    
     kill_all(None)

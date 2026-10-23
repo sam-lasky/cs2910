@@ -142,8 +142,9 @@ def main():
         print("Configuring replica...", flush=True)
 
         subprocess.run(
-            ["python3", "-m", "configure.config"],
-            cwd='..',
+            ["python3", "config.py"],
+            cwd='../configure',
+            env={**os.environ, "PYTHONPATH": os.path.abspath("..")},
             text=True,
             check=True
         )

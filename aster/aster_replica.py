@@ -142,10 +142,10 @@ def main():
     
     # clear terminal
     print("\033[2J\033[H", end="", flush=True)
-    # Sanity check: print all configured environment variables
-    for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"):
+    # print config for controller
+    print(f"[ASTER {os.environ['ASTER_MACHINE_ID']} CONFIGURATION]", flush=True)
+    for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED", "NUM_REPLICAS"):
         print(f"{key}={os.environ[key]}", flush=True)
-
     exit(0)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py

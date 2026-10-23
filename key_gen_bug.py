@@ -34,7 +34,7 @@ def check_configs():
 
 
     bugged_configs=[]
-    for i in range(6,11):
+    for i in range(6,31):
         f = configs[i][0]
         k = configs[i][1]
 

@@ -108,6 +108,9 @@ def run():
 
     for machine, process in sessions.items():
         output, _ = process.communicate()
+        for line in output.splitlines():
+            if line.startswith(('#define MAX_PO_IN_FLIGHT', 'IT_LinkCrypto', 'IT_LinkEncrypt')):
+                print(f'Aster {machine}: {line}', flush=True)
         status = process.returncode
 
     if status == 0:

@@ -9,6 +9,16 @@ def check_configs():
         8: (1, 2),
         9: (2, 1),
         10: (3, 0),
+        11: (2, 2),
+        12: (3, 1),
+        13: (4, 0),
+        14: (3, 2),
+        15: (4, 1),
+        16: (5, 0),
+        17: (4, 2),
+        18: (5, 1),
+        19: (6, 0),
+        20: (5, 2),
     }
     bugged_configs=[]
     for i in range(6,11):
@@ -16,8 +26,11 @@ def check_configs():
         k = configs[i][1]
 
         change_def(f,k)
-        subprocess.run(["make", "clean"], cwd="prime/src", check=True)
-        subprocess.run(["make"], cwd="prime/src", check=True)
+        subprocess.run(["make", "clean"], cwd="prime/src", check=True,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        subprocess.run(["make"], cwd="prime/src", check=True,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         p = subprocess.run(
             ["./gen_keys"], cwd="prime/bin",
             capture_output=True, text=True, check=False

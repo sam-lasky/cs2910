@@ -86,7 +86,11 @@ def reboot():
         time.sleep(1)
     # additional spaces
     print("\rUpdate applied. Restarting script...                 ", flush=True)    
-    os.execv(sys.executable, [sys.executable] + sys.argv)
+    if os.name == "nt":
+        subprocess.run([sys.executable] + sys.argv)
+        sys.exit(0)
+    else:
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # Handle any git errors
 def error_handler(error_msg:str):

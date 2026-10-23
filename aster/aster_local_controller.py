@@ -115,7 +115,6 @@ def run():
         else:
             print(f'Aster {machine}: SSH failed ({status})')
 
-        exit(0)
 
 
 #     # Start new sessions

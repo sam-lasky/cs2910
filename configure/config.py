@@ -173,10 +173,10 @@ def update_def_h():
             if line.startswith('#define MAX_PO_IN_FLIGHT'):
                 line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'
             # update num_f
-            if line.startswith('#define NUM_F ='):
-                line=f'NUM_F = {f}\n'
-            if line.startswith('NUM_K ='):
-                line=f'#define NUM_K = {k}\n'
+            if line.startswith('#define NUM_F '):
+                line = f'#define NUM_F {f}\n'
+            if line.startswith('#define NUM_K '):
+                line = f'#define NUM_K {k}\n'
             new_def+=line
 
     # update def.h w/ new f,k vals

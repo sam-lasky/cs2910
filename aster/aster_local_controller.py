@@ -1,5 +1,5 @@
 import sys, subprocess, time, os, socket, platform
-from common.env_vars import store_env
+from common.env_vars import store_env, get_env
 
 # Final selection of machines that will be used after
 # looking at both aster_machines_used.txt and barred_machines.txt
@@ -25,15 +25,15 @@ def select_replica_machines():
     global final_list
 
     # Get list of machines not to not use
-    barred_machines = get_machines('barred_machines.txt')
+    barred_machines = get_machines('aster/barred_machines.txt')
     # Get list of selected machines
-    selected_machines = get_machines('aster_machines_used.txt')
+    selected_machines = get_machines('aster/aster_machines_used.txt')
     # Get final list
     final_list = sorted([m for m in selected_machines if m not in barred_machines], key=int)    
 
     # Check for mismatch between total num of selected machines and num replicas being used
-    if len(final_list)!=os.environ['NUM_REPLICAS']:
-        error_handler(f'Expected {os.environ['NUM_REPLICAS']} total machines, but found {len(final_list)}.')
+    if len(final_list)!= get_env('NUM_REPLICAS'):
+       error_handler(f"Expected {os.environ['NUM_REPLICAS']} total machines, but found {len(final_list)}.")
     # Match, create and set ASTER_MACHINES_USED environment var to final_list
     else:
         store_env('ASTER_MACHINES_USED', ','.join(final_list))
@@ -41,13 +41,14 @@ def select_replica_machines():
 # Gets all the selected aster machines indicated by the file, where
 # file = <aster_machines_used | barred_machines>. Returns a list. 
 def get_machines(file_path):
-    with open(file_path,'r') as f:
-        machine_list=[]
+    with open(file_path, 'r') as f:
+        machine_list = []
         for line in f.readlines():
-            line.strip()
-            if line and not line.startswith('#'):
-                if line.isdecimal() and int(line)>0 and int(line)<21:
-                    machine_list.append(line)
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if line.isdecimal() and 1 <= int(line) <= 20:
+                machine_list.append(line)
             else:
                 error_handler(f'Invalid machine ID: {line}. Expected a value in range 1->20')
     return machine_list

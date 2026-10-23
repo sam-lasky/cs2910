@@ -4,13 +4,13 @@ import os
 #
 # Variable       Type   Description
 # -------------  -----  -------------------------------------------------------
-# ENVIRONMENT    str    Execution environment (docker | aster1 | aster2)
-# ENCRYPTED      str    Spines communication encryption mode (encrypted | plain)
-# MAX_PO         int    Maximum number of pre-order requests in flight (> 0)
-# NUM_REPLICAS   int    Number of Prime replicas (> 0)
-# PATCH_APPLIED  str    Whether the patch in order.c is enabled (on | off)
-# REBOOT         int    Set to 1 when a git update restarts the calling script, otherwise 0.
-# ASTER_MACHINES_USED str String that contains all the aster machines being used 
+# ENVIRONMENT           str    Execution environment (docker | aster1 | aster2)
+# ENCRYPTED             str    Spines communication encryption mode (encrypted | plain)
+# MAX_PO                int    Maximum number of pre-order requests in flight (> 0)
+# NUM_REPLICAS          int    Number of Prime replicas (> 0)
+# PATCH_APPLIED         str    Whether the patch in order.c is enabled (on | off)
+# REBOOT                int    Set to 1 when a git update restarts the calling script, otherwise 0.
+# ASTER_MACHINES_USED   str String that contains all the aster machines being used 
 
 # Creates the environment value & stores its associated value
 def store_env(env_var_name:str, env_val:str):

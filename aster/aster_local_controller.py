@@ -97,7 +97,7 @@ def start_replicas():
 
     for machine_id, session in sessions.items():
         for line in session.stdout:
-            print(f"Aster {machine_id}: {line}", end="", flush=True)
+            print(f"Aster [{machine_id}]: {line}", end="", flush=True)
     return sessions
 
 def run():

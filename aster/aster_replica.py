@@ -109,14 +109,11 @@ def startup():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-        print("Giving Spines time to start...", flush=True)
         time.sleep(10)
 
         # Verify Spines is still running
         if spines.poll() is not None:
             raise RuntimeError(f"Spines terminated with exit code {spines.returncode}")
-
-        print("Spines started successfully!", flush=True)
 
         # start prime: ./prime -i <server id> -g <global id>
         prime = subprocess.Popen(
@@ -126,14 +123,14 @@ def startup():
             stderr=subprocess.DEVNULL
         )
 
-        print("Giving Prime time to start...", flush=True)
+        # print("Giving Prime time to start...", flush=True)
         time.sleep(3)
 
         # Verify Prime is still running
         if prime.poll() is not None:
             raise RuntimeError(f"Prime terminated with exit code {prime.returncode}")
 
-        print("Prime started successfully!", flush=True)
+        # print("Prime started successfully!", flush=True)
 
     except Exception as e:
         print(f"ERROR: Replica startup failed: {type(e).__name__}: {e}", flush=True)
@@ -165,8 +162,6 @@ def main():
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'
     try:
-        print("Configuring replica...", flush=True)
-
         # env required due to sys.path issue between parent/child process
         subprocess.run(
             ["python3", "config.py"],

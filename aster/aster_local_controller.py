@@ -129,7 +129,6 @@ def run():
         print(output, flush=True)
         status = process.returncode
 
-        print(f'Aster {machine}: {"SUCCESS" if status == 0 else "FAILED"}')
 
         for line in output.splitlines():
             if line.startswith(('#define MAX_PO_IN_FLIGHT', 'IT_LinkCrypto', 'IT_LinkEncrypt')):
@@ -138,3 +137,7 @@ def run():
         if status != 0:
             print(f"Aster {machine}: FAILED (SSH exit code {status})", flush=True)
             print(output if output.strip() else "No output received from SSH.", flush=True)
+
+    print("\n========== FINAL REPLICA STATUS ==========")
+    for machine, process in sessions.items():
+        print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")

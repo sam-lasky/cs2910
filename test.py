@@ -13,7 +13,7 @@ def main():
     updates=20000
     filename = f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
-    for num_replicas in [6, 8]:
+    for num_replicas in [8]:
         for encrypted in ['encrypted', 'plain']:
             for distribution in [1]:
                     for max_po in max_po_list:

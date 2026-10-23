@@ -68,28 +68,31 @@ def error_handler(err_msg:str):
 #   (2) Clone or update cs2910 repo
 #   (3) Launch aster_replica.py
 def start_replicas():
-    # ssh sessions
+
+    # Package all required environment variables so remote Aster replicas receive controller's configuration
+    # Format: "ASTER_MACHINES_USED=<value> ENVIRONMENT=<value> MAX_PO=<value> ENCRYPTED=<value>"
+    env_list = " ".join(f"{key}={os.environ[key]}" for key in ("ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"))
+
+    # ssh sessions, session[i] = subprocess of aster machine i (where 1<=i<=20)
     sessions = {}
     # unique id of the replica
     id=1
-    for machine in final_list:
-        print(f'Starting session with Aster {machine}')
-
-        sessions[machine] = subprocess.Popen(
-            f'ssh -n -T sjl79@aster{machine}.cs.pitt.edu '
-            f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
+    for machine_id in final_list:
+        print(f'Starting session with Aster {machine_id}')
+        # Update the remote repository and start the replica with its ID, machine ID, and environment variables
+        command = (
+            f'git -C cs2910 pull && '
             f'cd cs2910/aster && '
-            f'ASTER_MACHINES_USED={os.environ["ASTER_MACHINES_USED"]} '
-            f'ENVIRONMENT={os.environ["ENVIRONMENT"]} '
-            f'MAX_PO={os.environ["MAX_PO"]} '
-            f'ENCRYPTED={os.environ["ENCRYPTED"]} '
-            f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            creationflags=subprocess.CREATE_NO_WINDOW
+            f'python3 -u aster_replica.py {id} {machine_id} {env_list}'
         )
+        # ssh to the aster machine, run the above command
+        sessions[machine_id] = subprocess.Popen(
+                ['ssh', '-T', f'sjl79@aster{machine_id}.cs.pitt.edu', command],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
         id += 1
     return sessions
 

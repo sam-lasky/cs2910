@@ -106,7 +106,7 @@ def run():
     sessions = start_replicas()
 
     for machine, process in sessions.items():
-        status = process.poll()
+        status = process.wait()
 
         if status is None:
             print(f'Aster {machine}: SSH still running')

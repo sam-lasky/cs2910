@@ -102,7 +102,6 @@ def run():
     
     # kill any old prime/spines/aster_replica.py processes on these machines
     kill_all()
-    exit(0)
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas()
@@ -120,7 +119,4 @@ def run():
         if status != 0:
             print(output, flush=True)
 
-def tests():
-    emulated_clients = [20,30,50,75,100,150,200,300,500,750]
-    num_trials = 5
 

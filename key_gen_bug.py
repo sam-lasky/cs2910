@@ -1,5 +1,5 @@
 import subprocess
-
+import shutil
 
 def check_configs():
     # configs[i] = (f,k) where f = max num byzantine replicas, k = max num benign replicas
@@ -36,8 +36,11 @@ def check_configs():
         if p.returncode==-11:
             print(f"Segmentation fault (core dumped) — {i} replicas")
             bugged_configs.append(i)
-    print(f'ALL BUGGED CONFIGS:{bugged_configs}')
+        elif p.returncode == 0:
+                shutil.copytree("prime/bin/keys", f"prime_keys/{i}_total_replicas", dirs_exist_ok=True)
 
+    print(f'ALL BUGGED CONFIGS:{bugged_configs}')
+        
 
 
 

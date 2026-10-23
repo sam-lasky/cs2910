@@ -44,7 +44,7 @@ def main():
                             for trial in range(1, num_trials + 1):
                                 result = subprocess.run(
                                     [
-                                        "ssh", "sjl79@aster17",
+                                        "ssh", "sjl79@aster17.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
                                         f"./driver -l 192.168.53.26 -i 1 -s 7 "
                                         f"-c {updates} -n {emulated_client}"

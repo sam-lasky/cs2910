@@ -44,15 +44,18 @@ def main():
                             for trial in range(1, num_trials + 1):
                                 result = subprocess.run(
                                     [
-                                        "ssh", "sjl79@aster17.cs.pitt.edu",
+                                        "ssh", "-T", "sjl79@aster17.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
                                         f"./driver -l 192.168.53.26 -i 1 -s 7 "
                                         f"-c {updates} -n {emulated_client}"
                                     ],
                                     capture_output=True,
                                     text=True,
-                                    check=True
+                                    check=False
                                 )
+
+                                print("ERROR:", result.stderr)
+                                print("OUTPUT:", result.stdout)
                                 fields = next(line.split(",") for line in result.stdout.splitlines()
                                             if line.startswith("RESULT,"))
 

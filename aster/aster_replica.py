@@ -106,10 +106,9 @@ def startup():
         spines = subprocess.Popen(
             ["./spines", "-I", base_ip],
             cwd='../prime/spines/daemon',
-            stdout=None,
-            stderr=None
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
-
         print("Giving Spines time to start...", flush=True)
         time.sleep(10)
 

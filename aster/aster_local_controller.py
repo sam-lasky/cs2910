@@ -68,12 +68,14 @@ def error_handler(err_msg:str):
 #   (2) Clone or update cs2910 repo
 #   (3) Launch aster_replica.py
 def start_replicas():
+    # ssh sessions
+    sessions = {}
     # unique id of the replica
     id=1
     for machine in final_list:
         print(f'Starting session with Aster {machine}')
 
-        subprocess.Popen(
+        sessions[machine] =subprocess.Popen(
             f'ssh -n -T sjl79@aster{machine}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'cd cs2910/aster && '
@@ -88,6 +90,7 @@ def start_replicas():
             creationflags=subprocess.CREATE_NO_WINDOW
         )
         id += 1
+    return sessions
 
 def run():
     print('[Aster Controller Local]')
@@ -100,11 +103,19 @@ def run():
     kill_all()
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
-    start_replicas()
+    sessions = start_replicas()
 
-    print('hello')
+    for machine, process in sessions.items():
+        status = process.poll()
 
-    exit(0)
+        if status is None:
+            print(f'Aster {machine}: SSH still running')
+        elif status == 0:
+            print(f'Aster {machine}: SSH exited successfully')
+        else:
+            print(f'Aster {machine}: SSH failed ({status})')
+
+        exit(0)
 
 
 #     # Start new sessions

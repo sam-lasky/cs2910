@@ -48,6 +48,43 @@ def validate_config(replica_list):
         print(f"Error: {e}")
         exit(1)
 
+
+def modify_fault_tolerance(num_replicas):
+    configurations = {
+        6: (1, 1),
+        7: (2, 0),
+        8: (1, 2),
+        9: (2, 1),
+        10: (3, 0),
+        11: (2, 2),
+        12: (3, 1),
+        13: (4, 0),
+        14: (3, 2),
+        15: (4, 1),
+        16: (5, 0),
+        17: (4, 2),
+        18: (5, 1),
+        19: (6, 0),
+        20: (5, 2)
+    }
+
+    f, k = configurations[num_replicas]
+
+    path = '../prime/src/def.h'
+
+    with open(path) as file:
+        contents = file.read()
+
+    import re
+    contents = re.sub(r'(#define NUM_F\s+)\d+', lambda m: m.group(1) + str(f), contents)
+    contents = re.sub(r'(#define NUM_K\s+)\d+', lambda m: m.group(1) + str(k), contents)
+
+    with open(path, 'w') as file:
+        file.write(contents)
+
+    print(f'NUM_F = {f}, NUM_K = {k}', flush=True)
+
+
 # parses the <aster_machines_used || docker_containers_used || replica_ip_addresses.txt> depending on config type 
 # returns a list of tuples of all the replicas where each tuple is in the form (replica_ip, replica_id)
 def load_replica_configuration():
@@ -177,6 +214,9 @@ def main():
     
     # modify MAX_PO_IN_FLIGHT
     modify_max_po(get_env('MAX_PO'))
+
+    # modify num replicas
+    modify_fault_tolerance(len(replica_list))
 
     # DELETE THIS MONSTROSITY # # 
 

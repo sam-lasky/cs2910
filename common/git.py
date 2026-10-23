@@ -36,7 +36,7 @@ def update_repo():
             # variable UPDATED
 
             # update has occurred. 
-            if updated_directories():
+            if updated_directories:
                 # Reboot the calling script
                 reboot()
         # Error, pass the subprocess's stderr

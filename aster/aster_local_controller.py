@@ -94,6 +94,8 @@ def run():
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     start_replicas()
 
+    print('hello')
+
     exit(0)
 
 

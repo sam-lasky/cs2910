@@ -139,7 +139,9 @@ def main():
     store_env(env_var_name="ENCRYPTED", env_val=sys.argv[6].split("=", 1)[1])
     # derive num replicas from aster machines used
     store_env(env_var_name="NUM_REPLICAS", env_val=str(len(os.environ["ASTER_MACHINES_USED"].split(","))))
-
+    
+    # clear terminal
+    print("\033[2J\033[H", end="", flush=True)
     # Sanity check: print all configured environment variables
     for key in ("REPLICA_ID", "ASTER_MACHINE_ID", "ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"):
         print(f"{key}={os.environ[key]}", flush=True)

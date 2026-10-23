@@ -152,10 +152,11 @@ def main():
     # located in '../configure'
     try:
         print("Configuring replica...", flush=True)
-
+        # env required due to sys.path issue between parent/child process
         subprocess.run(
             ["python3", "config.py"],
             cwd="../configure",
+            env={**os.environ, "PYTHONPATH": os.path.abspath("..")},
             check=True
         )
         print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Configuration successful!", flush=True)

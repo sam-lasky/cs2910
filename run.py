@@ -39,7 +39,7 @@ def main():
         # clear terminal for readability
         subprocess.run('cls' if platform.system()=='Windows' else 'clear', shell=True)
 
-        # get CLI arguments, confirm valid, store as environment variables
+        # get CLI arguments, confirm valid, store as environment variables.
         cli_parse_args(args=sys.argv, calling_script_name='run')
 
         # Output configuration to console

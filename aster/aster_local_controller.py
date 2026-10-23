@@ -119,6 +119,7 @@ def run():
     # kill any old prime/spines/aster_replica.py processes on all aster machines
     # included in final_list
     kill_all()
+    exit(0)
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas()

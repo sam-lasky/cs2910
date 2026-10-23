@@ -8,7 +8,7 @@ final_list = []
 # Kills any leftover prime, spines or aster_replica processes contained in 
 # the machine list
 def kill_all():
-    ['KILLING EXISTING PROCESSES']
+    print('\n[KILLING EXISTING PROCESSES]')
     for m in final_list:
         print(f"Cleaning Aster{m}...", flush=True)
         subprocess.run(
@@ -105,15 +105,15 @@ def start_replicas():
 
     for machine_id, session in sessions.items():
         for line in session.stdout:
+            print(f"\n{'=' * 12} ASTER {machine_id} CONFIGURATION {'=' * 12}")
             print(line, end="", flush=True)
     return sessions
 
 def run():
-    print('[Aster Controller Local]')
-    
+    print("\n========== ASTER LOCAL CONTROLLER ==========\n")    
     # finalize list of aster machines that will be used
     select_replica_machines()
-    print(f'Using machines:{','.join(final_list)}')
+    print(f'[ASTER MACHINES USED]:{','.join(final_list)}')
     
     # kill any old prime/spines/aster_replica.py processes on all aster machines
     # included in final_list

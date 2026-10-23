@@ -140,9 +140,6 @@ def main():
     # derive num replicas from aster machines used
     store_env(env_var_name="NUM_REPLICAS", env_val=str(len(os.environ["ASTER_MACHINES_USED"].split(","))))
     
-    # clear terminal
-    print("\033[2J\033[H", end="", flush=True)
-
     # print config for controller
     print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
     print("-" * 54)

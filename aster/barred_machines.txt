@@ -1,0 +1,11 @@
+# List of machines currently off limits, where each line represents the ID of an aster machine (e.g. 3 = aster 3)
+
+1
+2
+3
+4
+5
+6
+7
+8
+9

@@ -2,14 +2,14 @@ from .env_vars import store_env
 
 # CLI Argument Definitions
 #
-# Flag  Parameter           Expected Value     Type
-# ---- -----------------    ------------------ ----
-# -e   Environment          docker | aster     str
-# -x   Encryption           encrypted | plain  str
-# -p   MAX_PO_IN_FLIGHT     integer > 0        int
-# -r   NUM_REPLICAS         integer > 0        int
-# -f   Patch                on | off           str
-# -u   Prints Usage         none               none
+# Flag  Parameter           Expected Value             Type
+# ---- -----------------    -------------------------- ----
+# -e   Environment          docker | aster1 | aster2    str
+# -x   Encryption           encrypted | plain          str
+# -p   MAX_PO_IN_FLIGHT     integer > 0                int
+# -r   NUM_REPLICAS         integer > 0                int
+# -f   Patch                on | off                   str
+# -u   Prints Usage         none                       none
 
 scripts = {
     'run': ['-e','-x','-p','-r','-f']
@@ -18,8 +18,8 @@ scripts = {
 all_flags = {
     # environment
     '-e': {
-        'expected': '<docker|aster>',
-        'description': ['-e', 'Environment', 'docker | aster', 'str']
+        'expected': '<docker|aster1|aster2>',
+        'description': ['-e', 'Environment', 'docker | aster1 | aster2', 'str']
     },
     # encryption
     '-x': {
@@ -50,7 +50,7 @@ script_name=None
 def usage():
     # get all flags associated with the script
     script_flags = scripts[script_name]
-    
+
     # build usage message
     usage_msg=f'\n[USAGE]\npython {script_name}.py'
     for flag in script_flags:
@@ -63,7 +63,7 @@ def usage():
         d = all_flags[flag]['description']
         # append to flags
         flags_used_descriptions_msg+=f'Flag: {d[0]} Parameter: {d[1]} Expected Value: <{d[2]}> Type: {d[3]}\n'
-    
+
     # return as a str: the usage message & a detailed description of each flag used
     return usage_msg + flags_used_descriptions_msg +'\n'
 
@@ -95,9 +95,9 @@ def cli_parse_args(args:list[str], calling_script_name:str):
         # check if the input value is valid. If it is, create an environment variable for
         # it. Otherwise, call the error handler (print error, usage, terminate script)
         match flag:
-            # Environment flag: Should be either <docker|aster>
+            # Environment flag: Should be either <docker|aster1|aster2>
             case '-e':
-                if args[i+1] in ['docker','aster']:
+                if args[i+1] in ['docker','aster1','aster2']:
                     store_env(env_var_name='ENVIRONMENT',env_val=args[i+1])
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # Encryption flag: Should be either <encrypted|plain>

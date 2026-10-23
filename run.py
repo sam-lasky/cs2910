@@ -12,16 +12,16 @@ from aster import aster_local_controller
 
 
 # Usage:
-# python3 run.py -e <docker|aster> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
+# python3 run.py -e <docker|aster1|aster2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
 #
-#   -e  Environment       : docker or aster
+#   -e  Environment       : docker, aster1, or aster2
 #   -x  Encryption        : encrypted or plain (Spines)
 #   -p  MAX_PO_IN_FLIGHT  : Maximum number of pre-order requests in flight (integer > 0)
 #   -r  NUM_REPLICAS      : Total number of Prime replicas (integer > 0)
 #   -f  Patch             : on or off
 #
 # Environment Variables:
-#   ENVIRONMENT    : Environment selection (docker|aster), stored as str
+#   ENVIRONMENT    : Environment selection (docker|aster1|aster2), stored as str
 #   ENCRYPTED      : Encryption selection (encrypted|plain), stored as str
 #   MAX_PO         : MAX_PO_IN_FLIGHT value, stored as str
 #   NUM_REPLICAS   : Replica count, stored as str
@@ -62,8 +62,8 @@ def main():
         del os.environ['REBOOT']
         print('Script restarted successfully. Now using most up to date CS2910 repository.\n')
 
-    # Start the local controller based on ENVIRONMENT env var value <aster|docker>
-    if os.environ['ENVIRONMENT']=='aster':
+    # Start the local controller based on ENVIRONMENT env var value <aster1|aster2|docker>
+    if os.environ['ENVIRONMENT'] in ('aster1', 'aster2'):
         aster_local_controller.run()
     else:
         print('TODO: INCORPORATE DOCKER SUPPORT')

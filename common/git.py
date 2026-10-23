@@ -39,6 +39,9 @@ def update_repo():
             if updated_directories():
                 # Reboot the calling script
                 reboot()
+            # no update
+            else:
+                print('No updates detected, using the most up to date version.')
         # Error, pass the subprocess's stderr
         else:
             error_handler(p.stderr)

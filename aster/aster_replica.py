@@ -110,11 +110,12 @@ def main():
         text=True,
         check=True)
 
+
     setup_spines(aster_id)
     setup_prime(aster_id)
 
 
-    startup(machine_id,replica_id)
+    startup(aster_id,replica_id)
     
 if __name__ == "__main__":
     main()        

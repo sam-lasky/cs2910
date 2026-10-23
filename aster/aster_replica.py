@@ -102,8 +102,8 @@ def startup():
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+            stderr=None
+)
 
         print("Giving Prime time to start...", flush=True)
         time.sleep(3)

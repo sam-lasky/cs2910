@@ -28,9 +28,10 @@ def select_replica_machines():
     barred_machines = get_machines('aster/barred_machines.txt')
     # Get list of selected machines
     selected_machines = get_machines('aster/aster_machines_used.txt')
-    # Get final list
-    final_list = sorted([m for m in selected_machines if m not in barred_machines], key=int)    
-
+    # Remove barred machines and sort
+    final_list = sorted(set(selected_machines) - set(barred_machines), key=int)
+    # Keep only the number of machines needed
+    del final_list[get_env('NUM_REPLICAS'):]
     # Check for mismatch between total num of selected machines and num replicas being used
     if len(final_list)!= get_env('NUM_REPLICAS'):
        error_handler(f"Expected {os.environ['NUM_REPLICAS']} total machines, but found {len(final_list)}.")

@@ -136,6 +136,5 @@ def run():
                 print(f'Aster {machine}: {line}', flush=True)
 
         if status != 0:
-            print(output, flush=True)
-
-
+            print(f"Aster {machine}: FAILED (SSH exit code {status})", flush=True)
+            print(output if output.strip() else "No output received from SSH.", flush=True)

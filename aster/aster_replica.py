@@ -71,7 +71,9 @@ def setup_prime():
 
 # start spines, prime, and driver (if on replica 13)
 def startup(aster_id, replica_id):
-    base_ip = f'192.168.53.{aster_id+9}'
+
+    LAN = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
+    base_ip = f'192.168.{LAN}.{aster_id+9}'
 
     # start spines: ./spines -I <ip address> 
     spines = subprocess.Popen(
@@ -99,9 +101,6 @@ def main():
     replica_id = sys.argv[1]
     # aster machine id
     aster_id = sys.argv[2]
-
-    print("hello!", flush=True)
-    return
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure' using the command line argument "aster"

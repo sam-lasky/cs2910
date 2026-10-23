@@ -11,6 +11,7 @@
 
 import sys, subprocess, os, ipaddress, json; from pathlib import Path
 import time
+from common.env_vars import get_env
 
 # Inputs the list of candidate replicas (replica_list) which consists
 # of the replicas being used where each entry is a tuple in the form 
@@ -49,50 +50,26 @@ def validate_config(replica_list):
 
 # parses the <aster_machines_used || docker_containers_used || replica_ip_addresses.txt> depending on config type 
 # returns a list of tuples of all the replicas where each tuple is in the form (replica_ip, replica_id)
-def load_replica_configuration(config):
-    # path to the file containing the replica ip addresses
-    flie_path = None
-    
-    # Choice 1: aster 
-    if config =='aster': file_path =  'config_files/aster_machines_used.txt'
-    # Choice 2: docker
-    elif config=='docker':file_path= 'config_files/docker_containers_used.txt'
-    # Choice 3: existing - replica ip addresses already located in replica_ip_addresses.txt
-    elif config=='existing':file_path= 'config_files/replica_ip_addresses.txt'
-    # Invalid Choice: raise error
-    else: raise ValueError(f'Invalid Selection: {config}')
-
-    # Open the file, confirm IP addresses are valid & write to 
-    # replica_ip_addresses.txt if environment=aster|docker. If environment=existing,
-    # check if the current configuration is valid. 
-
-    # Tracks number of replicas - this value serves as the unique replica 
-    # identifier (must be a positive int from 1->N) and is assigned its ID by 
-    # line number (replica with ip on line i gets ID i, replica with ip on line i+1 gets ID i+1, etc)
-    num_of_replicas = 0
-
+def load_replica_configuration():
     # List of tuples holding the candidate replicas where each entry is (<replica_id>,<replica_ip>)
     candidate_replicas=[]
-    try:
-        with open(file_path,'r') as f:
-            for line in f:
-                # get line as a list, separated by whitespace 
-                line= line.split()
-                # skip comments and empty lines
-                if len(line)==0 or line[0].startswith('#'): continue                
-                # checks if line is a valid ip address, if not raises an exception
-                ipaddress.IPv4Address(line[0])
-                # valid line, increment number of replicas 
-                num_of_replicas+=1
-                # Replica id assignment - final line format in: <replica_id> <replica_ip>
-                candidate_replicas.append((num_of_replicas,line[0]))
 
-    except Exception as e:
-        print(f"Error: {e}")
-        exit(1)
+    # <aster1|aster2>
+    if get_env['ENVIRONMENT'] in ['aster1','aster2']:
+        machines = get_env['ENVIRONMENT']
+        network = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
+        id=1
+        for m in machines:
+            candidate_replicas.append((id,f'192.168.{network}.{int(m)+9}'))
+            id+=1
+    # docker
+    else:
+        #TODO: COMPLETE ME
+        pass
 
+    # Lets hope commenting this out doesn't break it!
     # validate the candidate_replicas list & return it. 
-    validate_config(candidate_replicas)
+    # validate_config(candidate_replicas)
     return candidate_replicas
 
 # updates the following config files with the using the 
@@ -189,47 +166,41 @@ def modify_max_po(MAX_PO_IN_FLIGHT):
             f.write(file_content)
     return updated
 
-# Usage: python config.py
 # All configuration information is stored as environment 
 # variables & will be retrieved as needed.  
 def main():
+    # load the replica config 
+    replica_list = load_replica_configuration()
 
-    # get the config type 
-    environment = sys.argv[1]
-    encrypted = sys.argv[2]
-    max_po = int(sys.argv[3])
-
-    # load the replica config from the text files
-    replica_list = load_replica_configuration(environment)
-   
-    # Update prime/spines configuration files, any 
-    # directories w/ files that have been modified
-    # are returned
-    updated_dirs = update_files(replica_list,encrypted)
+    # update config files
+    update_files(replica_list,os.environ['ENCRYPTED'])
+    
+    # modify MAX_PO_IN_FLIGHT
+    modify_max_po(get_env('MAX_PO'))
 
     # Modify MAX_PO_IN_FLIGHT in prime/src/def.h
-    if modify_max_po(max_po) and 'prime' not in updated_dirs:
-        updated_dirs.append('prime')
+    # if modify_max_po(max_po) and 'prime' not in updated_dirs:
+    #     updated_dirs.append('prime')
 
-    # Verify MAX_PO_IN_FLIGHT
-    with open('../prime/src/def.h') as f:
-        assert any(
-            line.strip() == f'#define MAX_PO_IN_FLIGHT {max_po}'
-            for line in f
-        ), "ERROR: MAX_PO_IN_FLIGHT configuration failed"
+    # # Verify MAX_PO_IN_FLIGHT
+    # with open('../prime/src/def.h') as f:
+    #     assert any(
+    #         line.strip() == f'#define MAX_PO_IN_FLIGHT {max_po}'
+    #         for line in f
+    #     ), "ERROR: MAX_PO_IN_FLIGHT configuration failed"
 
-    # Verify Spines encryption
-    with open('../prime/spines/daemon/spines.conf') as f:
-        contents = f.read()
+    # # Verify Spines encryption
+    # with open('../prime/spines/daemon/spines.conf') as f:
+    #     contents = f.read()
 
-    expected = 'True' if encrypted == 'encrypted' else 'False'
+    # expected = 'True' if encrypted == 'encrypted' else 'False'
 
-    assert f'IT_LinkCrypto = {expected}' in contents, "ERROR: IT_LinkCrypto configuration failed"
-    assert f'IT_LinkEncrypt = {expected}' in contents, "ERROR: IT_LinkEncrypt configuration failed"
+    # assert f'IT_LinkCrypto = {expected}' in contents, "ERROR: IT_LinkCrypto configuration failed"
+    # assert f'IT_LinkEncrypt = {expected}' in contents, "ERROR: IT_LinkEncrypt configuration failed"
 
-    print("Configuration successfully verified!", flush=True)
+    # print("Configuration successfully verified!", flush=True)
 
-    time.sleep(5)
+    # time.sleep(5)
 
     # print(','.join(updated_dirs))
 

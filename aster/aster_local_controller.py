@@ -77,6 +77,10 @@ def start_replicas():
             f'ssh -n -T sjl79@aster{machine}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'cd cs2910/aster && '
+            f'ASTER_MACHINES_USED={os.environ["ASTER_MACHINES_USED"]} '
+            f'ENVIRONMENT={os.environ["ENVIRONMENT"]} '
+            f'MAX_PO={os.environ["MAX_PO"]} '
+            f'ENCRYPTED={os.environ["ENCRYPTED"]} '
             f'python3 -u aster_replica.py {id} {machine} \\"$output\\""',
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,

@@ -1,5 +1,4 @@
 
-
 # python run.py -e aster1 -x plain -p 100 -r 8 -f off -d 1
 
 import sys, subprocess, time, os
@@ -11,7 +10,7 @@ def main():
     num_trials = 3
     max_po_list = [20, 100, 500, 1000]
     emulated_list = [20, 100, 500, 750]
-    updates=25000
+    updates=20000
     filename = f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
     for num_replicas in [6, 8]:
@@ -46,7 +45,7 @@ def main():
 
                             for trial in range(1, num_trials + 1):
                                 print(
-                                    f"[RUNNING] "
+                                    f"[RUNNING ON ASTER 11] "
                                     f"Replicas: {num_replicas} | "
                                     f"Encryption: {encrypted} | "
                                     f"Distribution: {distribution} | "
@@ -56,23 +55,33 @@ def main():
                                     f"Trial: {trial}/{num_trials}",
                                     flush=True
                                 )
-                                
-                                result = subprocess.run(
+
+                                process = subprocess.Popen(
                                     [
                                         "ssh", "-T", "sjl79@aster11.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
                                         f"./driver -l 192.168.53.20 -i 1 -s 1 "
                                         f"-c {updates} -n {emulated_client}"
                                     ],
-                                    capture_output=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,
                                     text=True,
-                                    check=True
+                                    bufsize=1
                                 )
 
-                                
-                                # print("ERROR:", result.stderr)
-                                # print("OUTPUT:", result.stdout)
-                                fields = next(line.split(",") for line in result.stdout.splitlines()
+                                output = []
+                                for line in process.stdout:
+                                    print(line, end="", flush=True)
+                                    output.append(line)
+
+                                returncode = process.wait()
+                                if returncode != 0:
+                                    raise subprocess.CalledProcessError(
+                                        returncode, process.args,
+                                        output="".join(output)
+                                    )
+
+                                fields = next(line.split(",") for line in output
                                             if line.startswith("RESULT,"))
 
                                 elapsed += float(fields[3])
@@ -88,6 +97,22 @@ def main():
                             min_latency /= num_trials
                             max_latency /= num_trials
                             avg_latency /= num_trials
+
+                            with open(filename, "a") as f:
+                                f.write(
+                                    f"Replicas: {num_replicas} | "
+                                    f"Encryption: {encrypted} | "
+                                    f"Distribution: {distribution} | "
+                                    f"MAX_PO: {max_po} | "
+                                    f"Clients: {emulated_client} | "
+                                    f"Updates: {updates} | "
+                                    f"Elapsed: {elapsed:.3f} | "
+                                    f"Stalls: {stalls:.2f} | "
+                                    f"Actual: {actual:.3f} | "
+                                    f"Min Latency: {min_latency:.3f} | "
+                                    f"Max Latency: {max_latency:.3f} | "
+                                    f"Avg Latency: {avg_latency:.3f}\n"
+                                )
 
 
 if __name__ == '__main__':

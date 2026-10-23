@@ -61,6 +61,7 @@ def error_handler(err_msg:str):
 
 def run():
     print('[Aster Controller Local]')
+    select_replica_machines()
     print(f'Using machines:{final_list}')
 
 

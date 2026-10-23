@@ -52,11 +52,11 @@
 #define RECONF 1
 #define CONFIDENTIAL 0
 /* Maximum number of tolerated Byzantine faults */
-#define NUM_F 1
+#define NUM_F 2
 
 /* Maximum number of tolerated benign faults, including rejuvenations,
  * disconnections (network partition/attack), and crashes */
-#define NUM_K 1
+#define NUM_K 0
 
 /*This parameter is used only in confidential spire. Will be replaced bu VAR.Num_Servers
  * in future version*/

@@ -49,42 +49,6 @@ def validate_config(replica_list):
         exit(1)
 
 
-def modify_fault_tolerance(num_replicas):
-    configurations = {
-        6: (1, 1),
-        7: (2, 0),
-        8: (1, 2),
-        9: (2, 1),
-        10: (3, 0),
-        11: (2, 2),
-        12: (3, 1),
-        13: (4, 0),
-        14: (3, 2),
-        15: (4, 1),
-        16: (5, 0),
-        17: (4, 2),
-        18: (5, 1),
-        19: (6, 0),
-        20: (5, 2)
-    }
-
-    f, k = configurations[num_replicas]
-
-    path = '../prime/src/def.h'
-
-    with open(path) as file:
-        contents = file.read()
-
-    import re
-    contents = re.sub(r'(#define NUM_F\s+)\d+', lambda m: m.group(1) + str(f), contents)
-    contents = re.sub(r'(#define NUM_K\s+)\d+', lambda m: m.group(1) + str(k), contents)
-
-    with open(path, 'w') as file:
-        file.write(contents)
-
-    print(f'NUM_F = {f}, NUM_K = {k}', flush=True)
-
-
 # parses the <aster_machines_used || docker_containers_used || replica_ip_addresses.txt> depending on config type 
 # returns a list of tuples of all the replicas where each tuple is in the form (replica_ip, replica_id)
 def load_replica_configuration():
@@ -96,7 +60,7 @@ def load_replica_configuration():
         machines = get_env('ASTER_MACHINES_USED')
         network = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
         id=1
-        for m in machines:
+        for m in machines.split(','):
             candidate_replicas.append((id,f'192.168.{network}.{int(m)+9}'))
             id+=1
     # docker
@@ -183,25 +147,42 @@ def update_files(replica_list,encrypted):
     return updated_directories
 
 
-# modifies MAX_PO_IN_FLIGHT based off the CLI argument provided 
-def modify_max_po(MAX_PO_IN_FLIGHT):
-    file_content = ''
-    updated = 0
+# Modifies MAX_PO_IN_FLIGHT and NUM_K/NUM_F based on env var MAX_PO and NUM_REPLICAS respectively
+def update_def_h():
+
+    configurations = {
+        6: (1, 1),
+        8: (1, 2),
+        10: (1, 3),
+        12: (1, 4),
+        14: (3, 2),
+        16: (5, 0),
+        18: (5, 1),
+        20: (5, 2)
+    }
+
+    f, k = configurations[get_env('NUM_REPLICAS')]
+    MAX_PO_IN_FLIGHT= get_env('MAX_PO')
+
+    # new def_h
+    new_def = ''
 
     with open('../prime/src/def.h','r') as f:
         for line in f.readlines():
-            check_line = line.split()
-            if len(check_line)==3 and check_line[1] == 'MAX_PO_IN_FLIGHT':
-                # check if max_po vals are not the same & update line accordingly if it is the case
-                if int(check_line[2])!=MAX_PO_IN_FLIGHT:
-                    updated=1
-                    line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'
-            file_content+=line
+            # update max po in flight
+            if line.startswith('#define MAX_PO_IN_FLIGHT'):
+                line=f'#define MAX_PO_IN_FLIGHT {MAX_PO_IN_FLIGHT}\n'
+            # update num_f
+            if line.startswith('#define NUM_F ='):
+                line=f'NUM_F = {f}\n'
+            if line.startswith('NUM_K ='):
+                line=f'#define NUM_K = {k}\n'
+            new_def+=line
 
-    if updated:
-        with open('../prime/src/def.h','w') as f:
-            f.write(file_content)
-    return updated
+    # update def.h w/ new f,k vals
+    with open('../prime/src/def.h', 'w') as file:
+        file.write(new_def)
+
 
 # All configuration information is stored as environment 
 # variables & will be retrieved as needed.  
@@ -211,12 +192,9 @@ def main():
 
     # update config files
     update_files(replica_list,os.environ['ENCRYPTED'])
-    
-    # modify MAX_PO_IN_FLIGHT
-    modify_max_po(get_env('MAX_PO'))
 
-    # modify num replicas
-    modify_fault_tolerance(len(replica_list))
+    # update def.h using the passed MAX_PO_IN_FLIGHT,NUM_F,NUM_K vals
+    update_def_h()
 
 
 

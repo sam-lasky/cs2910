@@ -147,7 +147,6 @@ def main():
     for replica_id, machine_id in enumerate(os.environ["ASTER_MACHINES_USED"].split(","), start=1):
         print(f"{machine_id:<8} {replica_id:<10} {os.environ['ENVIRONMENT']:<14} {os.environ['MAX_PO']:<10} {os.environ['ENCRYPTED']:<12}")
 
-    exit(0)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'
@@ -159,10 +158,10 @@ def main():
             cwd="../configure",
             check=True
         )
-        print("Replica configuration successful!", flush=True)
+        print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Configuration successful!", flush=True)
     # config failure
     except Exception as e:
-        print(f"ERROR: Replica configuration failed: {type(e).__name__}: {e}", flush=True)
+        print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Replica configuration failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
     setup_spines()

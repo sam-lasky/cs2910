@@ -76,6 +76,7 @@ def main():
 
                                 returncode = process.wait()
                                 if returncode != 0:
+                                    print("FAILED OUTPUT:", "".join(output), flush=True)
                                     raise subprocess.CalledProcessError(
                                         returncode, process.args,
                                         output="".join(output)

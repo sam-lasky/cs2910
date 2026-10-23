@@ -60,7 +60,7 @@ def load_replica_configuration():
         machines = get_env('ASTER_MACHINES_USED')
         network = '53' if '1' in os.environ['ENVIRONMENT'] else '54'
         id=1
-        for m in machines.split(','):
+        for m in machines:
             candidate_replicas.append((id,f'192.168.{network}.{int(m)+9}'))
             id+=1
     # docker

@@ -8,8 +8,9 @@ final_list = []
 # Kills any leftover prime, spines or aster_replica processes contained in 
 # the machine list
 def kill_all():
+    ['KILLING EXISTING PROCESSES']
     for m in final_list:
-        print(f"Cleaning Aster{m}...", end="\r", flush=True)
+        print(f"Cleaning Aster{m}...", flush=True)
         subprocess.run(
             [
                 "ssh",
@@ -77,6 +78,7 @@ def start_replicas():
     sessions = {}
     # unique id of the replica
     id=1
+    print('\n[STARTING MACHINES]')
     for machine_id in final_list:
         print(f'Starting session with Aster {machine_id}')
         # Update the remote repository and start the replica with its ID, machine ID, and environment variables

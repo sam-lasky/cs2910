@@ -36,7 +36,7 @@ def update_repo():
             # variable UPDATED
 
             # update has occurred. 
-            if updated_directories:
+            if updated_directories():
                 # Reboot the calling script
                 reboot()
         # Error, pass the subprocess's stderr
@@ -84,7 +84,8 @@ def reboot():
     for i in range(reboot_time, 0, -1):
         print(f"\rUpdate detected & applied, rebooting in {i} seconds...", end="", flush=True)
         time.sleep(1)
-    print('\rRebooting now!')
+    # additional spaces
+    print("\rUpdate applied. Restarting script...                 ", flush=True)    
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # Handle any git errors

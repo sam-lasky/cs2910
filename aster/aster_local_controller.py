@@ -9,7 +9,7 @@ final_list = []
 # the machine list
 def kill_all():
     for m in final_list:
-        print(f"Cleaning Aster{m}...", flush=True)
+        print(f"Cleaning Aster{m}...", end="\r", flush=True)
         subprocess.run(
             [
                 "ssh",

@@ -12,7 +12,7 @@ def setup_spines():
         subprocess.run(["chmod", "+x", "libspread-util/configure"], cwd=spines_path, check=True)
         subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
 
-        subprocess.run(["./configure"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)
+        subprocess.run(["./configure"], cwd=spines_path, check=True)
         subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)  
         subprocess.run(["make"], cwd=spines_path, check=True, stdout=subprocess.DEVNULL)
         # Copy Spines keys

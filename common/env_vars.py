@@ -11,8 +11,7 @@ import os
 # PATCH_APPLIED         str    Whether the patch in order.c is enabled (on | off)
 # REBOOT                int    Set to 1 when a git update restarts the calling script, otherwise 0.
 #
-# Aster-Specific Environment Variables
-#
+# [Aster-Specific Environment Variables]
 # ASTER_MACHINES_USED   str    String containing all Aster machines being used
 # REPLICA_ID            int    Unique identifier of the Prime replica
 # ASTER_MACHINE_ID      int    Identifier of the Aster machine hosting the replica

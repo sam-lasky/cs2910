@@ -18,16 +18,16 @@ from aster import aster_local_controller
 #   -x  Encryption        : encrypted or plain (Spines)
 #   -p  MAX_PO_IN_FLIGHT  : Maximum number of pre-order requests in flight (integer > 0)
 #   -r  NUM_REPLICAS      : Total number of Prime replicas (integer > 0)
-#   -f  Patch             : on or off
+#   -f  Patch             : on or off                                                         ****OPTIONAL******
 #
 #   Environment Variables:
 #   ENVIRONMENT          : Environment selection (docker|aster_LAN_1|aster_LAN_2), stored as str
 #   ENCRYPTED            : Encryption selection (encrypted|plain), stored as str
 #   MAX_PO               : MAX_PO_IN_FLIGHT value, stored as str
 #   NUM_REPLICAS         : Replica count, stored as str
-#   PATCH_APPLIED        : Patch selection (on|off), stored as str
+#   PATCH_APPLIED        : Patch selection (on|off), stored as str                                    
 #
-# All six flags and associated values are required for this script to execute. 
+# All flags are required, unless explicitly labeled as optional, to run this script. 
 
 def main():
 

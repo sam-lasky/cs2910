@@ -9,8 +9,8 @@
 # requirement for the M.S. in Computer Science.
 # ============================================================
 
-import sys, subprocess, os, ipaddress, json; from pathlib import Path
-import time
+import os
+from pathlib import Path
 from common.env_vars import get_env
 
 # Inputs the list of candidate replicas (replica_list) which consists

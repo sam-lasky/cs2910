@@ -43,8 +43,17 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
         '#def NUM_K':  f'#def NUM_K {NUM_K}',
     }
     modify_file('~/cs2910/prime/src/def.h', replacement_dict)
-    print('Success!')
-    exit(0)
+
+    # Make clean Prime
+    subprocess.run(["make", "clean"], cwd="prime/src", check=True,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Make Prime
+    subprocess.run(["make"], cwd="prime/src", check=True,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Generate keys
+    p = subprocess.run(["./gen_keys"], cwd="prime/bin")
+
+    exit(0)    
 
 
 def modify_file(file_path:str, replacements:dict):
@@ -60,13 +69,9 @@ def modify_file(file_path:str, replacements:dict):
     #         # update def.h
     #         change_def(f,k)
     #         # make clean (prime)
-    #         subprocess.run(["make", "clean"], cwd="prime/src", check=True,
-    #                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    #         # make prime
-    #         subprocess.run(["make"], cwd="prime/src", check=True,
-    #                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    #         # gen keys
-    #         p = subprocess.run(["./gen_keys"], cwd="prime/bin")
+
+   
+
 
     #         # seg fault
     #         if p.returncode==-11:

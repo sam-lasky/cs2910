@@ -36,7 +36,7 @@ configurations = [
 # Generates keys using the passed NUM_F/K values. 
 # Updates prime/src/def.h using these values
 # Stores the generated keys in CS2910/keys_aster/replicas_i
-def gen_keys(NUM_F, NUM_K):
+def gen_keys(NUM_F, NUM_K,num_replicas):
     
     # Remove the existing keys directory
     subprocess.run(["rmdir","f","keys"],cwd='cs2910/prime/bin') 
@@ -85,6 +85,11 @@ def main():
 
     # Connect to the aster machine where keygen will occur
     subprocess.Popen(['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu'])
+
+    # Generate all keys for number of replicas 1-->30
+    gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)
+    exit(0)
+
 
 
     print('we are connected')

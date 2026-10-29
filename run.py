@@ -33,7 +33,6 @@ def main():
         print("\n" + "═" * 46)
         print("           CS2910 Git Repo Synchronization")
         print("═" * 46)
-        print('[]')
         update_repo()
 
     # A reboot has occurred. The reboot func os.execv() preserves environment variables. 

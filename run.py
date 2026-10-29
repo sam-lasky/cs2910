@@ -45,6 +45,8 @@ def main():
     # Using most up to date local CS2910 Github Repository. Parse the CLI arguments & store
     # them in the dictionary args_dict (keys:'env', 'encrypt', 'max_po', 'num_replicas', 'patch' (optional))
     args_dict=cli_parse_args(args=sys.argv, calling_script_name='run')
+    print(args_dict)
+    exit(0)
 
     # Start the local controller & pass args_dict 
     # Aster

@@ -52,27 +52,13 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
     subprocess.run(["make"], cwd="prime/src", check=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Generate keys
-    p = subprocess.run(["./gen_keys"], cwd="prime/bin")
+    subprocess.run(["./gen_keys"], cwd="prime/bin")
 
-        # os.makedirs("key_gen_dir")
-    print(os.getcwd())
+    # Make a subdirectory for the generated set of keys in key_gen_dir
+    os.makedirs(f'key_gen_dir/replicas_{num_replicas}')
 
-
-    exit(0)    
-
-
-
-def change_def_h(f:int,k:int):
-    with open('prime/src/def.h', 'r') as file:
-        new_def_h=''
-        for line in file.readlines():
-            if line.startswith('#define NUM_F'):
-                line=f'#define NUM_F {f}\n'
-            elif line.startswith('#define NUM_K'):
-                line=f'#define NUM_K {k}\n'
-            new_def_h+=line 
-    with open('prime/src/def.h', 'w') as file:
-        file.write(new_def_h)
+    # Copy the generated keys to this directory
+    subprocess.run(["cp", "-r", "prime/bin/keys", f"key_gen_dir/replicas_{num_replicas}"], check=True)
 
 # Usage: python key_gen.py <L|A> <ASTER_MACHINE_NUMBER>
 # Assumes LAN 1

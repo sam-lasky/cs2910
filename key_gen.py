@@ -42,7 +42,7 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
         '#def NUM_F':  f'#def NUM_F {NUM_F}',
         '#def NUM_K':  f'#def NUM_K {NUM_K}',
     }
-    modify_file('~/cs2910/prime/src/def.h', replacement_dict)
+    modify_file('cs2910/prime/src/def.h', replacement_dict)
 
     # Make clean Prime
     subprocess.run(["make", "clean"], cwd="prime/src", check=True,

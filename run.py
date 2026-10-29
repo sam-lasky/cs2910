@@ -28,13 +28,13 @@ def main():
     if 'REBOOT' not in os.environ:
         # clear terminal for readability
         subprocess.run('cls' if platform.system()=='Windows' else 'clear', shell=True)
-
         # Updates the >>local<< CS2910 github repository.
         print("\n" + "═" * 46)
         print("           CS2910 Git Repo Synchronization")
         print("═" * 46)
         update_repo()
-
+        # this is a test this is a test
+        
     # A reboot has occurred. The reboot func os.execv() preserves environment variables. 
     # Skip previous, delete the REBOOT environment variable and print reboot success 
     else:

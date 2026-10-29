@@ -39,8 +39,7 @@ configurations = [
 def gen_keys(NUM_F, NUM_K,num_replicas):
     
     # Remove the existing keys directory
-    subprocess.run(["rmdir","f","keys"],cwd='cs2910/prime/bin') 
-
+    print('test')
     # # go through 
     # for i in range(6,31):
     #     for config in configs[i]:
@@ -84,7 +83,7 @@ def change_def_h(f:int,k:int):
 def main():
 
     # Connect to the aster machine where keygen will occur
-    subprocess.Popen(['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu'])
+    subprocess.run(['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu', 'python3 ~/cs2910/aster/key_gen.py 20'],check=True)
 
     # Generate all keys for number of replicas 1-->30
     gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)

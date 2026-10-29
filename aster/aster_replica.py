@@ -4,9 +4,19 @@ import subprocess
 import time
 import os
 
-# set up spines
+# Globals
+replica_id = None
+machine_id = None
+aster_machines_used = []
+env = None
+max_po = None
+encrypt = None
+
+# Set up spines
 def setup_spines():
     spines_path = "../prime/spines"
+
+
 
     try:
         subprocess.run(["chmod", "+x", "configure"], cwd=spines_path, check=True)
@@ -139,26 +149,26 @@ def startup():
 
     print(f"Replica {replica_id} on Aster {aster_id} started successfully!", flush=True)
 
-
-# Args: aster_replica.py <replica_id> <machine_id> ASTER_MACHINES_USED=<value> ENVIRONMENT=<value> MAX_PO=<value> ENCRYPTED=<value>
+# Args: aster_replica.py <replica_id> <machine_id> <aster_machines_used> <env> <max_po> <encrypt>
 def main():
-    # <--- Set up environment variables --->
-    store_env(env_var_name="REPLICA_ID", env_val=sys.argv[1])
-    store_env(env_var_name="ASTER_MACHINE_ID", env_val=sys.argv[2])
-    store_env(env_var_name="ASTER_MACHINES_USED", env_val=sys.argv[3].split("=", 1)[1])
-    store_env(env_var_name="ENVIRONMENT", env_val=sys.argv[4].split("=", 1)[1])
-    store_env(env_var_name="MAX_PO", env_val=sys.argv[5].split("=", 1)[1])
-    store_env(env_var_name="ENCRYPTED", env_val=sys.argv[6].split("=", 1)[1])
+    # <--- Set up global variables --->
+    global replica_id, machine_id, aster_machines_used, env, max_po, encrypt
+    replica_id = int(sys.argv[1])
+    machine_id = int(sys.argv[2])
+    aster_machines_used = list(map(int, sys.argv[3].split(',')))
+    env = sys.argv[4]
+    max_po = int(sys.argv[5])
+    encrypt = int(sys.argv[6])
 
-    # derive num replicas from aster machines used
-    store_env(env_var_name="NUM_REPLICAS", env_val=str(len(os.environ["ASTER_MACHINES_USED"].split(","))))
-
-    # print config for controller
+    # Print config for controller
     print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
     print("-" * 54)
 
-    for replica_id, machine_id in enumerate(os.environ["ASTER_MACHINES_USED"].split(","), start=1):
-        print(f"{machine_id:<8} {replica_id:<10} {os.environ['ENVIRONMENT']:<14} {os.environ['MAX_PO']:<10} {os.environ['ENCRYPTED']:<12}")
+    for rid, mid in enumerate(aster_machines_used, start=1):
+        print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
+
+
+    exit(0)
 
     # should be in cs2910/aster - run the config to update files accordingly using config.py
     # located in '../configure'

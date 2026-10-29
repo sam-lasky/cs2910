@@ -8,7 +8,7 @@ aster_machines_used = []
 # the machine list
 def kill_all():
     print('\n[KILLING EXISTING PROCESSES]')
-    for m in aster_machines_used.keys():
+    for m in aster_machines_used:
         print(f"Cleaning Aster{m}...", flush=True)
         subprocess.run(
             [
@@ -18,66 +18,6 @@ def kill_all():
             ],
             check=False
         )
-
-
-# For all aster machines in aster_machines_used:
-#   (1) Connect to the machine
-#   (2) Clone or update cs2910 repo
-#   (3) Launch aster_replica.py
-def start_replicas():
-
-    # Package all required environment variables so remote Aster replicas receive controller's configuration
-    # Format: "ASTER_MACHINES_USED=<value> ENVIRONMENT=<value> MAX_PO=<value> ENCRYPTED=<value>"
-    env_list = " ".join(f"{key}={os.environ[key]}" for key in ("ASTER_MACHINES_USED", "ENVIRONMENT", "MAX_PO", "ENCRYPTED"))
-
-    # ssh sessions, session[i] = subprocess of aster machine i (where 1<=i<=20)
-    sessions = {}
-    # unique id of the replica
-    id=1
-    print('\n[STARTING MACHINES]')
-    for machine_id in aster_machines_used:
-        print(f'Starting session with Aster {machine_id}')
-        # Update the remote repository and start the replica with its ID, machine ID, and environment variables
-        # command = (
-        #     f'git -C cs2910 pull && '
-        #     f'cd cs2910/aster && '
-        #     f'python3 -u aster_replica.py {id} {machine_id} {env_list}'
-        # )
-        # suppress git msgs 
-        command = (
-            f'git -C cs2910 pull > /dev/null 2>&1 && '
-            f'cd cs2910/aster && '
-            f'python3 -u aster_replica.py {id} {machine_id} {env_list}'
-        )
-        # ssh to the aster machine, run the above command
-        sessions[machine_id] = subprocess.Popen(
-                ['ssh', '-T', f'sjl79@aster{machine_id}.cs.pitt.edu', command],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True
-            )
-        id += 1
-
-    # for machine_id, session in sessions.items():
-    #     print(f"\n--- ASTER {machine_id} CONFIGURATION ---")
-    #     for line in session.stdout:
-    #         print(line, end="", flush=True)
-
-    return sessions
-
-def generate_machine_list(num_replicas, skipped_machines):
-    # Starting at machine 20, iterate backward and add each machine that is not in skipped_machines
-    # until all num_replicas have been added to the global list aster_machines_used
-    global aster_machines_used
-
-    for i in range(20,0,-1):
-        if i not in skipped_machines:
-            aster_machines_used.append(i)
-            if len(aster_machines_used)==num_replicas:return
-    # Too many skipped machines
-    if len(aster_machines_used)<num_replicas:
-        raise ValueError("Not enough machines available. Exiting.")
 
 
 def run(args_dict:dict):
@@ -94,17 +34,14 @@ def run(args_dict:dict):
     # Generate Machine list 
     generate_machine_list(args_dict['num_replicas'], skip)
 
-    print(f"[ASTER MACHINES USED]: {', '.join(sorted(aster_machines_used))}")
-
-    exit(0)
+    print(f"[ASTER MACHINES USED]: {sorted(aster_machines_used)}")
     
-    # kill any old prime/spines/aster_replica.py processes on all aster machines
+    # Kill any old prime/spines/aster_replica.py processes on all aster machines
     # included in aster_machines_used
     kill_all()
-    exit(0)
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
-    sessions = start_replicas()
+    sessions = start_replicas(args_dict)
 
     for machine, process in sessions.items():
         output, _ = process.communicate()
@@ -124,3 +61,68 @@ def run(args_dict:dict):
     print("\n========== FINAL REPLICA STATUS ==========")
     for machine, process in sessions.items():
         print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")
+
+# For all aster machines in aster_machines_used:
+#   (1) Connect to the machine
+#   (2) Clone or update cs2910 repo
+#   (3) Launch aster_replica.py
+def start_replicas(args_dict):
+    # Convert aster_machines_used from list to comma separated string to be passed to aster_replica.py
+    aster_machines_used_as_str = ','.join(map(str, aster_machines_used))
+    # Get the environment
+    env = args_dict['env']
+    # Get the max_po
+    max_po = args_dict['max_po']
+    # Get encrypted (0/1)
+    encrypt = args_dict['encrypt']
+    # Generate the argument list: 
+    args_str = aster_machines_used_as_str + ' ' + env + ' ' + max_po + ' ' + encrypt
+
+    # ssh sessions, session[i] = subprocess of aster machine i (where 1<=i<=20)
+    sessions = {}
+    # unique id of the replica
+    id=1
+    print('\n[STARTING MACHINES]')
+    for aster_machine_id in aster_machines_used:
+        print(f'Starting session with Aster {aster_machine_id}')
+
+        # Updates the repo if it exists, otherwise clones it. 
+        # Purges stdout/err by writing to dev/null
+        git_command = (
+            'if [ -d cs2910/.git ]; then '
+            f'git -C cs2910 pull; '
+            f'else git clone https://github.com/sam444555/cs2910.git; '
+            'fi > /dev/null 2>&1 && '
+        )
+
+        # CD into aster dir and startup the replica startup script
+        replica_startup_command = (
+            'cd cs2910/aster && '
+            f'python3 -u aster_replica.py {id} {aster_machine_id} {args_str}'
+        )
+
+        # ssh to the aster machine, run the above command
+        sessions[aster_machine_id] = subprocess.Popen(
+                ['ssh', '-T', f'sjl79@aster{aster_machine_id}.cs.pitt.edu', git_command+replica_startup_command],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+        id += 1
+
+    return sessions
+
+def generate_machine_list(num_replicas, skipped_machines):
+    # Starting at machine 20, iterate backward and add each machine that is not in skipped_machines
+    # until all num_replicas have been added to the global list aster_machines_used
+    global aster_machines_used
+
+    for i in range(20,0,-1):
+        if i not in skipped_machines:
+            aster_machines_used.append(i)
+            if len(aster_machines_used)==num_replicas:return
+    # Too many skipped machines
+    if len(aster_machines_used)<num_replicas:
+        raise ValueError("Not enough machines available. Exiting.")
+

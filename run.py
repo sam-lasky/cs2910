@@ -66,7 +66,7 @@ def print_config(args_dict:dict):
     print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
     print(f"  {'Environment':<22} {args_dict['env']}")
     print(f"  {'Spines Encrypted':<22} {'YES' if args_dict['encrypt'] else 'NO'}")
-    print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
+    print(f"  {'MAX_PO_IN_FLIGHT':<22} {args_dict['max_po']}")
     print("═" * 46 + "\n")
 
 if __name__=="__main__":

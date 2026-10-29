@@ -1,15 +1,14 @@
 import sys, subprocess, time, os, socket, platform
 from common.env_vars import store_env, get_env
 
-# Final selection of machines that will be used after
-# looking at both aster_machines_used.txt and barred_machines.txt
-final_list = []
+# IDs of machines being used ([1,2,3] = aster1/2/3 being used)
+aster_machines_used = []
 
 # Kills any leftover prime, spines or aster_replica processes contained in 
 # the machine list
 def kill_all():
     print('\n[KILLING EXISTING PROCESSES]')
-    for m in final_list:
+    for m in aster_machines_used.keys():
         print(f"Cleaning Aster{m}...", flush=True)
         subprocess.run(
             [
@@ -21,7 +20,7 @@ def kill_all():
         )
 
 
-# For all aster machines in final_list:
+# For all aster machines in aster_machines_used:
 #   (1) Connect to the machine
 #   (2) Clone or update cs2910 repo
 #   (3) Launch aster_replica.py
@@ -36,7 +35,7 @@ def start_replicas():
     # unique id of the replica
     id=1
     print('\n[STARTING MACHINES]')
-    for machine_id in final_list:
+    for machine_id in aster_machines_used:
         print(f'Starting session with Aster {machine_id}')
         # Update the remote repository and start the replica with its ID, machine ID, and environment variables
         # command = (
@@ -68,11 +67,21 @@ def start_replicas():
     return sessions
 
 def generate_machine_list(num_replicas, skipped_machines):
-    pass    
+    # Starting at machine 20, iterate backward and add each machine that is not in skipped_machines
+    # until all num_replicas have been added to the global list aster_machines_used
+    global aster_machines_used
+
+    for i in range(20,0,-1):
+        if i not in skipped_machines:
+            aster_machines_used.append(i)
+            if len(aster_machines_used)==num_replicas:return
+    # Too many skipped machines
+    if len(aster_machines_used)<num_replicas:
+        raise ValueError("Not enough machines available. Exiting.")
+
 
 def run(args_dict:dict):
-    # List of machines that'll be used
-    global final_list
+
     # Machines to skip 
     skip=[3]
 
@@ -83,12 +92,14 @@ def run(args_dict:dict):
     print("═" * 46 + "\n")
 
     # Generate Machine list 
-    final_list = generate_machine_list(args_dict['num_replicas'], skip)
+    generate_machine_list(args_dict['num_replicas'], skip)
 
-    print(f'[ASTER MACHINES USED]:{','.join(final_list)}')
+    print(f'[ASTER MACHINES USED]:\n{','.join(aster_machines_used)}')
+
+    exit(0)
     
     # kill any old prime/spines/aster_replica.py processes on all aster machines
-    # included in final_list
+    # included in aster_machines_used
     kill_all()
     exit(0)
 

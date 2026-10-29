@@ -13,6 +13,12 @@ import os
 from pathlib import Path
 from common.env_vars import get_env
 
+# Updates prime/bin/spines_address.config
+def spines_address_config():
+    pass
+
+
+
 # Inputs the list of candidate replicas (replica_list) which consists
 # of the replicas being used where each entry is a tuple in the form 
 # (replica_ip_address, replica_id)

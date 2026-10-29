@@ -3,6 +3,9 @@ import sys
 import subprocess
 import time
 import os
+# local 
+from configure.config import update_files, update_def_h
+
 
 # Globals
 replica_id = None
@@ -15,8 +18,8 @@ encrypt = None
 # Set up spines
 def setup_spines():
     spines_path = "../prime/spines"
-
-
+    print(os.getcwd)
+    return 
 
     try:
         subprocess.run(["chmod", "+x", "configure"], cwd=spines_path, check=True)
@@ -167,28 +170,9 @@ def main():
     for rid, mid in enumerate(aster_machines_used, start=1):
         print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
-
-    exit(0)
-
-    # should be in cs2910/aster - run the config to update files accordingly using config.py
-    # located in '../configure'
-    try:
-        # env required due to sys.path issue between parent/child process
-        subprocess.run(
-            ["python3", "config.py"],
-            cwd="../configure",
-            env={**os.environ, "PYTHONPATH": os.path.abspath("..")},
-            check=True
-        )
-
-        print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Configuration successful!", flush=True)
-
-    # config failure
-    except Exception as e:
-        print(f"[Aster {get_env('ASTER_MACHINE_ID')}]: Replica configuration failed: {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
-
+    # Sets up spines, only remakes it 
     setup_spines()
+    exit(0)
     setup_prime()
 
     startup()

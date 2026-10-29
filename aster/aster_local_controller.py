@@ -28,7 +28,6 @@ def run(args_dict:dict):
     # Output configuration to console
     print("\n" + "═" * 46)
     print("           ASTER LOCAL CONTROLLER")
-    print("═" * 46)
     print("═" * 46 + "\n")
 
     # Generate Machine list 

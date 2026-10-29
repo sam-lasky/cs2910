@@ -5,7 +5,7 @@ import sys
 import time
 # Local imports
 from .env_vars import get_env
-
+from .error_handler import handle_error
 
 # Updates the CS2910 repository on the machine the calling
 # script is running on. If an update is detected, reboot the 
@@ -44,7 +44,7 @@ def update_repo():
                 print('No updates detected, using the most up to date version.')
         # Error, pass the subprocess's stderr
         else:
-            error_handler(p.stderr)
+            handle_error('git.py',p.stderr)
     # Update applied, do nothing and return
     else:
         return
@@ -76,7 +76,8 @@ def updated_directories():
             return True
     # Subprocess encountered errors
     else:
-        error_handler(p.stderr)
+        handle_error('git.py',p.stderr)
+
 
 # Reboot the calling script
 def reboot():
@@ -97,9 +98,3 @@ def reboot():
     else:
         os.execv(sys.executable, [sys.executable] + sys.argv)
 
-# Handle any git errors
-def error_handler(error_msg:str):
-    print('\n[GIT UPDATE ERROR]\nIssue updating git repository CS2910')
-    print(f'[Error Message]\n{error_msg}\n')
-    print('---TERMINATING PROCESS---')
-    exit(1)

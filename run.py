@@ -5,52 +5,30 @@ import subprocess
 import sys
 from datetime import datetime
 # local imports 
-from common.cli_parser import cli_parse_args
 from common.git import update_repo
-from common.env_vars import get_encryption_status
 from aster import aster_local_controller
 
 
 # Usage:
-# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off> >
+# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
 #
-#   -e  Environment       : docker, aster_LAN_1, or aster_LAN_2
-#   -x  Encryption        : encrypted or plain (Spines)
-#   -p  MAX_PO_IN_FLIGHT  : Maximum number of pre-order requests in flight (integer > 0)
-#   -r  NUM_REPLICAS      : Total number of Prime replicas (integer > 0)
-#   -f  Patch             : on or off                                                         ****OPTIONAL******
-#
-#   Environment Variables:
-#   ENVIRONMENT          : Environment selection (docker|aster_LAN_1|aster_LAN_2), stored as str
-#   ENCRYPTED            : Encryption selection (encrypted|plain), stored as str
-#   MAX_PO               : MAX_PO_IN_FLIGHT value, stored as str
-#   NUM_REPLICAS         : Replica count, stored as str
-#   PATCH_APPLIED        : Patch selection (on|off), stored as str                                    
+#   -e  Environment                 : docker, aster_LAN_1, or aster_LAN_2
+#   -x  Encryption (Spines)         : 0 (plain text) or 1 (encrypted)
+#   -p  MAX_PO_IN_FLIGHT            : Maximum number of pre-order requests in flight (integer > 0)
+#   -r  NUM_REPLICAS                : Total number of Prime replicas (integer > 0)
+#   -f  Patch                       : 0 (disabled) or 1 (enabled) ***OPTIONAL***
 #
 # All flags are required, unless explicitly labeled as optional, to run this script. 
-
 def main():
 
     # The environment variable UPDATE does not exist yet. It is only created 
-    # when a reboot occurs. A reboot has not occurred, run the standard setup. 
+    # when a reboot occurs. A reboot has not occurred, run the standard setup
+    # procedure. 
     if 'REBOOT' not in os.environ:
         # clear terminal for readability
         subprocess.run('cls' if platform.system()=='Windows' else 'clear', shell=True)
 
-        # get CLI arguments, confirm valid, store as environment variables.
-        cli_parse_args(args=sys.argv, calling_script_name='run')
-
-        # Output configuration to console
-        print("\n" + "═" * 46)
-        print("           STARTUP CONFIGURATION")
-        print("═" * 46)
-        print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
-        print(f"  {'Environment':<22} {os.environ['ENVIRONMENT']}")
-        print(f"  {'Spines Encrypted':<22} {'Yes' if get_encryption_status() else 'No'}")
-        print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
-        print("═" * 46 + "\n")
-
-        # update the CS2910 github repository.
+        # Updates the >>local<< CS2910 github repository.
         print('[CS2910 Git Repo Synchronization]')
         update_repo()
 
@@ -58,9 +36,12 @@ def main():
     # Skip previous, delete the REBOOT environment variable and print reboot success 
     else:
         # Delete the REBOOT environment variable so child processes do not 
-        # mistakenly use it when running their own updates
+        # mistakenly use it when running their own updates upon inheriting it
         del os.environ['REBOOT']
         print('Script restarted successfully. Now using most up to date CS2910 repository.\n')
+        print(f'Affected Directories:{os.environ['UPDATED']}')
+        exit(1)
+
 
     # Start the local controller based on ENVIRONMENT env var value <aster_LAN_1|aster_LAN_2|docker>
     if os.environ['ENVIRONMENT'] in ('aster_LAN_1', 'aster_LAN_2'):
@@ -72,3 +53,20 @@ def main():
 
 if __name__=="__main__":
     main()
+
+
+
+
+
+        #    # get CLI arguments, confirm valid, store as environment variables.
+        #     cli_parse_args(args=sys.argv, calling_script_name='run')
+    
+        #     # Output configuration to console
+        #     print("\n" + "═" * 46)
+        #     print("           STARTUP CONFIGURATION")
+        #     print("═" * 46)
+        #     print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
+        #     print(f"  {'Environment':<22} {os.environ['ENVIRONMENT']}")
+        #     print(f"  {'Spines Encrypted':<22} {'Yes' if get_encryption_status() else 'No'}")
+        #     print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
+        #     print("═" * 46 + "\n")

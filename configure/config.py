@@ -49,7 +49,7 @@ def validate_config(replica_list):
         exit(1)
 
 
-# parses the <aster_machines_used || docker_containers_used || replica_ip_addresses.txt> depending on config type 
+# Parses the <aster_machines_used || docker_containers_used || replica_ip_addresses.txt> depending on config type 
 # returns a list of tuples of all the replicas where each tuple is in the form (replica_ip, replica_id)
 def load_replica_configuration():
     # List of tuples holding the candidate replicas where each entry is (<replica_id>,<replica_ip>)

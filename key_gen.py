@@ -90,7 +90,7 @@ def main():
             'cd ~/cs2910 && git pull && python3 key_gen.py A 20'
             ],capture_output=True, text=True)
         print(p.stdout)
-        exit(1)
+        return
     # Aster execution
     else:
         # In /home/sjl79, update the GitHub Repository
@@ -98,13 +98,8 @@ def main():
 
     # Generate all keys for number of replicas 1-->30
     gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)
-    exit(0)
 
 
-
-    print('we are connected')
-    exit(0)
-    check_configs()
 
 if __name__ == '__main__':
     main()

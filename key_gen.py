@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import shutil
+import os
 from common.file_ops import *
 
 # All possible configs
@@ -52,6 +53,11 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Generate keys
     p = subprocess.run(["./gen_keys"], cwd="prime/bin")
+
+    # Make the keys directory in the root cs2910 file 
+    if os.path.exists("key_gen_dir"):
+        shutil.rmtree("key_gen_dir")
+    os.makedirs("key_gen_dir")
 
     exit(0)    
 

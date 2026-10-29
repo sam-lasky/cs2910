@@ -82,7 +82,7 @@ def generate_machine_list(num_replicas, skipped_machines):
 
 def run(args_dict:dict):
 
-    # Machines to skip 
+    # List of aster machine IDs to skip
     skip=[3]
 
     # Output configuration to console

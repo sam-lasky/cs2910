@@ -54,10 +54,9 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
     # Generate keys
     p = subprocess.run(["./gen_keys"], cwd="prime/bin")
 
-    # Make the keys directory in the root cs2910 file 
-    if os.path.exists("key_gen_dir"):
-        shutil.rmtree("key_gen_dir")
-    os.makedirs("key_gen_dir")
+        # os.makedirs("key_gen_dir")
+    print(os.getcwd())
+
 
     exit(0)    
 
@@ -90,6 +89,11 @@ def main():
         return
    
     # *** Aster execution ***
+    
+    # Make the keys directory in the root cs2910 file, replace it if it already exists
+    if os.path.exists("key_gen_dir"):
+        shutil.rmtree("key_gen_dir")
+    os.makedirs("key_gen_dir")
 
     # Generate all keys for number of replicas 1-->30
     for config in configurations:

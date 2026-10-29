@@ -34,7 +34,7 @@ def main():
         print("═" * 46)
         update_repo()
         # this is a test this is a test
-        
+
     # A reboot has occurred. The reboot func os.execv() preserves environment variables. 
     # Skip previous, delete the REBOOT environment variable and print reboot success 
     else:
@@ -42,7 +42,7 @@ def main():
         # mistakenly use it when running their own updates upon inheriting it
         del os.environ['REBOOT']
         print('Script restarted successfully. Now using most up to date CS2910 repository.')
-        print(f'Affected Directories:{os.environ['UPDATED']}')
+        print(f'Affected Directories/Files: {os.environ['UPDATED']}')
 
     # Using most up to date local CS2910 Github Repository. Parse the CLI arguments & store
     # them in the dictionary args_dict (keys:'env', 'encrypt', 'max_po', 'num_replicas', 'patch' (optional))

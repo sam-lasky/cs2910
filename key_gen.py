@@ -78,13 +78,20 @@ def change_def_h(f:int,k:int):
     with open('prime/src/def.h', 'w') as file:
         file.write(new_def_h)
 
-# Usage: python key_gen.py <ASTER_MACHINE_NUMBER>
+# Usage: python key_gen.py <L|A> <ASTER_MACHINE_NUMBER>
 # Assumes LAN 1
 def main():
-
-    # Connect to the aster machine where keygen will occur
-    subprocess.run(['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu', 'python3 ~/cs2910/aster/key_gen.py 20'],check=True)
-
+    # Local execution
+    if sys.argv[1]=='L':
+        machine_number=sys.argv[2]
+        p = subprocess.run(['ssh',f'sjl79@aster{machine_number}.cs.pitt.edu','cd ~/cs2910 && python3 key_gen.py A 20'])
+        print(p.stdout)
+        exit(1)
+    # Aster execution
+    else:
+        # In /home/sjl79, update the GitHub Repository
+        subprocess.run(['git','pull'],capture_output=True, text=True)    
+    
     # Generate all keys for number of replicas 1-->30
     gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)
     exit(0)

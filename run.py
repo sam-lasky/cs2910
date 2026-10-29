@@ -47,8 +47,7 @@ def main():
     args_dict=cli_parse_args(args=sys.argv, calling_script_name='run')
 
     # Print the configuration
-    print(args_dict)
-
+    print_config(args_dict)
     # Start the local controller & pass args_dict 
     # Aster
     if args_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
@@ -60,7 +59,6 @@ def main():
 
 
 def print_config(args_dict:dict):
-
     # Output configuration to console
     print("\n" + "═" * 46)
     print("           STARTUP CONFIGURATION")

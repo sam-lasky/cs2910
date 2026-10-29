@@ -90,8 +90,9 @@ def main():
     # Aster execution
     else:
         # In /home/sjl79, update the GitHub Repository
+        print('hello world')
         subprocess.run(['git','pull'])    
-    
+        exit(0)
     # Generate all keys for number of replicas 1-->30
     gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)
     exit(0)

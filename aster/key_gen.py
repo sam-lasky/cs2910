@@ -79,7 +79,7 @@ def change_def(f:int,k:int):
 def main():
 
     # Connect to the aster machine where keygen will occur
-    subprocess.run['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu']
+    subprocess.run(['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu'])
     print('we are connected')
     exit(0)
     check_configs()

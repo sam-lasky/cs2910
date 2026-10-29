@@ -38,7 +38,7 @@ def update_repo():
             # update has occurred. 
             if updated_directories():
                 # Reboot the calling script
-                reboot()
+                reboot(True)
             # no update
             else:
                 print('No updates detected, using the most up to date version.')

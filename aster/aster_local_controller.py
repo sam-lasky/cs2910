@@ -76,8 +76,8 @@ def start_replicas(args_dict):
     # Get encrypted (0/1)
     encrypt = args_dict['encrypt']
     # Generate the argument list: 
-    args_str = aster_machines_used_as_str + ' ' + env + ' ' + max_po + ' ' + encrypt
-
+    args_str = f"{aster_machines_used_as_str} {env} {max_po} {encrypt}" 
+   
     # ssh sessions, session[i] = subprocess of aster machine i (where 1<=i<=20)
     sessions = {}
     # unique id of the replica

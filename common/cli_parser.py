@@ -128,4 +128,4 @@ def cli_parse_args(args:list[str], calling_script_name:str):
         if err_msg is not None:
             handle_error(script_name+'.py', err_msg+usage)
         # return the dictionary
-        return arg_dict
+    return arg_dict

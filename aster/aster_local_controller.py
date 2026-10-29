@@ -92,7 +92,7 @@ def start_replicas(args_dict):
             'if [ -d cs2910/.git ]; then '
             f'git -C cs2910 pull; '
             f'else git clone https://github.com/sam444555/cs2910.git; '
-            'fi > /dev/null 2>&1 && '
+            'fi && '
         )
 
         # CD into aster dir and startup the replica startup script

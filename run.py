@@ -47,7 +47,7 @@ def main():
     args_dict=cli_parse_args(args=sys.argv, calling_script_name='run')
 
     # Print the configuration
-
+    print(args_dict)
 
     # Start the local controller & pass args_dict 
     # Aster

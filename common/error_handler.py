@@ -14,6 +14,7 @@ def handle_error(script_name:str, error_message:str,fatal:bool=True):
     print(f'Fatal Error: {fatal}')
     if fatal==True:
         print('Terminating Program...\n')
+        exit(1)
     # Recover
     else:
         pass

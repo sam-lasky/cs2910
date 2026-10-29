@@ -66,12 +66,18 @@ def main():
     # Local execution
     if sys.argv[1]=='L':
         machine_number=sys.argv[2]
-        p = subprocess.run([
+        subprocess.run([
             'ssh',
             f'sjl79@aster{machine_number}.cs.pitt.edu',
             'cd ~/cs2910 && git pull && python3 key_gen.py A 20'
             ],capture_output=True, text=True)
-        print(p.stdout)
+        # Retrieve the keys from aster 20 and store locally 
+        subprocess.run([
+            'scp',
+            '-r',
+            'sjl79@aster20.cs.pitt.edu:~/cs2910/key_gen_dir',
+            './'
+        ], check=True)
         return
    
     # *** Aster execution ***
@@ -87,10 +93,6 @@ def main():
         NUM_K = config[1]
         num_replicas = config[2]
         gen_keys(NUM_F, NUM_K, num_replicas)
-
-# Index configs[i]= (NUM_F, NUM_K, i TOTAL REPLICAS)
-
-
 
 if __name__ == '__main__':
     main()

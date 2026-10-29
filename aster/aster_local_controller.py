@@ -20,49 +20,6 @@ def kill_all():
             check=False
         )
 
-# Get all the aster machines indicated by the contents of aster_machines_used.txt
-# and barred_machines.txt
-def select_replica_machines():
-    global final_list
-
-    # Get list of machines not to not use
-    barred_machines = get_machines('aster/barred_machines.txt')
-    # Get list of selected machines
-    selected_machines = get_machines('aster/aster_machines_used.txt')
-    # Remove barred machines and sort
-    final_list = sorted(set(selected_machines) - set(barred_machines), key=int)
-    # Keep only the number of machines needed
-    del final_list[get_env('NUM_REPLICAS'):]
-
-    # Check for mismatch between total num of selected machines and num replicas being used
-    if len(final_list)!= get_env('NUM_REPLICAS'):
-       error_handler(f"Expected {os.environ['NUM_REPLICAS']} total machines, but found {len(final_list)}.")
-    # Match, create and set ASTER_MACHINES_USED environment var to final_list
-    else:
-        store_env('ASTER_MACHINES_USED', ','.join(final_list))
-
-
-# Gets all the selected aster machines indicated by the file, where
-# file = <aster_machines_used | barred_machines>. Returns a list. 
-def get_machines(file_path):
-    with open(file_path, 'r') as f:
-        machine_list = []
-        for line in f.readlines():
-            line = line.strip()
-            if not line or line.startswith('#'):
-                continue
-            if line.isdecimal() and 1 <= int(line) <= 20:
-                machine_list.append(line)
-            else:
-                error_handler(f'Invalid machine ID: {line}. Expected a value in range 1->20')
-    return machine_list
-
-# Prints out any errors encountered, terminates the program. 
-def error_handler(err_msg:str):
-    print(['ERROR'])
-    print(err_msg)
-    exit(1)
-
 
 # For all aster machines in final_list:
 #   (1) Connect to the machine
@@ -110,8 +67,14 @@ def start_replicas():
 
     return sessions
 
+def generate_machine_list(num_replicas, skipped_machines):
+    pass    
+
 def run(args_dict:dict):
-    
+    # List of machines that'll be used
+    global final_list
+    # Machines to skip 
+    skip=[3]
 
     # Output configuration to console
     print("\n" + "═" * 46)
@@ -119,8 +82,9 @@ def run(args_dict:dict):
     print("═" * 46)
     print("═" * 46 + "\n")
 
-    # finalize list of aster machines that will be used
-    select_replica_machines()
+    # Generate Machine list 
+    final_list = generate_machine_list(args_dict['num_replicas'], skip)
+
     print(f'[ASTER MACHINES USED]:{','.join(final_list)}')
     
     # kill any old prime/spines/aster_replica.py processes on all aster machines

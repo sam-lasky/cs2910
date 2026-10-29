@@ -84,13 +84,13 @@ def main():
     # Local execution
     if sys.argv[1]=='L':
         machine_number=sys.argv[2]
-        p = subprocess.run(['ssh',f'sjl79@aster{machine_number}.cs.pitt.edu','cd ~/cs2910 && python3 key_gen.py A 20'])
+        p = subprocess.run(['ssh',f'sjl79@aster{machine_number}.cs.pitt.edu','cd ~/cs2910 && python3 key_gen.py A 20'],capture_output=True, text=True)
         print(p.stdout)
         exit(1)
     # Aster execution
     else:
         # In /home/sjl79, update the GitHub Repository
-        subprocess.run(['git','pull'],capture_output=True, text=True)    
+        subprocess.run(['git','pull'])    
     
     # Generate all keys for number of replicas 1-->30
     gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)

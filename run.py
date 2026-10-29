@@ -39,14 +39,15 @@ def main():
         # Delete the REBOOT environment variable so child processes do not 
         # mistakenly use it when running their own updates upon inheriting it
         del os.environ['REBOOT']
-        print('Script restarted successfully. Now using most up to date CS2910 repository.\n')
+        print('Script restarted successfully. Now using most up to date CS2910 repository.')
         print(f'Affected Directories:{os.environ['UPDATED']}')
 
     # Using most up to date local CS2910 Github Repository. Parse the CLI arguments & store
     # them in the dictionary args_dict (keys:'env', 'encrypt', 'max_po', 'num_replicas', 'patch' (optional))
     args_dict=cli_parse_args(args=sys.argv, calling_script_name='run')
-    print(args_dict)
-    exit(0)
+
+    # Print the configuration
+
 
     # Start the local controller & pass args_dict 
     # Aster
@@ -58,6 +59,18 @@ def main():
         exit(0)
 
 
+def print_config(args_dict:dict):
+
+    # Output configuration to console
+    print("\n" + "═" * 46)
+    print("           STARTUP CONFIGURATION")
+    print("═" * 46)
+    print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
+    print(f"  {'Environment':<22} {args_dict['env']}")
+    print(f"  {'Spines Encrypted':<22} {'YES' if args_dict['encrypt'] else 'NO'}")
+    print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
+    print("═" * 46 + "\n")
+
 if __name__=="__main__":
     main()
 
@@ -65,15 +78,3 @@ if __name__=="__main__":
 
 
 
-        #    # get CLI arguments, confirm valid, store as environment variables.
-        #     cli_parse_args(args=sys.argv, calling_script_name='run')
-    
-        #     # Output configuration to console
-        #     print("\n" + "═" * 46)
-        #     print("           STARTUP CONFIGURATION")
-        #     print("═" * 46)
-        #     print(f"  {'Start Time':<22} {datetime.now().strftime('%I:%M:%S %p')}")
-        #     print(f"  {'Environment':<22} {os.environ['ENVIRONMENT']}")
-        #     print(f"  {'Spines Encrypted':<22} {'Yes' if get_encryption_status() else 'No'}")
-        #     print(f"  {'MAX_PO_IN_FLIGHT':<22} {os.environ['MAX_PO']}")
-        #     print("═" * 46 + "\n")

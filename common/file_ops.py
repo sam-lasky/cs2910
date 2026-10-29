@@ -21,25 +21,31 @@ def modify_file(file_path:str, replacements:dict):
 
     try:
         # Open the target file
-        with open(file_path, 'w') as f:
+        with open(file_path, 'r+') as f:
             # Stores the updated file
             new_file=''
             # Go through each line of the file @ file_path, applying replacements when necessary
             for line in f.readlines():
                 # Check if the current line should be replaced
-                if line in replacements:
-                    # Check if the replacement line and curr line are not identical (if identical no update required)
-                    if replacements[line]!=line:
-                        # Set the current line to the replacement line
-                        line = replacements[line]
-                        # Set updated to true
-                        updated=True
+                for key, replacement in replacements.items():
+                    if line.startswith(key):
+                        # Only replace if the replacement line/current line do not match
+                        if line!=replacement:
+                            # Update line
+                            line=replacement
+                            # Set updated to True
+                            updated=True
                 # Write the line to new_file
                 new_file+=line
 
             # If modifications were made to the file, write new_file to file_path and return updated
             if updated:
+                # Return to beginning of file
+                f.seek(0)
+                # Write the updated file
                 f.write(new_file)
+                # Remove any leftovers
+                f.truncate()
             # Return updated
             return updated
 

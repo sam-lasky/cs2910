@@ -110,8 +110,7 @@ def start_replicas():
 
     return sessions
 
-def run(args_dict:dict,keygen:bool=False):
-    # Special Case: keygen
+def run(args_dict:dict):
     
 
     # Output configuration to console

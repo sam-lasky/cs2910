@@ -36,7 +36,19 @@ configurations = [
 # Generates keys using the passed NUM_F/K values. 
 # Updates prime/src/def.h using these values
 # Stores the generated keys in CS2910/keys_aster/replicas_i
-def gen_keys(NUM_F, NUM_K,num_replicas):
+def gen_keys(NUM_F, NUM_K, num_replicas):
+    # Update prime/src/def.h using the correct NUM_F/K values
+    replacement_dict = {
+        '#def NUM_F':  f'#def NUM_F {NUM_F}',
+        '#def NUM_K':  f'#def NUM_K {NUM_K}',
+    }
+    modify_file('~/cs2910/prime/src/def.h', replacement_dict)
+
+    exit(0)
+
+
+def modify_file(file_path:str, replacements:dict):
+    
     
     # Remove the existing keys directory
     print('test')
@@ -91,13 +103,17 @@ def main():
             ],capture_output=True, text=True)
         print(p.stdout)
         return
-    # Aster execution
-    else:
-        # In /home/sjl79, update the GitHub Repository
-        print('hello world')
+   
+    # *** Aster execution ***
 
     # Generate all keys for number of replicas 1-->30
-    gen_keys(NUM_F=1, NUM_K=1,num_replicas=1)
+    for config in configurations:
+        NUM_F = config[0]
+        NUM_K = config[1]
+        num_replicas = config[2]
+        gen_keys(NUM_F, NUM_K, num_replicas)
+
+# Index configs[i]= (NUM_F, NUM_K, i TOTAL REPLICAS)
 
 
 

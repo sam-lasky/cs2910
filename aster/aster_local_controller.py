@@ -94,7 +94,7 @@ def run(args_dict:dict):
     # Generate Machine list 
     generate_machine_list(args_dict['num_replicas'], skip)
 
-    print(f'[ASTER MACHINES USED]: {','.join(sorted(aster_machines_used))}')
+    print(f"[ASTER MACHINES USED]: {', '.join(sorted(aster_machines_used))}")
 
     exit(0)
     

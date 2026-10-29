@@ -56,32 +56,6 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
     exit(0)    
 
 
-def modify_file(file_path:str, replacements:dict):
-    
-    
-    # Remove the existing keys directory
-    print('test')
-    # # go through 
-    # for i in range(6,31):
-    #     for config in configs[i]:
-    #         f=config[0]
-    #         k=config[1]
-    #         # update def.h
-    #         change_def(f,k)
-    #         # make clean (prime)
-
-   
-
-
-    #         # seg fault
-    #         if p.returncode==-11:
-    #             print(f"Segmentation fault (core dumped) — {i} replicas")
-    #             bugged_configs.setdefault(i, []).append((f, k))
-
-    # print(f'ALL BUGGED CONFIGS:{bugged_configs}')
-        
-
-
 
 def change_def_h(f:int,k:int):
     with open('prime/src/def.h', 'r') as file:

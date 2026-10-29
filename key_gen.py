@@ -84,7 +84,11 @@ def main():
     # Local execution
     if sys.argv[1]=='L':
         machine_number=sys.argv[2]
-        p = subprocess.run(['ssh',f'sjl79@aster{machine_number}.cs.pitt.edu','cd ~/cs2910 && python3 key_gen.py A 20'],capture_output=True, text=True)
+        p = subprocess.run([
+            'ssh',
+            f'sjl79@aster{machine_number}.cs.pitt.edu',
+            'cd ~/cs2910 && git pull && python3 key_gen.py A 20'
+            ],capture_output=True, text=True)
         print(p.stdout)
         exit(1)
     # Aster execution

@@ -1,5 +1,3 @@
-
-
 # Accepts two arguments: 
 # (1) file_path: The path to the file to be modified, including its name 
 # (2) replacements: A dictionary which maps the original lines to their
@@ -51,6 +49,8 @@ def modify_file(file_path:str, replacements:dict):
     # Other errors
     except Exception as e:
         print(f'Error: {e}')
+
+
 
 # Given a file located at file_path and a list of lines in check_lines, 
 # this function returns True if all the lines in check_lines were found

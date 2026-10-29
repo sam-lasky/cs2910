@@ -110,8 +110,15 @@ def start_replicas():
 
     return sessions
 
-def run():
-    print("\n========== ASTER LOCAL CONTROLLER ==========\n")    
+def run(args_dict:dict,keygen:bool=False):
+    # Special Case: keygen
+
+    # Output configuration to console
+    print("\n" + "═" * 46)
+    print("           ASTER LOCAL CONTROLLER")
+    print("═" * 46)
+    print("═" * 46 + "\n")
+
     # finalize list of aster machines that will be used
     select_replica_machines()
     print(f'[ASTER MACHINES USED]:{','.join(final_list)}')

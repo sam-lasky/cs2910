@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import shutil
 
 def check_configs():
@@ -73,8 +74,14 @@ def change_def(f:int,k:int):
     with open('prime/src/def.h', 'w') as file:
         file.write(new_def_h)
 
-
+# Usage: python key_gen.py <ASTER_MACHINE_NUMBER>
+# Assumes LAN 1
 def main():
+
+    # Connect to the aster machine where keygen will occur
+    subprocess.run['ssh',f'sjl79@aster{sys.argv[1]}.cs.pitt.edu']
+    print('we are connected')
+    exit(0)
     check_configs()
 
 if __name__ == '__main__':

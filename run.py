@@ -8,7 +8,7 @@ from datetime import datetime
 from common.cli_parser import cli_parse_args
 from common.git import update_repo
 from aster import aster_local_controller
-
+from docker import docker_local_controller
 
 # Usage:
 # python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <0|1> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
@@ -50,15 +50,15 @@ def main():
 
     # Print the configuration
     print_config(args_dict)
+
     # Start the local controller & pass args_dict 
     # Aster
     if args_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
         aster_local_controller.run(args_dict)
     # Docker
     else:
-        print('TODO: INCORPORATE DOCKER SUPPORT')
+        print('TODO: FINISH DOCKER')
         exit(0)
-
 
 def print_config(args_dict:dict):
     # Output configuration to console

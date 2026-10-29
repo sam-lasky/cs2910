@@ -118,7 +118,7 @@ def cli_parse_args(args:list[str], calling_script_name:str):
             # NUM_REPLICAS flag: Should be an integer > 0
             case '-r':
                 if args[i+1].isdecimal() and int(args[i+1])>0:
-                    if args[i+1]>20 and arg_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
+                    if int(args[i+1])>20 and arg_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
                         err_msg=f'Too many machines, there are only 20 available but {args[i+1]} were requested'
                     arg_dict['num_replicas']=int(args[i+1])
                 else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'

@@ -1,7 +1,7 @@
 import subprocess
 import sys
 import shutil
-from common import *
+from common.file_ops import *
 
 # All possible configs
 # Index configs[i]= (NUM_F, NUM_K, i TOTAL REPLICAS)

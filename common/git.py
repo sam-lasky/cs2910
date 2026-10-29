@@ -72,6 +72,11 @@ def updated_directories():
         else:
             # Store the names of each unique top level directories affected by the 
             # update in the environment variable UPDATED 
+            # example output of subprocess:
+            #   prime/src/driver.c
+            #   spines/example/example.h 
+            #   .....
+            # Below would set the environment variable UPDATED to string 'prime,spines'
             os.environ['UPDATED'] = ','.join(set(line.split('/')[0] for line in p.stdout.splitlines()))
             return True
     # Subprocess encountered errors
@@ -80,10 +85,11 @@ def updated_directories():
 
 
 # Reboot the calling script
-def reboot():
+# test_mode used for quicker testing, reboot time becomes 0
+def reboot(test_mode:bool=False):
     # Create & set the REBOOT env variable to 1
     os.environ['REBOOT']='1'
-    reboot_time = 3
+    reboot_time = 3 if not test_mode else 0
     # Print reboot msg
     for i in range(reboot_time, 0, -1):
         print(f"\rUpdate detected & applied, rebooting in {i} seconds...", end="", flush=True)

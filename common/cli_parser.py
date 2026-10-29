@@ -1,19 +1,17 @@
 from .env_vars import store_env
+from .error_handler import handle_error
 
 # CLI Argument Definitions
 #
 # Flag  Parameter           Expected Value             Type
 # ---- -----------------    -------------------------- ----
 # -e   Environment          docker | aster_LAN_1 | aster_LAN_2    str
-# -x   Encryption           encrypted | plain          str
+# -x   Encryption           <0 | 1>                    int
 # -p   MAX_PO_IN_FLIGHT     integer > 0                int
 # -r   NUM_REPLICAS         integer > 0                int
-# -f   Patch                on | off                   str
-# -d   Update Distribution  integer > 0                int
-# -u   Prints Usage         none                       none
 
 scripts = {
-    'run': ['-e','-x','-p','-r','-f','-d']
+    'run': ['-e','-x','-p','-r']
 }
 
 all_flags = {
@@ -25,7 +23,7 @@ all_flags = {
     # encryption
     '-x': {
         'expected': '<encrypted|plain>',
-        'description': ['-x', 'Encryption', 'encrypted | plain', 'str']
+        'description': ['-x', 'Encryption', '0|1', 'int']
     },
     # MAX_PO_IN_FLIGHT
     '-p': {
@@ -36,13 +34,7 @@ all_flags = {
     '-r': {
         'expected': '<NUM_REPLICAS>',
         'description': ['-r', 'NUM_REPLICAS', 'integer > 0', 'int']
-    },
-    # Patch
-    '-f': {
-        'expected': '<on|off>',
-        'description': ['-f', 'Patch', 'on | off', 'str']
     }
-
 }
 
 # Name of the script 
@@ -70,8 +62,15 @@ def usage():
     return usage_msg + flags_used_descriptions_msg +'\n'
 
 
-# Parses CLI args from any py script, ensuring consistent & standard
+# Parses CLI args from any py script (currently only run supported), ensuring consistent & standard
 # argument definitions across scripts.
+#
+# Returns the dictionary arg_dict= {
+#   'env':      <'docker' | 'aster_LAN_1' | 'aster_LAN_2'>,   
+#   'encrypt':  <0|1>,
+#   'max_po':   integer value > 0,
+#   'num_replicas:   integer value > 0,
+#   'patch':     <0|1> (optional)
 def cli_parse_args(args:list[str], calling_script_name:str):
     # set the global script name variable 
     global script_name
@@ -85,7 +84,11 @@ def cli_parse_args(args:list[str], calling_script_name:str):
 
     # Check if the expected number of arguments was passed based on the calling script
     if len(args) != expected_num_args:
-        cli_error(f'Missing required command line args for {script_name}.py: Expected {expected_num_args}, received {len(args)}')
+        error_message=f'Missing required command line args for {script_name}.py: Expected {expected_num_args}, received {len(args)}'+usage()
+        handle_error(script_name+'.py',error_message)
+
+    # Returned dictionary of arguments
+    arg_dict={}
 
     for i in range(0,len(args),2):
         # error msg initialized to None
@@ -100,38 +103,29 @@ def cli_parse_args(args:list[str], calling_script_name:str):
             # Environment flag: Should be either <docker|aster_LAN_1|aster_LAN_2>
             case '-e':
                 if args[i+1] in ['docker','aster_LAN_1','aster_LAN_2']:
-                    store_env(env_var_name='ENVIRONMENT',env_val=args[i+1])
+                    arg_dict['env']=args[i+1]
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # Encryption flag: Should be either <encrypted|plain>
             case '-x':
-                if args[i+1] in ['encrypted','plain']:
-                    store_env(env_var_name='ENCRYPTED',env_val=args[i+1])
+                if args[i+1] in ['0','1']:
+                    arg_dict['encrypt']=int(args[i+1])
                 else: err_msg=f'Invalid argument given for {flag}: {args[i+1]}'
             # MAX_PO_IN_FLIGHT flag: Should be an integer > 0
             case '-p':
                 if args[i+1].isdecimal() and int(args[i+1])>0:
-                    store_env(env_var_name='MAX_PO',env_val=args[i+1])
+                    arg_dict['max_po']=int(args[i+1])
                 else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'
             # NUM_REPLICAS flag: Should be an integer > 0
             case '-r':
                 if args[i+1].isdecimal() and int(args[i+1])>0:
-                    store_env(env_var_name='NUM_REPLICAS',env_val=args[i+1])
+                    arg_dict['num_replicas']=int(args[i+1])
                 else: err_msg=f'Invalid value given for {flag}: {args[i+1]}'
             # Patch: Should be <on|off>
             case '-f':
-                if args[i+1] in ['on','off']:
-                    store_env(env_var_name='PATCH_APPLIED',env_val=args[i+1])
-
+                if args[i+1] in ['0','1']:
+                    arg_dict['patch']=int(args[i+1])
         # check if there is an error.
-        if err_msg is not None: cli_error(err_msg)
-
-# Print error message, print usage for the script being used, print flag details, exit.
-def cli_error(err_msg: str):
-    # add a newline at the start of the msg for cleaner readability
-    err_msg='\n[CLI ERROR]\n'+err_msg
-    # get the error message & usage 
-    err_msg+=usage()
-    # print 
-    print(err_msg+'<<<TERMINATING>>>\n')
-    # terminate the script with error exit code
-    exit(1)
+        if err_msg is not None:
+            handle_error(script_name+'.py', err_msg+usage)
+        # return the dictionary
+        return arg_dict

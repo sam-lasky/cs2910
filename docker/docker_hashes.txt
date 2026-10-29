@@ -1,9 +1,0 @@
-# Each time a new Docker image is created using Dockerfile.base/prime/spines the SHA-256 hash
-# of the Dockerfile used is computed and stored in this file. Subsequent build.py calls (auto mode)
-# checks if the hash of the current file matches the one stored here. If they do not, the script
-# will recreate the image using the most up to date version & update the hash here as well. 
-# ****DO NOT ALTER THIS FILE****
-
-base NONE
-spines NONE
-prime NONE

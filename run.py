@@ -5,12 +5,13 @@ import subprocess
 import sys
 from datetime import datetime
 # local imports 
+from common.cli_parser import cli_parse_args
 from common.git import update_repo
 from aster import aster_local_controller
 
 
 # Usage:
-# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <encrypted|plain> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
+# python3 run.py -e <docker|aster_LAN_1|aster_LAN_2> -x <0|1> -p <MAX_PO_IN_FLIGHT> -r <NUM_REPLICAS> -f <on|off>
 #
 #   -e  Environment                 : docker, aster_LAN_1, or aster_LAN_2
 #   -x  Encryption (Spines)         : 0 (plain text) or 1 (encrypted)
@@ -40,12 +41,16 @@ def main():
         del os.environ['REBOOT']
         print('Script restarted successfully. Now using most up to date CS2910 repository.\n')
         print(f'Affected Directories:{os.environ['UPDATED']}')
-        exit(1)
 
+    # Using most up to date local CS2910 Github Repository. Parse the CLI arguments & store
+    # them in the dictionary args_dict (keys:'env', 'encrypt', 'max_po', 'num_replicas', 'patch' (optional))
+    args_dict=cli_parse_args(args=sys.argv, calling_script_name='run')
 
-    # Start the local controller based on ENVIRONMENT env var value <aster_LAN_1|aster_LAN_2|docker>
-    if os.environ['ENVIRONMENT'] in ('aster_LAN_1', 'aster_LAN_2'):
-        aster_local_controller.run()
+    # Start the local controller & pass args_dict 
+    # Aster
+    if args_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
+        aster_local_controller.run(args_dict)
+    # Docker
     else:
         print('TODO: INCORPORATE DOCKER SUPPORT')
         exit(0)

@@ -83,7 +83,6 @@
 /* Adjust this to configure how often a client prints. */
 #define PRINT_INTERVAL 1000
 
-#define TEST_MESSAGE 10
 
 /* This sets the maximum number of updates a client can submit */
 #define MAX_ACTIONS 100000 

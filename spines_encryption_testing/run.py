@@ -38,7 +38,7 @@ run(
 
 compose('up', '-d', '--force-recreate')
 
-for bandwidth in [100, 250, 500, 750]:
+for bandwidth in [100, 250, 500, 750,1000]:
     for encrypted in [True, False]:
         for trial in range(1, 6):
             mode = 'on' if encrypted else 'off'
@@ -140,4 +140,4 @@ for bandwidth in [100, 250, 500, 750]:
 
                 time.sleep(1)
 
-print('\nDone. Saved 40 receiver logs.')
+print('\nDone. Saved 50 receiver logs.')

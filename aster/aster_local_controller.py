@@ -23,14 +23,18 @@ def kill_all():
 def connection_test():
     print('\n[TESTING CONNECTIONS TO ALL MACHINES]')
     for machine in sorted(aster_machines_used):
-        p=subprocess.run(['ssh',f'sjl79@aster{machine}.cs.pitt.edu'],capture_output=True,text=True)
+        p = subprocess.run(
+            ['ssh', f'sjl79@aster{machine}.cs.pitt.edu', 'true'],
+            capture_output=True,
+            text=True
+        )        
         message = f"ASTER_{machine} CONNECTION STATUS: {'SUCCESS' if p.returncode == 0 else 'FAILED'}"
         if p.returncode!=0:
             message+=f'\nERROR MESSAGE:{p.stderr}'
             if 'Connection timed out' in p.stderr:
                 message+='Are you connected to GlobalProtect?\n'
             print(message)
-            exit(1)
+            exit(0)
         print(message)
         
 

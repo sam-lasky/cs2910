@@ -132,7 +132,7 @@ def main():
         print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
     # Sets up Spines
-    
+    setup_spines(replica_ip,encrypt)
     exit(0)
     setup_prime()
 

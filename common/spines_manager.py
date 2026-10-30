@@ -71,3 +71,19 @@ def build_spines(spines_path):
     except Exception as e:
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
+
+
+# Start Spines
+def start_spines(replica_ip:dict, replica_id:int):
+
+    with open('status.log', 'w') as status_log:
+        # Start the Spines Process, write stdout/err to status_log
+        spines = subprocess.Popen(
+            ["./spines", "-I", replica_ip[replica_id]],
+            cwd="../prime/spines/daemon",
+            stdout=status_log,
+            stderr=status_log
+        )
+
+
+

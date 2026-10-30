@@ -151,16 +151,18 @@ def generate_machine_list(num_replicas, skipped_machines):
     for i in range(20,0,-1):
         if i not in skipped_machines:
             aster_machines_used.append(i)
-            if len(aster_machines_used)==num_replicas:return
+            if len(aster_machines_used)==num_replicas:
+                # sort in ascending order
+                aster_machines_used.sort()
+                return
     # Too many skipped machines
     if len(aster_machines_used)<num_replicas:
         raise ValueError("Not enough machines available. Exiting.")
 
 # Prints all aster machines used <ID> <LAN_1|2> <IP>
 def print_machines(env:str):
-        machines = sorted(aster_machines_used)
         print(f"[ASTER MACHINES USED]")
-        for i, aster_id in enumerate(machines):
+        for i, aster_id in enumerate(aster_machines_used):
             LAN_TYPE = 'LAN_1' if env=='aster_LAN_1' else 'LAN_2'
             LAN_IP_VAL = '53' if env=='aster_LAN_2' else '54'
             IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'

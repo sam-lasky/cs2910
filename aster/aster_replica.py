@@ -21,20 +21,24 @@ replica_ip={}
 # start spines and prime
 def startup():
     try:
-        # start spines: ./spines -I <ip address>
-        spines = subprocess.Popen(
-            ["./spines", "-I", replica_ip[replica_id]],
-            cwd="../prime/spines/daemon",
-        )
-        print('test')
+        # Start Spines
+
+        # # start spines: ./spines -I <ip address>
+        # spines = subprocess.Popen(
+        #     ["./spines", "-I", replica_ip[replica_id]],
+        #     cwd="../prime/spines/daemon",
+        # )
+        # print('test')
 
 
-        time.sleep(10)
-        exit(1)
+        # time.sleep(10)
+        # exit(1)
 
-        # Verify Spines is still running
-        if spines.poll() is not None:
-            raise RuntimeError(f"Spines terminated with exit code {spines.returncode}")
+        # # Verify Spines is still running
+        # if spines.poll() is not None:
+        #     raise RuntimeError(f"Spines terminated with exit code {spines.returncode}")
+
+
 
         # start prime: ./prime -i <server id> -g <global id>
         prime = subprocess.Popen(

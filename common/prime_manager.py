@@ -1,6 +1,7 @@
 import subprocess
 import os
 import sys
+import time
 # local imports
 from common.config import address_conf, def_h
 
@@ -95,3 +96,34 @@ def build_prime(prime_path):
     except Exception as e:
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
+
+
+# Start Prime
+def start_prime(replica_ip:dict, replica_id:int):
+
+    with open('status.log', 'w') as status_log:
+        # Start the Prime Process, write stdout/err to status_log
+        prime = subprocess.Popen(
+            ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
+            cwd='../prime/bin',
+            stdout=status_log,
+            stderr=status_log
+        )
+
+    # Loop until all handshakes are completed
+    while True:
+        time.sleep(1)
+        # Checkup on Spines
+        #   poll() return values:
+        #       None: Process still executing
+        #       0: Process successfully exited
+        #       Nonzero int: Process exited w/ error
+        if prime.poll() is not None:
+            raise RuntimeError(f'Prime exited during startup')
+        else:
+            # Check log file for handshake msgs
+            with open('status.log', 'r') as status_log:
+                for line in status_log.readlines():
+                    if line.startswith('Called PR_Resume_Normal_operations'):
+                        time.sleep(2)
+                        return prime

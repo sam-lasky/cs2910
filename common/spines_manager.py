@@ -1,6 +1,7 @@
 import subprocess
 import os
 import sys
+import time
 # local imports
 from common.config import spines_address_config, spines_conf
 
@@ -84,6 +85,27 @@ def start_spines(replica_ip:dict, replica_id:int):
             stdout=status_log,
             stderr=status_log
         )
+        # Remove fn caller's replica_id
+        handshake_replica_ids = set(replica_ip.keys())-{replica_id}
 
+    # Loop until all handshakes are completed
+    while True:
+        time.sleep(1)
+        # Checkup on Spines
+        #   poll() return values:
+        #       None: Process still executing
+        #       0: Process successfully exited
+        #       Nonzero int: Process exited w/ error
+        if spines.poll() is not None:
+            raise RuntimeError(f'Spines exited during startup')
+        else:
+            # Check log file for handshake msgs
+            with open('status.log', 'r') as status_log:
+                for line in status_log.readlines():
+                    if line.startswith('Completed handshake with'):
+                        handshake_replica_ids-={int(line.split()[3])}
+                        if len(handshake_replica_ids)==0:
+                            return spines
+        
 
 

@@ -18,51 +18,6 @@ encrypt = None
 # k,v = replica id (int), replica ip (str)
 replica_ip={}
 
-# start spines and prime
-def startup():
-    try:
-        # Start Spines
-
-        # # start spines: ./spines -I <ip address>
-        # spines = subprocess.Popen(
-        #     ["./spines", "-I", replica_ip[replica_id]],
-        #     cwd="../prime/spines/daemon",
-        # )
-        # print('test')
-
-
-        # time.sleep(10)
-        # exit(1)
-
-        # # Verify Spines is still running
-        # if spines.poll() is not None:
-        #     raise RuntimeError(f"Spines terminated with exit code {spines.returncode}")
-
-
-
-        # start prime: ./prime -i <server id> -g <global id>
-        prime = subprocess.Popen(
-            ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
-            cwd='../prime/bin',
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        # print("Giving Prime time to start...", flush=True)
-        time.sleep(3)
-
-        # Verify Prime is still running
-        if prime.poll() is not None:
-            raise RuntimeError(f"Prime terminated with exit code {prime.returncode}")
-
-        # print("Prime started successfully!", flush=True)
-
-    except Exception as e:
-        print(f"ERROR: Replica startup failed: {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
-
-    print(f"Replica {replica_id} on Aster {aster_id} started successfully!", flush=True)
-
 # fills in replica_ip dict where replica_ip[replica id]= replica ip
 def build_replica_ip_map():
     LAN = '53' if env == 'aster_LAN_1' else '54'
@@ -84,7 +39,6 @@ def main():
     # Print config for controller
     print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
     print("-" * 54)
-
     for rid, mid in enumerate(aster_machines_used, start=1):
         print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
@@ -93,15 +47,15 @@ def main():
     
     # Sets up Spines
     setup_spines(replica_ip,encrypt)
-    
     # Set up Prime
     setup_prime(replica_ip,num_replicas=len(replica_ip.keys()),max_po=max_po) 
 
-    startup()
+    # Start Spines
+    start_spines(replica_ip, replica_id)
+    # Start Prime
+    start_prime(replica_ip, replica_id)
 
-    # All setup and startup checks passed
-    sys.exit(0)
-
+    return
 
 if __name__ == "__main__":
     main()

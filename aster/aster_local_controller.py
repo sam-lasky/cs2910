@@ -64,24 +64,7 @@ def run(args_dict:dict):
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas(args_dict)
 
-    exit(0)
-
-    for machine, process in sessions.items():
-        output, _ = process.communicate()
-        print(f"\n--- ASTER {machine} CONFIGURATION ---")
-        print(output, flush=True)
-        status = process.returncode
-
-
-        for line in output.splitlines():
-            if line.startswith(('#define MAX_PO_IN_FLIGHT', 'IT_LinkCrypto', 'IT_LinkEncrypt')):
-                print(f'Aster {machine}: {line}', flush=True)
-
-        if status != 0:
-            print(f"Aster {machine}: FAILED (SSH exit code {status})", flush=True)
-            print(output if output.strip() else "No output received from SSH.", flush=True)
-
-    print("\n========== FINAL REPLICA STATUS ==========")
+    print("\n========== REPLICA STATUS ==========")
     for machine, process in sessions.items():
         print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")
 
@@ -164,6 +147,6 @@ def print_machines(env:str):
         print(f"[ASTER MACHINES USED]")
         for i, aster_id in enumerate(aster_machines_used):
             LAN_TYPE = 'LAN_1' if env=='aster_LAN_1' else 'LAN_2'
-            LAN_IP_VAL = '53' if env=='aster_LAN_2' else '54'
+            LAN_IP_VAL = '53' if env=='aster_LAN_1' else '54'
             IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'
             print(f'[{i+1}] ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')

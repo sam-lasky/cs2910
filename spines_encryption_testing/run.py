@@ -58,7 +58,7 @@ for encrypted in (True, False):
 
     time.sleep(5)
 
-    opts = '-P 8 -D 0 -n 100000 -b 1000'
+    opts = '-P 8 -D 0 -n 1000000 -b 1000'
 
     run('docker', 'exec', '-d', 'spines2', 'sh', '-c',
         f'cd {TEST} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1')

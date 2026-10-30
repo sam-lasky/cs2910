@@ -3,13 +3,13 @@ import os
 import subprocess
 import time
 from pathlib import Path
+from sys import path
 
 ROOT = Path(__file__).resolve().parent.parent
 HERE = Path(__file__).resolve().parent
 DAEMON = '/root/cs2910/prime/spines/daemon'
 TEST = '/root/cs2910/prime/spines/testprogs'
 
-from sys import path
 path.insert(0, str(ROOT))
 from common.config import spines_conf
 
@@ -40,7 +40,6 @@ compose('up', '-d', '--force-recreate')
 
 for bandwidth in [100, 250, 500, 750]:
     for trial in range(1, 6):
-        # Alternate which mode runs first.
         modes = (True, False) if trial % 2 else (False, True)
 
         for encrypted in modes:
@@ -51,24 +50,12 @@ for bandwidth in [100, 250, 500, 750]:
                 flush=True
             )
 
-            # Keep authentication enabled; toggle only encryption.
+            # ON: both True. OFF: both False.
             os.chdir(ROOT / 'common')
-            spines_conf({1: '172.20.0.2', 2: '172.20.0.3'}, True)
+            spines_conf({1: '172.20.0.2', 2: '172.20.0.3'}, encrypted)
             os.chdir(ROOT)
 
             config_path = ROOT / 'prime/spines/daemon/spines.conf'
-            config = config_path.read_text()
-            setting = 'IT_LinkEncrypt = True'
-
-            if config.count(setting) != 1:
-                raise RuntimeError('Expected one IT_LinkEncrypt setting')
-
-            config_path.write_text(
-                config.replace(
-                    setting,
-                    f'IT_LinkEncrypt = {"True" if encrypted else "False"}'
-                )
-            )
 
             compose('restart')
 

@@ -107,10 +107,9 @@ def main():
                             # Get the updates per machine
                             updates_distributed = updates//distribution
                             # Start a driver program on all machines being used
-                            for machine_id, (replica_id, ip) in aster_config[distribution].items():
-                                print(machine_id, replica_id, ip)
-                                exit(0)
-
+                            for key in sorted(machines.keys()):
+                                print(key)
+                            exit(0)
 
 if __name__ == '__main__':
     main()

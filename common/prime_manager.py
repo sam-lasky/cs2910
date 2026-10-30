@@ -114,6 +114,7 @@ def start_prime(replica_ip:dict, replica_id:int):
         )
 
     # Loop until all handshakes are completed
+    print('TESSSSSSSSSSST')
     while True:
         time.sleep(1)
         # Checkup on Spines

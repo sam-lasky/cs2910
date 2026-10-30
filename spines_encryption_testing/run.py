@@ -94,3 +94,28 @@ def test_mode(encrypted, count, rate, size, timeout):
     except subprocess.TimeoutExpired:
         print(f'Timed out after {timeout}s. Check docker exec spines1 cat /tmp/spines.log')
         return 'timeout'
+
+def main():
+    parser = argparse.ArgumentParser(description='Compare Spines throughput with encryption off and on')
+    parser.add_argument('--count', type=int, default=100000)
+    parser.add_argument('--rate', type=int, default=100000)
+    parser.add_argument('--size', type=int, default=1000)
+    parser.add_argument('--timeout', type=int, default=180)
+    args = parser.parse_args()
+
+    docker('build', '-f', ROOT / 'docker/docker_files/Dockerfile.base', '-t', 'base-img', ROOT)
+    docker('build', '-f', ROOT / 'docker/docker_files/Dockerfile.spines', '-t', 'spines-img', ROOT)
+    compose('up', '-d', '--force-recreate')
+    results = []
+    for encrypted in (False, True):
+        throughput = test_mode(encrypted, args.count, args.rate, args.size, args.timeout)
+        results.append({'encryption': 'on' if encrypted else 'off', 'throughput_mbps': throughput})
+    with (HERE / 'results.csv').open('w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['encryption', 'throughput_mbps'])
+        writer.writeheader()
+        writer.writerows(results)
+    print('\nResults saved to', HERE / 'results.csv', flush=True)
+
+
+if __name__ == '__main__':
+    main()

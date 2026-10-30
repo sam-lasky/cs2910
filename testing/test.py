@@ -121,12 +121,12 @@ def main():
     
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
-                        # Skip configurations already completed.
+                                                # Skip all 21 completed configurations.
                         if (
                             num_replicas == 6
                             and encrypted == 0
                             and max_po == 20
-                            and distribution in (6, 3)
+                            and distribution in (1, 3, 6)
                             and emulated_client in (
                                 20, 100, 500, 1000, 2500, 5000, 25000
                             )

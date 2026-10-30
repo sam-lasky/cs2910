@@ -6,42 +6,50 @@ configurations = range(6, 21)
 
 
 def gen_keys(num_replicas):
-    daemon_dir = "prime/spines/daemon"
-    script_path = f"{daemon_dir}/gen_keys"
+    keys_dir = f"spines_key_gen_dir/replicas_{num_replicas}/keys"
+    os.makedirs(keys_dir)
 
-    # Update the Bash loop for this replica count.
-    with open(script_path) as file:
-        lines = file.readlines()
-
-    for index, line in enumerate(lines):
-        if line.strip().startswith("for i in {1.."):
-            lines[index] = f"for i in {{1..{num_replicas}}}\n"
-            break
-    else:
-        raise ValueError("Could not find replica loop in Spines gen_keys")
-
-    with open(script_path, "w") as file:
-        file.writelines(lines)
-
-    # Generate Spines keys.
+    # Generate Diffie-Hellman parameters.
     subprocess.run(
-        ["bash", "-e", "./gen_keys"],
-        cwd=daemon_dir,
+        [
+            "openssl", "dhparam",
+            "-outform", "PEM",
+            "-out", f"{keys_dir}/dhparam.pem",
+            "2048",
+        ],
         check=True,
     )
 
-    # Save this set of keys.
-    output_dir = f"spines_key_gen_dir/replicas_{num_replicas}"
-    os.makedirs(output_dir)
-    subprocess.run(
-        ["cp", "-r", f"{daemon_dir}/keys", output_dir],
-        check=True,
-    )
+    # Generate each replica's private and public keys.
+    for i in range(1, num_replicas + 1):
+        subprocess.run(
+            [
+                "openssl", "genrsa",
+                "-out", f"{keys_dir}/private{i}.pem",
+                "1024",
+            ],
+            check=True,
+        )
+
+        subprocess.run(
+            [
+                "openssl", "rsa",
+                "-in", f"{keys_dir}/private{i}.pem",
+                "-out", f"{keys_dir}/public{i}.pem",
+                "-outform", "PEM",
+                "-pubout",
+            ],
+            check=True,
+        )
 
 
 # Usage: python3 spines_key_gen.py <L|A> <ASTER_MACHINE_NUMBER>
-# Assumes LAN 1.
 def main():
+    if len(sys.argv) != 3 or sys.argv[1] not in ("L", "A"):
+        sys.exit(
+            "Usage: python3 spines_key_gen.py <L|A> <ASTER_MACHINE_NUMBER>"
+        )
+
     mode = sys.argv[1]
     machine_number = str(int(sys.argv[2]))
 
@@ -64,43 +72,8 @@ def main():
             check=True,
         )
 
-    # Aster execution.
+    # Aster execution. Requires OpenSSL; no Spines build needed.
     elif mode == "A":
-        spines_path = "prime/spines"
-
-        for path in [
-            "configure",
-            "stdutil/configure",
-            "libspread-util/configure",
-        ]:
-            subprocess.run(
-                ["chmod", "+x", path],
-                cwd=spines_path,
-                check=True,
-            )
-
-        for path in [
-            "stdutil/buildtools",
-            "libspread-util/buildtools",
-        ]:
-            subprocess.run(
-                ["chmod", "-R", "+x", path],
-                cwd=spines_path,
-                check=True,
-            )
-
-        # Build Spines once before generating the key sets.
-        for command in [
-            ["./configure"],
-            ["make", "-C", "daemon", "parser"],
-            ["make"],
-        ]:
-            subprocess.run(
-                command,
-                cwd=spines_path,
-                check=True,
-            )
-
         for num_replicas in configurations:
             gen_keys(num_replicas)
 

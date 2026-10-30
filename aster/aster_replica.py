@@ -109,8 +109,8 @@ def startup():
 # fills in replica_ip dict where replica_ip[replica id]= replica ip
 def build_replica_ip_map():
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for aster_id in aster_machines_used:
-        replica_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
+    for i,aster_id in enumerate(aster_machines_used,start=1):
+        replica_ip[aster_id]=f'192.168.{LAN}.{i+9}'
 
 
 # Args: aster_replica.py <replica_id> <machine_id> <aster_machines_used> <env> <max_po> <encrypt>
@@ -131,6 +131,8 @@ def main():
     for rid, mid in enumerate(aster_machines_used, start=1):
         print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
+    # Build the replica id <--> replica ip mapping
+    build_replica_ip_map()
     # Sets up Spines
     setup_spines(replica_ip,encrypt)
     exit(0)

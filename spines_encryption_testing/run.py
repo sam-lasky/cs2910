@@ -19,86 +19,140 @@ def run(*args):
 
 
 def compose(*args):
-    run('docker', 'compose', '-p', 'spines-encryption',
-        '-f', HERE / 'docker-compose_base.yml', *args)
+    run(
+        'docker', 'compose', '-p', 'spines-encryption',
+        '-f', HERE / 'docker-compose_base.yml', *args
+    )
 
 
-run('docker', 'build', '-f', ROOT / 'docker/docker_files/Dockerfile.base',
-    '-t', 'base-img', ROOT)
-run('docker', 'build', '-f', ROOT / 'docker/docker_files/Dockerfile.spines',
-    '-t', 'spines-img', ROOT)
+run(
+    'docker', 'build',
+    '-f', HERE / 'docker_files/Dockerfile.base',
+    '-t', 'base-img', ROOT
+)
+run(
+    'docker', 'build',
+    '-f', HERE / 'docker_files/Dockerfile.spines',
+    '-t', 'spines-img', ROOT
+)
 
 compose('up', '-d', '--force-recreate')
 
-bandwidths = [100, 250, 500, 750]
+for bandwidth in [100, 250, 500, 750]:
+    for trial in range(1, 6):
+        # Alternate which mode runs first.
+        modes = (True, False) if trial % 2 else (False, True)
 
-for encrypted in (True, False):
-    mode = 'on' if encrypted else 'off'
-    print(f'\n=== Encryption {mode.upper()} ===', flush=True)
-
-    # Generate the appropriate Spines configuration.
-    os.chdir(ROOT / 'common')
-    spines_conf({1: '172.20.0.2', 2: '172.20.0.3'}, encrypted)
-    os.chdir(ROOT)
-
-    for bandwidth in bandwidths:
-        for trial in range(1, 6):
+        for encrypted in modes:
+            mode = 'on' if encrypted else 'off'
             print(
-                f'\n=== Encryption {mode.upper()} | '
-                f'{bandwidth} Mbps | Trial {trial}/5 ===',
+                f'\nEncryption {mode.upper()} | '
+                f'{bandwidth} Mbps | Trial {trial}/5',
                 flush=True
+            )
+
+            # Keep authentication enabled; toggle only encryption.
+            os.chdir(ROOT / 'common')
+            spines_conf({1: '172.20.0.2', 2: '172.20.0.3'}, True)
+            os.chdir(ROOT)
+
+            config_path = ROOT / 'prime/spines/daemon/spines.conf'
+            config = config_path.read_text()
+            setting = 'IT_LinkEncrypt = True'
+
+            if config.count(setting) != 1:
+                raise RuntimeError('Expected one IT_LinkEncrypt setting')
+
+            config_path.write_text(
+                config.replace(
+                    setting,
+                    f'IT_LinkEncrypt = {"True" if encrypted else "False"}'
+                )
             )
 
             compose('restart')
 
-            # Enforce the selected bandwidth on both containers.
             for name in ('spines1', 'spines2'):
-                run('docker', 'exec', name, 'tc', 'qdisc', 'replace',
+                run(
+                    'docker', 'exec', name,
+                    'tc', 'qdisc', 'replace',
                     'dev', 'eth0', 'root', 'tbf',
                     'rate', f'{bandwidth}mbit',
-                    'burst', '32kbit', 'latency', '400ms')
+                    'burst', '32kbit', 'latency', '400ms'
+                )
 
-            # Copy configuration and start Spines daemons.
-            for name, ip in [('spines1', '172.20.0.2'),
-                             ('spines2', '172.20.0.3')]:
-                run('docker', 'cp',
-                    ROOT / 'prime/spines/daemon/spines.conf',
-                    f'{name}:{DAEMON}/spines.conf')
-
-                run('docker', 'exec', name, 'rm', '-f',
-                    '/tmp/spines8100', '/tmp/spines8100data')
-
-                run('docker', 'exec', '-d', '-w', DAEMON, name, 'sh', '-c',
-                    f'./spines -I {ip} > /tmp/spines.log 2>&1')
+            for name, ip in [
+                ('spines1', '172.20.0.2'),
+                ('spines2', '172.20.0.3')
+            ]:
+                run(
+                    'docker', 'cp', config_path,
+                    f'{name}:{DAEMON}/spines.conf'
+                )
+                run(
+                    'docker', 'exec', name, 'rm', '-f',
+                    '/tmp/spines8100', '/tmp/spines8100data'
+                )
+                run(
+                    'docker', 'exec', '-d', '-w', DAEMON,
+                    name, 'sh', '-c',
+                    f'./spines -I {ip} > /tmp/spines.log 2>&1'
+                )
 
             time.sleep(5)
 
             opts = '-P 8 -D 0 -n 1000000 -b 1000'
 
-            # Start receiver.
-            run('docker', 'exec', '-d', 'spines2', 'sh', '-c',
+            run(
+                'docker', 'exec', 'spines2',
+                'rm', '-f', '/tmp/receiver.log'
+            )
+            run(
+                'docker', 'exec', '-d', 'spines2', 'sh', '-c',
                 f'cd {TEST} && ./sp_bflooder -v {opts} '
-                f'> /tmp/receiver.log 2>&1')
+                '> /tmp/receiver.log 2>&1'
+            )
 
             time.sleep(2)
 
-            # Start sender at the selected bandwidth.
-            run('docker', 'exec', 'spines1', 'sh', '-c',
+            run(
+                'docker', 'exec', 'spines1', 'sh', '-c',
                 f'cd {TEST} && ./sp_bflooder -s {opts} '
-                f'-a 172.20.0.3 -R {bandwidth * 1000}')
+                f'-a 172.20.0.3 -R {bandwidth * 1000}'
+            )
 
-            time.sleep(3)
+            filename = (
+                HERE / f'receiver-{mode}-{bandwidth}mbps-trial{trial}.log'
+            )
+            deadline = time.monotonic() + 60
 
-            # Save receiver results.
-            filename = HERE / f'receiver-{mode}-{bandwidth}mbps-trial{trial}.log'
-
-            with open(filename, 'w') as f:
-                subprocess.run(
-                    ['docker', 'exec', 'spines2', 'cat', '/tmp/receiver.log'],
-                    stdout=f,
+            while True:
+                result = subprocess.run(
+                    [
+                        'docker', 'exec', 'spines2',
+                        'cat', '/tmp/receiver.log'
+                    ],
+                    capture_output=True,
+                    text=True,
                     check=True
                 )
+                log = result.stdout
 
-            print(f'Saved {filename.name}', flush=True)
+                if (
+                    '- Num Pkts Received:' in log
+                    and '- Throughput:' in log
+                ):
+                    filename.write_text(log)
+                    print(f'Saved {filename.name}', flush=True)
+                    break
 
-print('\nDone. Check the 40 receiver log files.')
+                if time.monotonic() >= deadline:
+                    partial = filename.with_suffix('.incomplete.log')
+                    partial.write_text(log)
+                    raise RuntimeError(
+                        f'Receiver did not finish: {partial.name}'
+                    )
+
+                time.sleep(1)
+
+print('\nDone. Saved 40 receiver logs.')

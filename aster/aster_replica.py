@@ -5,8 +5,7 @@ import time
 import os
 # local 
 sys.path.insert(0, "..")
-from configure.config import update_files, update_def_h
-
+from configure.config import spines_address_config,spines_conf
 
 # Globals
 replica_id = None
@@ -15,11 +14,18 @@ aster_machines_used = []
 env = None
 max_po = None
 encrypt = None
+# k,v = replica id (int), replica ip (str)
+replica_ip={}
 
 # Set up spines
 def setup_spines():
+
+    # Updates prime/bin/spines_address.config
+    spines_address_config(replica_ip)
+    # Update prime/spines/daemon/spines.conf
+    spines_conf(replica_ip, encrypt)
+
     spines_path = "../prime/spines"
-    print(os.getcwd())
     return 
 
     try:
@@ -153,6 +159,13 @@ def startup():
 
     print(f"Replica {replica_id} on Aster {aster_id} started successfully!", flush=True)
 
+# fills in replica_ip dict where replica_ip[replica id]= replica ip
+def build_replica_ip_map():
+    LAN = '53' if env == 'aster_LAN_1' else '54'
+    for aster_id in aster_machines_used:
+        replica_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
+
+    
 # Args: aster_replica.py <replica_id> <machine_id> <aster_machines_used> <env> <max_po> <encrypt>
 def main():
     # <--- Set up global variables --->

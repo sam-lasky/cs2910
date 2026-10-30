@@ -13,10 +13,53 @@ import os
 from pathlib import Path
 from common.env_vars import get_env
 
-# Updates prime/bin/spines_address.config
-def spines_address_config():
-    pass
+# Update prime/bin/spines_address.config
+def spines_address_config(replica_ip_mapping):
+    # writes <replica id> <replica ip>
+    with open('../prime/bin/spines_address.config','w') as f:
+        for key, value in replica_ip_mapping.items():
+            f.write(f"{key} {value}\n")
 
+# Update prime/spines/daemon/spines.conf
+def spines_conf(replica_ip_mapping:dict,encrypted):
+    new_file=''
+    with open('../prime/spines/daemon/spines_template.conf', 'r') as f:
+        for line in f.readlines():
+            # ENCRYPTION SETTING 1
+            if line.startswith('IT_LinkCrypto'):
+                if encrypted:
+                    line='IT_LinkCrypto = True\n'
+                else:
+                    line='IT_LinkCrypto = False\n'
+            # ENCRYPTION SETTING 2
+            elif line.startswith('IT_LinkEncrypt'):
+                if encrypted:
+                    line = 'IT_LinkEncrypt = True\n'
+                else:
+                    line = 'IT_LinkEncrypt = False\n'
+            # Hosts{}    
+            elif line.startswith('# List of hosts in the network'):
+                hosts = 'Hosts{\n' + ''.join(f'{k} {v}\n' for k, v in replica_ip_mapping.items()) + '}\n'
+                line = line + hosts
+            # Edges{}
+            elif line.startswith('# Each line is in form:'):
+                edges = 'Edges{\n'
+                sorted_keys = sorted(replica_ip_mapping.keys())
+                for i in range(len(sorted_keys)):
+                    for j in range(i+1, len(sorted_keys)):
+                        edges+=f'{sorted_keys[i]} {sorted_keys[j]} {1}\n'
+                edges +='}\n'
+                line += edges
+            # add line to new file
+            new_file+=line
+
+    # Write the updated file to spines.conf
+    with open('../prime/spines/daemon/spines.conf', 'w') as f:
+        f.write(new_file)
+
+# Update prime/src/def.h
+def def_h(NUM_F,NUM_K, MAX_PO):
+    pass
 
 
 # Inputs the list of candidate replicas (replica_list) which consists

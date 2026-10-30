@@ -22,9 +22,9 @@ replica_ip={}
 def startup():
     try:
         # start spines: ./spines -I <ip address>
-        spines = subprocess.run(
-            [f"./spines", "-I",{replica_ip[machine_id]}],
-            cwd='../prime/spines/daemon'
+        spines = subprocess.Popen(
+            ["./spines", "-I", replica_ip[machine_id]],
+            cwd="../prime/spines/daemon",
         )
 
 

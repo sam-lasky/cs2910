@@ -6,18 +6,54 @@ aster_machines_used = []
 
 # Kills any leftover prime, spines or aster_replica processes contained in 
 # the machine list
+# def kill_all():
+#     print('\n[KILLING EXISTING PROCESSES]')
+#     for m in aster_machines_used:
+#         print(f"Cleaning Aster{m}...", flush=True)
+#         subprocess.run(
+#             [
+#                 "ssh",
+#                 f"sjl79@aster{m}.cs.pitt.edu",
+#                 "pkill -x prime; pkill -x spines; pkill -f '[a]ster_replica.py'"
+#             ],
+#             check=False
+#         )
 def kill_all():
-    print('\n[KILLING EXISTING PROCESSES]')
+    print("\n[KILLING EXISTING PROCESSES]", flush=True)
+
     for m in aster_machines_used:
         print(f"Cleaning Aster{m}...", flush=True)
-        subprocess.run(
-            [
-                "ssh",
-                f"sjl79@aster{m}.cs.pitt.edu",
-                "pkill -x prime; pkill -x spines; pkill -f '[a]ster_replica.py'"
-            ],
-            check=False
-        )
+
+        try:
+            result = subprocess.run(
+                [
+                    "ssh",
+                    "-n",
+                    "-T",
+                    "-o", "BatchMode=yes",
+                    "-o", "ConnectTimeout=10",
+                    "-o", "ConnectionAttempts=1",
+                    f"sjl79@aster{m}.cs.pitt.edu",
+                    "pkill -x driver; "
+                    "pkill -x prime; "
+                    "pkill -x spines; "
+                    "pkill -f '[a]ster_replica.py'; "
+                    "echo CLEANED"
+                ],
+                check=False,
+                timeout=30
+            )
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(
+                f"Cleanup SSH timed out on Aster{m}. "
+                "Cleanup status is unknown; stopping startup."
+            ) from None
+
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Cleanup SSH failed on Aster{m}: "
+                f"exit code {result.returncode}"
+            )
 
 
 def connection_test():

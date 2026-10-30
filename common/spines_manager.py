@@ -1,7 +1,7 @@
 import subprocess
 import os
 # local imports
-from config import spines_address_config, spines_conf
+from common.config import spines_address_config, spines_conf
 
 # Set up spines
 def setup_spines(replica_ip:dict, encrypt:int):

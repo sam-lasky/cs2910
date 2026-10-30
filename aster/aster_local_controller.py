@@ -34,7 +34,7 @@ def connection_test():
             if 'Connection timed out' in p.stderr:
                 message+='Are you connected to GlobalProtect?\n'
             print(message)
-            exit(0)
+            exit(1)
         print(message)
         
 

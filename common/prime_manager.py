@@ -8,7 +8,7 @@ from common.config import address_conf, def_h
 # Maps the total number of replicas (int) to (NUM_F, NUM_K).
 configurations = {
     6: (1, 1),
-    7: (1, 2),
+    7: (2, 0),
     8: (1, 2),
     9: (2, 1),
     10: (1, 3),

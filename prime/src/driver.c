@@ -273,15 +273,16 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   {
     highest_seq_num=response_specific->seq_num;
   }
-  if(response_specific->seq_num % PRINT_INTERVAL == 0)
-  {
+  
+  // if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  // {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
       printf("Highest SeqNo Processed=%u Total Updates Processed=%d Execution Time=%f sec\n",
             highest_seq_num,response_specific->seq_num, elapsed_sec);
       fflush(stdout);
-  }
+  // }
 
     if (response_specific->seq_num <= 5 || response_specific->seq_num % 100 == 0) {
       printf("[DEBUG RESPONSE] seq=%u sent=%u outstanding_before=%u target=%u\n",

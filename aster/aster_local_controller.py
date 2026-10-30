@@ -64,9 +64,10 @@ def run(args_dict:dict):
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas(args_dict)
 
-    print("\n==========REPLICA STATUS ==========")
+    print("\n========== REPLICA STATUS ==========")
     for machine, process in sessions.items():
-        print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")
+        status = process.wait()
+        print(f"Aster {machine}: {'SUCCESS' if status == 0 else 'FAILED'}")
 
 # For all aster machines in aster_machines_used:
 #   (1) Connect to the machine

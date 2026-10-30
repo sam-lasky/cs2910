@@ -3,6 +3,7 @@ import sys, subprocess, time, os
 import csv
 from pathlib import Path
 from datetime import datetime
+import time
 
 # aster_config = {
 #     num_replicas: {
@@ -64,6 +65,10 @@ aster_config = {
 
 
 def main():
+
+    while True:
+        time.sleep(50)
+
     # Total number of trials each test configuration runs 
     num_trials = 5
     # MAX_PO_IN_FLIGHT values tested (prime/src/def.h)

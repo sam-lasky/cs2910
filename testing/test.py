@@ -5,13 +5,13 @@ from pathlib import Path
 from datetime import datetime
 import time
 
-# aster_config = {
-#     num_replicas: {
-#         machine_id: (replica_id, ip_address)
-#     }
-# }
+# Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
+# Use the machine number for SSH (e.g., aster20).
+# Use replica_id for BOTH driver flags -i and -s, and ip_address for -l.
+# Example: with 6 replicas, Aster 20 is replica 6 → SSH to aster20, pass -i 6 -s 6.
 aster_config = {
     6: {
+
         15: (1, "192.168.53.24"),
         16: (2, "192.168.53.25"),
         17: (3, "192.168.53.26"),
@@ -117,13 +117,12 @@ def main():
                         "-p", str(max_po),
                         "-r", str(num_replicas) ]
                         , check=True)
-                        
-                    while True:
-                        time.sleep(50)
+    
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
                         # Conduct num_trials of the current config
                         for trial in range(1, num_trials + 1):
+                            # aster_config structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
                             machines = aster_config[num_replicas]
                             updates_distributed = updates // distribution
                             print(
@@ -139,12 +138,11 @@ def main():
                             )
                             while True:
                                 processes = []
-
                                 for key in sorted(sorted(machines.keys(), reverse=True)[:distribution]):
                                     driver_process = subprocess.Popen(
                                         ["ssh", "-T", f"sjl79@aster{key}.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
-                                        f"./driver -l {machines[key][1]} -i {key} -s {machines[key][0]} "
+                                        f"./driver -l {machines[key][1]} -i {machines[key][0]} -s {machines[key][0]} "
                                         f"-r {num_replicas} -c {updates_distributed} -n {emulated_client}"],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,

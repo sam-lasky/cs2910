@@ -149,18 +149,24 @@ def main():
                                 ):
                                     print(f'starting driver on aster {key}')
                                     driver_process = subprocess.Popen(
-                                        [
-                                            "ssh",
-                                            "-T",
-                                            f"sjl79@aster{key}.cs.pitt.edu",
-                                            f"cd ~/cs2910/prime/bin && "
-                                            f"./driver -l {machines[key][1]} "
-                                            f"-i {machines[key][0]} "
-                                            f"-s {machines[key][0]} "
-                                            f"-r {num_replicas} "
-                                            f"-c {updates_distributed} "
-                                            f"-n {emulated_client}"
-                                        ],
+                                    [
+                                        "ssh",
+                                        "-n",
+                                        "-T",
+                                        "-o", "BatchMode=yes",
+                                        "-o", "ServerAliveInterval=15",
+                                        "-o", "ServerAliveCountMax=2",
+                                        "-vv",
+                                        "-E", f"ssh_aster{key}.log",
+                                        f"sjl79@aster{key}.cs.pitt.edu",
+                                        f"cd ~/cs2910/prime/bin && "
+                                        f"./driver -l {machines[key][1]} "
+                                        f"-i {machines[key][0]} "
+                                        f"-s {machines[key][0]} "
+                                        f"-r {num_replicas} "
+                                        f"-c {updates_distributed} "
+                                        f"-n {emulated_client}"
+                                    ],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
                                         text=True

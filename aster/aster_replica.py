@@ -25,6 +25,9 @@ def setup_spines():
     # Update prime/spines/daemon/spines.conf
     spines_conf(replica_ip, encrypt)
 
+    # Check 
+
+
     spines_path = "../prime/spines"
     return 
 

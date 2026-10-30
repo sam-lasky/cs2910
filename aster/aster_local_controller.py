@@ -20,6 +20,12 @@ def kill_all():
         )
 
 
+def connection_test():
+    for machine in sorted(aster_machines_used):
+        p=subprocess.run(['ssh',f'sjl79@aster{machine}.cs.pitt.edu'],capture_output=True,text=True)
+        print(p.stdout)
+        exit(0)
+
 def run(args_dict:dict):
 
     # List of aster machine IDs to skip
@@ -33,8 +39,12 @@ def run(args_dict:dict):
     # Generate Machine list 
     generate_machine_list(args_dict['num_replicas'], skip)
 
+    # Prints all machines being used 
     print(f"[ASTER MACHINES USED]: {sorted(aster_machines_used)}")
-    
+
+    # Attempt to connect to all the machines being used. Terminates if all connections do not succeed
+    connection_test()
+
     # Kill any old prime/spines/aster_replica.py processes on all aster machines
     # included in aster_machines_used
     kill_all()

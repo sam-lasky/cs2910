@@ -5,7 +5,7 @@ import time
 import os
 # local 
 sys.path.insert(0, "..")
-from configure.config import spines_address_config,spines_conf
+from common.spines_manager import *
 
 # Globals
 replica_id = None
@@ -16,62 +16,6 @@ max_po = None
 encrypt = None
 # k,v = replica id (int), replica ip (str)
 replica_ip={}
-
-# Set up spines
-def setup_spines():
-
-    # Updates prime/bin/spines_address.config
-    spines_address_config(replica_ip)
-    # Update prime/spines/daemon/spines.conf
-    spines_conf(replica_ip, encrypt)
-
-    # Check 
-
-
-    spines_path = "../prime/spines"
-    return 
-
-    try:
-        subprocess.run(["chmod", "+x", "configure"], cwd=spines_path, check=True)
-        subprocess.run(["chmod", "+x", "stdutil/configure"], cwd=spines_path, check=True)
-        subprocess.run(["chmod", "-R", "+x", "stdutil/buildtools"], cwd=spines_path, check=True)
-        subprocess.run(["chmod", "+x", "libspread-util/configure"], cwd=spines_path, check=True)
-        subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
-
-        subprocess.run(
-            ["./configure"],
-            cwd=spines_path,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        subprocess.run(
-            ["make", "-C", "daemon", "parser"],
-            cwd=spines_path,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        subprocess.run(
-            ["make"],
-            cwd=spines_path,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        # Copy Spines keys
-        subprocess.run(
-            ["cp", "-a", "../saved_keys/spines_keys/.", spines_path + "/daemon/keys/"],
-            check=True
-        )
-
-    except Exception as e:
-        print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
-
 
 # set up prime
 def setup_prime():
@@ -168,7 +112,7 @@ def build_replica_ip_map():
     for aster_id in aster_machines_used:
         replica_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
 
-    
+
 # Args: aster_replica.py <replica_id> <machine_id> <aster_machines_used> <env> <max_po> <encrypt>
 def main():
     # <--- Set up global variables --->
@@ -187,8 +131,8 @@ def main():
     for rid, mid in enumerate(aster_machines_used, start=1):
         print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
-    # Sets up spines, only remakes it 
-    setup_spines()
+    # Sets up Spines
+    
     exit(0)
     setup_prime()
 

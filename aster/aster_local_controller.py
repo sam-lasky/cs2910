@@ -64,7 +64,7 @@ def run(args_dict:dict):
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas(args_dict)
 
-    print("\n========== REPLICA STATUS ==========")
+    print("\n==========REPLICA STATUS ==========")
     for machine, process in sessions.items():
         print(f"Aster {machine}: {'SUCCESS' if process.returncode == 0 else 'FAILED'}")
 
@@ -98,8 +98,10 @@ def start_replicas(args_dict):
             '{ if [ -d cs2910/.git ]; then '
             'git -C cs2910 pull; '
             'else git clone https://github.com/sam444555/cs2910.git; '
-            'fi; } > /dev/null 2>&1 && '
+            'fi; } '
         )
+
+# > /dev/null 2>&1 && 
 
         # CD into aster dir and startup the replica startup script
         replica_startup_command = (

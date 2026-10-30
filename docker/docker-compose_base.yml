@@ -16,6 +16,18 @@ networks:
 # TODO: add more serves to evaluate local scalability
 services:
 
+    prime1:
+    image: replica-img
+    container_name: prime1
+    cap_add:
+      - NET_ADMIN
+    networks:
+      prime-net:
+        ipv4_address: 172.20.0.2
+    command: python3 /root/cs2910/docker/startup.py 1
+
+
+
   # Only instance of driver.c is run from replica prime1. Once a baseline throughput is established,
   # running multiple instances of this program would be an interesting follow up stress test evaluation. 
   # prime1:

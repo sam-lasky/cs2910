@@ -38,7 +38,7 @@ run(
 
 compose('up', '-d', '--force-recreate')
 
-for bandwidth in [100, 250, 500, 750,1000]:
+for bandwidth in [750]:
     for encrypted in [True, False]:
         for trial in range(1, 6):
             mode = 'on' if encrypted else 'off'
@@ -48,9 +48,11 @@ for bandwidth in [100, 250, 500, 750,1000]:
                 flush=True
             )
 
-            # ON: both True. OFF: both False.
             os.chdir(ROOT / 'common')
-            spines_conf({1: '172.20.0.2', 2: '172.20.0.3'}, encrypted)
+            spines_conf(
+                {1: '172.20.0.2', 2: '172.20.0.3'},
+                encrypted
+            )
             os.chdir(ROOT)
 
             config_path = ROOT / 'prime/spines/daemon/spines.conf'
@@ -134,10 +136,12 @@ for bandwidth in [100, 250, 500, 750,1000]:
                 if time.monotonic() >= deadline:
                     partial = filename.with_suffix('.incomplete.log')
                     partial.write_text(log)
-                    raise RuntimeError(
-                        f'Receiver did not finish: {partial.name}'
+                    print(
+                        f'Timed out; saved {partial.name}. Continuing.',
+                        flush=True
                     )
+                    break
 
                 time.sleep(1)
 
-print('\nDone. Saved 50 receiver logs.')
+print('\nDone. Ran 10 trials at 750 Mbps.')

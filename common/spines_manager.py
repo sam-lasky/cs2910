@@ -77,7 +77,7 @@ def build_spines(spines_path):
 # Start Spines
 def start_spines(replica_ip:dict, replica_id:int):
 
-    with open('status.log', 'w') as spines_status_log:
+    with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log
         spines = subprocess.Popen(
             ["./spines", "-I", replica_ip[replica_id]],
@@ -100,7 +100,7 @@ def start_spines(replica_ip:dict, replica_id:int):
             raise RuntimeError(f'Spines exited during startup')
         else:
             # Check log file for handshake msgs
-            with open('status.log', 'r') as spines_status_log:
+            with open('spines_status.log', 'r') as spines_status_log:
                 for line in spines_status_log.readlines():
                     if line.startswith('Completed handshake with'):
                         handshake_replica_ids-={int(line.split()[3])}

@@ -104,13 +104,13 @@ def build_prime(prime_path):
 # Start Prime
 def start_prime(replica_ip:dict, replica_id:int):
 
-    with open('status.log', 'w') as status_log:
-        # Start the Prime Process, write stdout/err to status_log
+    with open('status.log', 'w') as prime_status_log:
+        # Start the Prime Process, write stdout/err to prime_status_log
         prime = subprocess.Popen(
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
-            stdout=status_log,
-            stderr=status_log
+            stdout=prime_status_log,
+            stderr=prime_status_log
         )
 
     # Loop until all handshakes are completed
@@ -125,8 +125,8 @@ def start_prime(replica_ip:dict, replica_id:int):
             raise RuntimeError(f'Prime exited during startup')
         else:
             # Check log file for handshake msgs
-            with open('status.log', 'r') as status_log:
-                for line in status_log.readlines():
+            with open('status.log', 'r') as prime_status_log:
+                for line in prime_status_log.readlines():
                     if line.startswith('Called PR_Resume_Normal_operations'):
                         time.sleep(2)
                         return prime

@@ -20,21 +20,16 @@ replica_ip={}
 
 # start spines and prime
 def startup():
-    aster_id = int(os.environ["ASTER_MACHINE_ID"])
-    replica_id = int(os.environ["REPLICA_ID"])
-
-    LAN = '53' if os.environ['ENVIRONMENT'] == 'aster_LAN_1' else '54'
-    base_ip = f'192.168.{LAN}.{aster_id+9}'
-
     try:
         # start spines: ./spines -I <ip address>
-        spines = subprocess.Popen(
-            ["./spines", "-I", base_ip],
-            cwd='../prime/spines/daemon',
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+        spines = subprocess.run(
+            [f"./spines", "-I",{replica_ip[machine_id]}],
+            cwd='../prime/spines/daemon'
         )
+
+
         time.sleep(10)
+        exit(1)
 
         # Verify Spines is still running
         if spines.poll() is not None:
@@ -96,10 +91,6 @@ def main():
     
     # Set up Prime
     setup_prime(replica_ip,num_replicas=len(replica_ip.keys()),max_po=max_po) 
-
-    print('hey now!')
-
-    exit(0)
 
     startup()
 

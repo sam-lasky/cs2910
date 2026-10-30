@@ -301,13 +301,13 @@ def generate_command(key, machines, num_replicas, updates_distributed, emulated_
         "-n",
         "-T",
         "-o", "BatchMode=yes",
+        "-o", "ConnectTimeout=10",
+        "-o", "ConnectionAttempts=1",
         "-o", "ServerAliveInterval=15",
         "-o", "ServerAliveCountMax=2",
-        "-vv",
-        "-E", f"ssh_aster{key}.log",
         f"sjl79@aster{key}.cs.pitt.edu",
         f"cd ~/cs2910/prime/bin && "
-        f"./driver -l {machines[key][1]} "
+        f"exec ./driver -l {machines[key][1]} "
         f"-i {machines[key][0]} "
         f"-s {machines[key][0]} "
         f"-r {num_replicas} "

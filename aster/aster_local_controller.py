@@ -64,10 +64,10 @@ def run(args_dict:dict):
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas(args_dict)
 
-    print("\n========== REPLICA STATUS ==========")
+    print("\n[REPLICA STATUS]")
     for machine, process in sessions.items():
         status = process.wait()
-        print(f"Aster {machine}: {'SUCCESS' if status == 0 else 'FAILED'}")
+        print(f"Aster {machine}: {'Spines & Prime Successfully Started' if status == 0 else 'FAILED'}")
 
 # For all aster machines in aster_machines_used:
 #   (1) Connect to the machine
@@ -99,10 +99,9 @@ def start_replicas(args_dict):
             '{ if [ -d cs2910/.git ]; then '
             'git -C cs2910 pull; '
             'else git clone https://github.com/sam444555/cs2910.git; '
-            'fi; } && '
+            'fi; } > /dev/null 2>&1 && '
         )
 
-# > /dev/null 2>&1 && 
 
         # CD into aster dir and startup the replica startup script
         replica_startup_command = (
@@ -116,15 +115,6 @@ def start_replicas(args_dict):
                 stdin=subprocess.DEVNULL,
                 text=True
             )
-
-
-            #    sessions[aster_machine_id] = subprocess.Popen(
-            #             ['ssh', '-T', f'sjl79@aster{aster_machine_id}.cs.pitt.edu', git_command+replica_startup_command],
-            #             stdin=subprocess.DEVNULL,
-            #             stdout=subprocess.PIPE,
-            #             stderr=subprocess.STDOUT,
-            #             text=True
-            #         )
         id += 1
 
     return sessions

@@ -36,11 +36,11 @@ def main():
     max_po = int(sys.argv[5])
     encrypt = int(sys.argv[6])
 
-    # Print config for controller
-    print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
-    print("-" * 54)
-    for rid, mid in enumerate(aster_machines_used, start=1):
-        print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
+    # # Print config for controller
+    # print(f"\n{'ASTER':<8} {'REPLICA':<10} {'ENVIRONMENT':<14} {'MAX_PO':<10} {'ENCRYPTED':<12}")
+    # print("-" * 54)
+    # for rid, mid in enumerate(aster_machines_used, start=1):
+    #     print(f"{mid:<8} {rid:<10} {env:<14} {max_po:<10} {encrypt:<12}")
 
     # Build the replica id <--> replica ip mapping
     build_replica_ip_map()

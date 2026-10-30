@@ -181,7 +181,6 @@ void clean_exit(int signum)
 int main(int argc, char** argv) 
 {
 
-  puts("This is a test!!!!!!!!!!!!!!!!!!!!!!!!!");
   /* char buf[128]; */
 
 
@@ -230,6 +229,10 @@ int main(int argc, char** argv)
   signal(SIGTTIN, clean_exit);
   signal(SIGPIPE, clean_exit);
 
+  printf("[DEBUG INIT] client=%u server=%u replicas=%u updates=%u window=%u ipc=%s\n",
+         My_Client_ID, My_Server_ID, VAR.Num_Servers, total_required_updates,
+         num_clients_to_emulate, Conn.sun_path);
+  fflush(stdout);
   Run_Client();
 
   Alarm(PRINT, "%d entering event system.\n\n", My_Client_ID);
@@ -270,7 +273,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   {
     highest_seq_num=response_specific->seq_num;
   }
-  if(response_specific->seq_num % PRINT_INTERVAL)
+  if(response_specific->seq_num % PRINT_INTERVAL == 0)
   {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
@@ -280,6 +283,11 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       fflush(stdout);
   }
 
+    if (response_specific->seq_num <= 5 || response_specific->seq_num % 100 == 0) {
+      printf("[DEBUG RESPONSE] seq=%u sent=%u outstanding_before=%u target=%u\n",
+             response_specific->seq_num, curr_seq_num, num_outstanding_updates, total_required_updates);
+      fflush(stdout);
+    }
     num_outstanding_updates--;
 
   
@@ -418,6 +426,13 @@ void Send_Update(int dummy, void *dummyp)
   // tracks the num_outstanding on the first stalled update for rollback purposes
   u_int32_t rollback_outstanding;
 
+  static unsigned long send_calls = 0;
+  send_calls++;
+  if (send_calls <= 5 || send_calls % 1000 == 0) {
+    printf("[DEBUG SEND_CALLBACK] call=%lu sent=%u outstanding=%u fd=%d\n",
+           send_calls, curr_seq_num, num_outstanding_updates, sd[send_to_server]);
+    fflush(stdout);
+  }
   while((num_outstanding_updates < num_clients_to_emulate) && (curr_seq_num<total_required_updates)) 
   {
 
@@ -448,6 +463,12 @@ void Send_Update(int dummy, void *dummyp)
           assume failure (i.e. send is not called). However, pipeline space remains,
           therefore their timers are started as if the updates had been sent
       */
+      if (curr_seq_num <= 5 || ret == -1) {
+        int saved_errno = (ret == -1) ? errno : 0;
+        printf("[DEBUG SEND] seq=%u ret=%d errno=%d (%s) destination=%s\n",
+               curr_seq_num, ret, saved_errno, strerror(saved_errno), Conn.sun_path);
+        fflush(stdout);
+      }
       if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
       {
         // update stall tracker
@@ -496,6 +517,9 @@ void Send_Update(int dummy, void *dummyp)
   */
   if(stall_detected)
   {
+    printf("[DEBUG STALL] rollback seq=%u->%u outstanding=%u->%u\n",
+           curr_seq_num, rollback_seqno, num_outstanding_updates, rollback_outstanding);
+    fflush(stdout);
     num_outstanding_updates = rollback_outstanding;
     curr_seq_num = rollback_seqno;
     // E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, HIGH_PRIORITY); // results in freeze
@@ -796,6 +820,11 @@ int32u Validate_Message( signed_message *mess, int32u num_bytes )
     return 0;
   }
 
+  if(r->seq_num == 0 || r->seq_num >= MAX_ACTIONS) {
+    printf("[DEBUG VALIDATION] invalid seq=%u\n", r->seq_num);
+    fflush(stdout);
+    return 0;
+  }
   if(executed[r->seq_num] != 0) {
     Alarm(PRINT, "Already processed response for seq %d\n", r->seq_num);
     return 0;
@@ -1006,6 +1035,10 @@ void Net_Cli_Recv(channel sk, int dummy, void *dummy_p)
       E_detach_fd(sk, READ_FD);
       CLIENT_Cleanup();
     }
+    if (ret > 0) {
+      printf("[DEBUG RECV] bytes=%d\n", ret);
+      fflush(stdout);
+    }
     received_bytes = ret;
   }
   else {
@@ -1044,6 +1077,8 @@ void Net_Cli_Recv(channel sk, int dummy, void *dummy_p)
   /* Validate the client response */
   if(!Validate_Message((signed_message*)srv_recv_scat.elements[0].buf, 
  	       received_bytes)) {
+    printf("[DEBUG VALIDATION] response rejected, bytes=%d\n", received_bytes);
+    fflush(stdout);
     Alarm(DEBUG,"CLIENT VALIDATION FAILURE\n");
     return;
   } 

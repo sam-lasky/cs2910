@@ -6,6 +6,7 @@ import os
 # local 
 sys.path.insert(0, "..")
 from common.spines_manager import *
+from common.prime_manager import *
 
 # Globals
 replica_id = None
@@ -16,50 +17,6 @@ max_po = None
 encrypt = None
 # k,v = replica id (int), replica ip (str)
 replica_ip={}
-
-# set up prime
-def setup_prime():
-    prime_path = "../prime"
-
-    try:
-        subprocess.run(
-            "chmod +x stdutil/configure && "
-            "chmod -R +x stdutil/buildtools && "
-            "chmod +x libspread-util/configure && "
-            "chmod -R +x libspread-util/buildtools && "
-            "chmod +x OpenTC-1.1/TC-lib-1.0/configure && "
-            "chmod +x OpenTC-1.1/TC-lib-1.0/missing",
-            cwd=prime_path,
-            shell=True,
-            check=True
-        )
-
-        subprocess.run(
-            ["make", "clean"],
-            cwd=prime_path + "/src",
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        subprocess.run(
-            ["make", "-j1"],
-            cwd=prime_path + "/src",
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
-
-        # Copy Prime keys
-        subprocess.run(
-            ["cp", "-a", f'../saved_keys/prime_keys/{os.environ["NUM_REPLICAS"]}_total_reps/.', prime_path + "/bin/keys/"],
-            check=True
-        )
-
-    except Exception as e:
-        print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
-        sys.exit(1)
-
 
 # start spines and prime
 def startup():
@@ -133,10 +90,16 @@ def main():
 
     # Build the replica id <--> replica ip mapping
     build_replica_ip_map()
+    
     # Sets up Spines
     setup_spines(replica_ip,encrypt)
+    
+    # Set up Prime
+    setup_prime(replica_ip,num_replicas=len(replica_ip.keys()),max_po=max_po) 
+
+    print('hey now!')
+
     exit(0)
-    setup_prime()
 
     startup()
 

@@ -30,10 +30,6 @@ def setup_spines(replica_ip:dict, encrypt:int):
         check=True,
     )
 
-    print('GROOVY BABY YEAHHHH!!!!!')
-    exit(0)
- 
-
 
 
 # Builds Spines:

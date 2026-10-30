@@ -92,7 +92,7 @@ def main():
                     # Execute run which runs num_replicas aster machines where each machine
                     # is using the current encryption status and max_po value 
                     subprocess.run([
-                        sys.executable, "run.py",
+                        sys.executable, "../run.py",
                         "-e", "aster_LAN_1",
                         "-x", str(encrypted),
                         "-p", str(max_po),

@@ -23,7 +23,7 @@ def startup():
     try:
         # start spines: ./spines -I <ip address>
         spines = subprocess.Popen(
-            ["./spines", "-I", replica_ip[machine_id]],
+            ["./spines", "-I", replica_ip[replica_id]],
             cwd="../prime/spines/daemon",
         )
 

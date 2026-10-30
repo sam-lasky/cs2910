@@ -55,6 +55,7 @@ for encrypted in (True, False):
     compose('restart')  # Stops daemons and test processes from the previous run.
     for name, ip in (('spines1', IPS[1]), ('spines2', IPS[2])):
         cmd('docker', 'cp', config, f'{name}:{DAEMON}/spines.conf')
+        cmd('docker', 'exec', name, 'rm', '-f', '/tmp/spines8100')
         cmd('docker', 'exec', '-d', '-w', DAEMON, name, 'sh', '-c',
             f'./spines -I {ip} > /tmp/spines.log 2>&1')
     time.sleep(5)
@@ -73,4 +74,3 @@ for encrypted in (True, False):
     print(f'Encryption {label}: receiver reported {rates[-1] if rates else "no throughput sample"} Mbps')
 
 print('\nReceiver logs saved in spines_encryption_testing/.')
-

@@ -90,7 +90,7 @@ def main():
     # MAX_PO_IN_FLIGHT values tested (prime/src/def.h)
     max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
     # Number of Replicas tested (NUM_SERVERS=(3*NUM_F + 2*NUM_K + 1) in prime/src/def.h)
-    total_replicas_used = [6, 8, 10]
+    total_replicas_used = [6, 8]
     # Number of emulated clients (prime/src/driver.c)
     emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
     # Encrypted Status (0=False,1=True)
@@ -122,7 +122,7 @@ def main():
 
                 # Distribution (Number of replicas running drivers, each assigned an equal share of total updates)
                 # for distribution in [num_replicas, num_replicas // 2, 1]:
-                for distribution in [1]:
+                for distribution in [1,6]:
                     # Execute run which runs num_replicas aster machines where each machine
                     # is using the current encryption status and max_po value 
                     subprocess.run([

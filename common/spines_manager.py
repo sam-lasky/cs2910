@@ -24,7 +24,7 @@ def setup_spines(replica_ip:dict, encrypt:int):
     subprocess.run(
         [
             "cp", "-a",
-            f"../saved_keys/spines_keys/replicas_{len(replica_ip.keys())}/keys/.",
+            f"../keys/saved_keys/spines_keys/replicas_{len(replica_ip)}/keys/.",
             spines_path + "/daemon/keys/",
         ],
         check=True,

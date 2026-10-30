@@ -181,6 +181,7 @@ void clean_exit(int signum)
 int main(int argc, char** argv) 
 {
 
+  puts("This is a test!!!!!!!!!!!!!!!!!!!!!!!!!");
   /* char buf[128]; */
 
 

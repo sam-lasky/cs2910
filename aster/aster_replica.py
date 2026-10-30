@@ -62,7 +62,7 @@ def startup():
 def build_replica_ip_map():
     LAN = '53' if env == 'aster_LAN_1' else '54'
     for i,aster_id in enumerate(aster_machines_used,start=1):
-        replica_ip[aster_id]=f'192.168.{LAN}.{i+9}'
+        replica_ip[i]=f'192.168.{LAN}.{aster_id+9}'
 
 
 # Args: aster_replica.py <replica_id> <machine_id> <aster_machines_used> <env> <max_po> <encrypt>

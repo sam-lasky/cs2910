@@ -129,7 +129,7 @@ def main():
                                         ["ssh", "-T", f"sjl79@aster{key}.cs.pitt.edu",
                                         f"cd ~/cs2910/prime/bin && "
                                         f"./driver -l {machines[key][1]} -i {key} -s {machines[key][0]} "
-                                        f"-c {updates_distributed} -n {emulated_client}"],
+                                        f"-r {num_replicas} -c {updates_distributed} -n {emulated_client}"],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
                                         text=True

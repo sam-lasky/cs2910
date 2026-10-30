@@ -573,7 +573,7 @@ void Usage(int argc, char **argv)
   NET.My_Address = -1;
   My_Client_ID   =  0;
   My_Server_ID   =  0;
-  VAR.Num_Servers=6;
+  VAR.Num_Servers=0;
   my_global_configuration_number = 0;
   My_Server_Alive =1; 
   while(--argc > 0) {
@@ -620,6 +620,10 @@ void Usage(int argc, char **argv)
       sscanf(argv[1], "%d", &tmp);
       num_clients_to_emulate = tmp;
       argc--; argv++;
+    }
+    else if ((argc > 1) && (!strncmp(*argv, "-r", 2))) {
+    VAR.Num_Servers = atoi(argv[1]);
+    argc--; argv++;
     }
    else 
    {

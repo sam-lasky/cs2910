@@ -98,6 +98,7 @@ def main():
         NUM_F = config[0]
         NUM_K = config[1]
         num_replicas = config[2]
+        print(f'GENERATING KEYS FOR {num_replicas}')
         gen_keys(NUM_F, NUM_K, num_replicas)
 
 if __name__ == '__main__':

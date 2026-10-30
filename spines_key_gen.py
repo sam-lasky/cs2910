@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-configurations = range(6, 21)
+configurations = range(6, 31)
 
 
 def gen_keys(num_replicas):

@@ -66,8 +66,6 @@ aster_config = {
 
 def main():
 
-    while True:
-        time.sleep(50)
 
     # Total number of trials each test configuration runs 
     num_trials = 5
@@ -119,6 +117,9 @@ def main():
                         "-p", str(max_po),
                         "-r", str(num_replicas) ]
                         , check=True)
+                        
+                    while True:
+                        time.sleep(50)
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
                         # Conduct num_trials of the current config

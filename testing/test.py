@@ -79,7 +79,7 @@ HEADERS = [
 def main():
     num_trials = 1
     max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
-    total_replicas_used = [6, 8]
+    total_replicas_used = [6]
     emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
     encrypted_values = [0]
     updates = 25000
@@ -96,7 +96,7 @@ def main():
                     print("Skipping completed replicas=6, MAX_PO=20", flush=True)
                     continue
 
-                for distribution in [1, 6]:
+                for distribution in [1]:
                     subprocess.run(
                         [
                             sys.executable, "../run.py",

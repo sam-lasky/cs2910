@@ -19,7 +19,7 @@ encrypt = None
 # Set up spines
 def setup_spines():
     spines_path = "../prime/spines"
-    print(os.getcwd)
+    print(os.getcwd())
     return 
 
     try:

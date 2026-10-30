@@ -147,6 +147,7 @@ def main():
                                 for key in sorted(
                                     sorted(machines.keys(), reverse=True)[:distribution]
                                 ):
+                                    print(f'starting driver on aster {key}')
                                     driver_process = subprocess.Popen(
                                         [
                                             "ssh",

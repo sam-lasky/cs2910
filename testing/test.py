@@ -112,6 +112,14 @@ def main():
         for encrypted in [0]:
             # Test different MAX_PO values
             for max_po in max_po_list:
+                
+                
+                 # All 6-replica / MAX_PO=20 configurations are completed.
+                if num_replicas == 6 and encrypted == 0 and max_po == 20:
+                    print("Skipping completed replicas=6, MAX_PO=20", flush=True)
+                    continue
+
+
                 # Distribution (Number of replicas running drivers, each assigned an equal share of total updates)
                 for distribution in [num_replicas, num_replicas // 2, 1]:
                     # Execute run which runs num_replicas aster machines where each machine

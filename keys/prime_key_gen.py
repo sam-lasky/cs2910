@@ -68,11 +68,15 @@ def main():
     # Local execution
     if sys.argv[1]=='L':
         machine_number=sys.argv[2]
-        subprocess.run([
-            'ssh',
-            f'sjl79@aster{machine_number}.cs.pitt.edu',
-            'cd ~/cs2910 && git pull && python3 key_gen.py A 20'
-            ],capture_output=True, text=True)
+        subprocess.run(
+            [
+                'ssh',
+                f'sjl79@aster{machine_number}.cs.pitt.edu',
+                'cd ~/cs2910 && git pull && '
+                f'PYTHONPATH=. python3 keys/prime_key_gen.py A {machine_number}',
+            ],
+            check=True,
+        )
         # Retrieve the keys from aster 20 and store locally 
         subprocess.run([
             'scp',

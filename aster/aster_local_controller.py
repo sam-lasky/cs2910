@@ -28,7 +28,7 @@ def connection_test():
         if p.returncode!=0:
             message+=f'\nERROR MESSAGE:{p.stderr}'
             if 'Connection timed out' in p.stderr:
-                message+='Are you connected to GlobalProtect?'
+                message+='Are you connected to GlobalProtect?\n'
             print(message)
             exit(1)
         print(message)
@@ -143,11 +143,12 @@ def generate_machine_list(num_replicas, skipped_machines):
     if len(aster_machines_used)<num_replicas:
         raise ValueError("Not enough machines available. Exiting.")
 
+# Prints all aster machines used <ID> <LAN_1|2> <IP>
 def print_machines(env:str):
         machines = sorted(aster_machines_used)
         print(f"[ASTER MACHINES USED]")
-        for aster_id in machines:
+        for i, aster_id in enumerate(machines):
             LAN_TYPE = 'LAN_1' if env=='aster_LAN_1' else 'LAN_2'
             LAN_IP_VAL = '53' if env=='aster_LAN_2' else '54'
             IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'
-            print(f'ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')
+            print(f'[{i+1}] ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')

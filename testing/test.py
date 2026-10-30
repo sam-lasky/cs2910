@@ -79,7 +79,23 @@ def main():
     updates=25000
      
 
-    filename = f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+
+    csv_file = "throughput_results.csv"
+
+    headers = [
+        "replicas", "encrypted", "max_po", "distribution",
+        "emulated_clients", "trial", "total_updates",
+        "elapsed", "throughput", "total_stalls",
+        "min_latency", "max_latency", "avg_latency",
+        "start_timestamp", "end_timestamp"
+    ]
+
+    with open(csv_file, "w", newline="") as f:
+        csv.writer(f).writerow(headers)
+
+
+
+
 
     # Test diff num of replicas [6 thru 10]
     for num_replicas in total_replicas_used:
@@ -101,16 +117,88 @@ def main():
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
                         # Conduct num_trials of the current config
-                        for trial in range(1,num_trials+1):
-                            # Get the machines used
+                        for trial in range(1, num_trials + 1):
                             machines = aster_config[num_replicas]
-                            # Get the updates per machine
-                            updates_distributed = updates//distribution
-                            # Start a driver program on all machines being used
-                            for key in sorted(machines.keys()):
-                                print(key)
-                            exit(0)
+                            updates_distributed = updates // distribution
 
+                            while True:
+                                processes = []
+
+                                for key in sorted(sorted(machines.keys(), reverse=True)[:distribution]):
+                                    driver_process = subprocess.Popen(
+                                        ["ssh", "-T", f"sjl79@aster{key}.cs.pitt.edu",
+                                        f"cd ~/cs2910/prime/bin && "
+                                        f"./driver -l {machines[key]} -i {key} -s 1 "
+                                        f"-c {updates_distributed} -n {emulated_client}"],
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT,
+                                        text=True
+                                    )
+                                    processes.append(driver_process)
+
+                                results = []
+
+                                for process in processes:
+                                    output, _ = process.communicate()
+
+                                    for line in output.splitlines():
+                                        if line.startswith("RESULT,"):
+                                            fields = line.split(",")
+
+                                            results.append({
+                                                "clients": int(fields[1]),
+                                                "updates": int(fields[2]),
+                                                "elapsed": float(fields[3]),
+                                                "stalls": int(fields[4]),
+                                                "expected": float(fields[5]),
+                                                "actual": float(fields[6]),
+                                                "min": float(fields[7]),
+                                                "max": float(fields[8]),
+                                                "avg": float(fields[9]),
+                                                "start": float(fields[10]),
+                                                "end": float(fields[11])
+                                            })
+
+                                if len(results) != distribution:
+                                    raise RuntimeError("One or more drivers failed to return results")
+
+                                elapsed = max(r["end"] for r in results) - min(r["start"] for r in results)
+
+                                if elapsed < 25:
+                                    updates_distributed *= 2
+                                    print(f"Trial {trial}: {elapsed:.2f}s < 25s. Doubling updates to {updates_distributed} per driver.")
+                                    continue
+
+                                total_updates = sum(r["updates"] for r in results)
+                                throughput = total_updates / elapsed
+
+                                
+                                total_stalls = sum(r["stalls"] for r in results)
+                                min_latency = min(r["min"] for r in results)
+                                max_latency = max(r["max"] for r in results)
+                                avg_latency = sum(r["avg"] * r["updates"] for r in results) / total_updates
+
+                                with open(csv_file, "a", newline="") as f:
+                                    csv.writer(f).writerow([
+                                        num_replicas,
+                                        encrypted,
+                                        max_po,
+                                        distribution,
+                                        emulated_client,
+                                        trial,
+                                        total_updates,
+                                        elapsed,
+                                        throughput,
+                                        total_stalls,
+                                        min_latency,
+                                        max_latency,
+                                        avg_latency,
+                                        min(r["start"] for r in results),
+                                        max(r["end"] for r in results)
+                                    ])
+
+                                print(f"Saved trial {trial}: {throughput:.2f} updates/sec")
+                                break                        
 if __name__ == '__main__':
     main()
 

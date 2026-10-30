@@ -63,6 +63,7 @@
 #include "net_wrapper.h"
 #include "merkle.h"
 #include "spines_lib.h"
+#include <time.h>
 
 /* The behavior of the client can be controlled with parameters that follow */
 
@@ -165,7 +166,8 @@ int32u send_stalls = 0;
 util_stopwatch throughput_sw;
 //Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
 int32u num_clients_to_emulate = 1;
-
+struct timespec throughput_start;
+struct timespec throughput_end;
 
 
 
@@ -300,6 +302,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 /* Prints the results of the test and exits the driver program */
 void Print_And_Exit(void)
 {
+    clock_gettime(CLOCK_REALTIME, &throughput_end);
     //stop timer [throughput measurement]
     UTIL_Stopwatch_Stop(&throughput_sw);
 
@@ -347,17 +350,21 @@ void Print_And_Exit(void)
     // printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
     // printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
 
-    // CSV VERSION 
-    printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f\n",
-       num_clients_to_emulate,
-       total_required_updates,
-       time_elapsed,
-       send_stalls,
-       expected_throughput,
-       actual_throughput,
-       min,
-       max,
-       avg);
+    // emulated clients, total updates, elapsed time, send stalls,
+    // expected throughput, actual throughput, minimum latency, maximum latency,
+    // average latency, start timestamp, end timestamp
+    printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f,%.9f,%.9f\n",
+        num_clients_to_emulate,
+        total_required_updates,
+        time_elapsed,
+        send_stalls,
+        expected_throughput,
+        actual_throughput,
+        min,
+        max,
+        avg,
+        throughput_start.tv_sec + throughput_start.tv_nsec / 1e9,
+        throughput_end.tv_sec + throughput_end.tv_nsec / 1e9);
     exit(0);
 
 }
@@ -382,6 +389,7 @@ void Run_Client()
     send_to_server = 1;
   
   /* Timer for throughput testing begins here */
+  clock_gettime(CLOCK_REALTIME, &throughput_start);
   UTIL_Stopwatch_Start(&throughput_sw);
 
   if(curr_seq_num<total_required_updates)

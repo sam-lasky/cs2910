@@ -110,10 +110,10 @@ def start_replicas(args_dict):
         # Updates the repo if it exists, otherwise clones it. 
         # Purges stdout/err by writing to dev/null
         git_command = (
-            'if [ -d cs2910/.git ]; then '
-            f'git -C cs2910 pull; '
-            f'else git clone https://github.com/sam444555/cs2910.git; '
-            'fi && '
+            '{ if [ -d cs2910/.git ]; then '
+            'git -C cs2910 pull; '
+            'else git clone https://github.com/sam444555/cs2910.git; '
+            'fi; } > /dev/null 2>&1 && '
         )
 
         # CD into aster dir and startup the replica startup script

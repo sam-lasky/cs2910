@@ -1,17 +1,11 @@
-
-import sys, subprocess, time, os
+import sys
+import subprocess
 import csv
-from pathlib import Path
 from datetime import datetime
-import time
 
 # Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
-# Use the machine number for SSH (e.g., aster20).
-# Use replica_id for BOTH driver flags -i and -s, and ip_address for -l.
-# Example: with 6 replicas, Aster 20 is replica 6 → SSH to aster20, pass -i 6 -s 6.
 aster_config = {
     6: {
-
         15: (1, "192.168.53.24"),
         16: (2, "192.168.53.25"),
         17: (3, "192.168.53.26"),
@@ -70,95 +64,85 @@ METRIC_NAMES = [
     "total_stalls",
     "min_latency",
     "max_latency",
-    "avg_latency"
+    "avg_latency",
 ]
-
 
 HEADERS = [
     "replicas", "encrypted", "max_po", "distribution",
     "emulated_clients", "num_trials",
     "mean_total_updates", "mean_elapsed", "mean_throughput",
     "mean_total_stalls", "mean_min_latency",
-    "mean_max_latency", "mean_avg_latency"
+    "mean_max_latency", "mean_avg_latency",
 ]
 
 
 def main():
-
-    # Total number of trials each test configuration runs 
     num_trials = 1
-    # MAX_PO_IN_FLIGHT values tested (prime/src/def.h)
     max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
-    # Number of Replicas tested (NUM_SERVERS=(3*NUM_F + 2*NUM_K + 1) in prime/src/def.h)
     total_replicas_used = [6, 8]
-    # Number of emulated clients (prime/src/driver.c)
     emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
-    # Encrypted Status (0=False,1=True)
-    encrypted = [0]
-    
-    # Total updates sent per individual test
-    updates=25000
-     
+    encrypted_values = [0]
+    updates = 25000
 
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    csv_file = f"throughput_results_{run_id}.csv"
+    with open(csv_file, "x", newline="") as f:
+        csv.writer(f).writerow(HEADERS)
 
-    # Test diff num of replicas [6, 8, 10]
     for num_replicas in total_replicas_used:
-        csv_file = f"throughput_results_{run_id}_replicas_{num_replicas}.csv"
-        with open(csv_file, "x", newline="") as f:
-            csv.writer(f).writerow(HEADERS)
-        # print(f"Writing results to {csv_file}", flush=True)
-        # Test encrypted [0=True,1=False]
-        for encrypted in [0]:
-            # Test different MAX_PO values
+        for encrypted in encrypted_values:
             for max_po in max_po_list:
-                
-                
-                 # All 6-replica / MAX_PO=20 configurations are completed.
                 if num_replicas == 6 and encrypted == 0 and max_po == 20:
                     print("Skipping completed replicas=6, MAX_PO=20", flush=True)
                     continue
 
+                for distribution in [1, 6]:
+                    subprocess.run(
+                        [
+                            sys.executable, "../run.py",
+                            "-e", "aster_LAN_1",
+                            "-x", str(encrypted),
+                            "-p", str(max_po),
+                            "-r", str(num_replicas),
+                        ],
+                        check=True,
+                    )
 
-                # Distribution (Number of replicas running drivers, each assigned an equal share of total updates)
-                # for distribution in [num_replicas, num_replicas // 2, 1]:
-                for distribution in [1,6]:
-                    # Execute run which runs num_replicas aster machines where each machine
-                    # is using the current encryption status and max_po value 
-                    subprocess.run([
-                        sys.executable, "../run.py",
-                        "-e", "aster_LAN_1",
-                        "-x", str(encrypted),
-                        "-p", str(max_po),
-                        "-r", str(num_replicas) ]
-                        , check=True)
-    
-                    # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
-                        # Skip all 21 completed configurations.
-                        if should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):continue
-                        # Conduct num_trials of the current configuration.
+                        if should_skip(
+                            num_replicas, encrypted, max_po,
+                            distribution, emulated_client
+                        ):
+                            continue
+
                         trial_results = []
                         min_test_seconds = 15
+
                         for trial in range(1, num_trials + 1):
-                            # gets machines being used
                             machines = aster_config[num_replicas]
-                            # gets update distribution (num updates per machine)
                             updates_distributed = updates // distribution
-                            # Prints the current test configuration
-                            print_test_config(num_replicas, encrypted, max_po, distribution, emulated_client, trial, num_trials, updates_distributed)
-    
+
+                            print_test_config(
+                                num_replicas, encrypted, max_po,
+                                distribution, emulated_client, trial,
+                                num_trials, updates_distributed
+                            )
+
                             while True:
                                 processes = []
 
-                                for key in sorted(sorted(machines.keys(), reverse=True)[:distribution]):
-                                    print(f'starting driver on aster {key}')
+                                for key in sorted(
+                                    sorted(machines.keys(), reverse=True)[:distribution]
+                                ):
+                                    print(f"starting driver on aster {key}")
                                     driver_process = subprocess.Popen(
-                                        # Genereate SSH command (cleaner this way)
-                                        generate_command(key, machines, num_replicas, updates_distributed, emulated_client),
+                                        generate_command(
+                                            key, machines, num_replicas,
+                                            updates_distributed, emulated_client
+                                        ),
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
-                                        text=True
+                                        text=True,
                                     )
                                     processes.append(driver_process)
 
@@ -172,7 +156,6 @@ def main():
                                     for line in output.splitlines():
                                         if line.startswith("RESULT,"):
                                             fields = line.split(",")
-
                                             results.append({
                                                 "clients": int(fields[1]),
                                                 "updates": int(fields[2]),
@@ -184,7 +167,7 @@ def main():
                                                 "max": float(fields[8]),
                                                 "avg": float(fields[9]),
                                                 "start": float(fields[10]),
-                                                "end": float(fields[11])
+                                                "end": float(fields[11]),
                                             })
 
                                 if len(results) != distribution:
@@ -203,12 +186,11 @@ def main():
                                         f"Trial {trial}: {elapsed:.2f}s "
                                         f"< {min_test_seconds}s. Doubling updates "
                                         f"to {updates_distributed} per driver.",
-                                        flush=True
+                                        flush=True,
                                     )
                                     continue
 
                                 total_updates = sum(r["updates"] for r in results)
-
                                 if total_updates <= 0:
                                     raise RuntimeError(
                                         "Drivers reported no completed updates"
@@ -230,17 +212,15 @@ def main():
                                     "total_stalls": total_stalls,
                                     "min_latency": min_latency,
                                     "max_latency": max_latency,
-                                    "avg_latency": avg_latency
+                                    "avg_latency": avg_latency,
                                 })
 
                                 print(
                                     f"Finished trial {trial}: "
                                     f"{throughput:.2f} updates/sec",
-                                    flush=True
+                                    flush=True,
                                 )
                                 break
-
-
 
                         averages = {
                             name: sum(r[name] for r in trial_results)
@@ -256,34 +236,36 @@ def main():
                                 distribution,
                                 emulated_client,
                                 len(trial_results),
-                                *[averages[name] for name in METRIC_NAMES]
+                                *[averages[name] for name in METRIC_NAMES],
                             ])
 
                         print(
                             f"Saved average of {len(trial_results)} trials: "
                             f"{averages['throughput']:.2f} updates/sec",
-                            flush=True
+                            flush=True,
                         )
+
         print(
-            f"Completed {num_replicas} replicas. Ready to analyze: {csv_file}",
-            flush=True
+            f"Completed {num_replicas} replicas. Results saved to: {csv_file}",
+            flush=True,
         )
 
 
 def print_test_config(
     num_replicas, encrypted, max_po, distribution,
-    emulated_client, trial, num_trials, updates_distributed):    
+    emulated_client, trial, num_trials, updates_distributed
+):
     print(
-            f"\n[TEST CONFIG] "
-            f"Replicas={num_replicas} | "
-            f"Encrypted={encrypted} | "
-            f"MAX_PO={max_po} | "
-            f"Distribution={distribution} | "
-            f"Emulated Clients={emulated_client} | "
-            f"Trial={trial}/{num_trials} | "
-            f"Updates per Driver={updates_distributed}",
-            flush=True
-        )
+        f"\n[TEST CONFIG] "
+        f"Replicas={num_replicas} | "
+        f"Encrypted={encrypted} | "
+        f"MAX_PO={max_po} | "
+        f"Distribution={distribution} | "
+        f"Emulated Clients={emulated_client} | "
+        f"Trial={trial}/{num_trials} | "
+        f"Updates per Driver={updates_distributed}",
+        flush=True,
+    )
 
 
 def should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):
@@ -298,11 +280,12 @@ def should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):
             f"Skipping completed config: replicas={num_replicas}, "
             f"MAX_PO={max_po}, distribution={distribution}, "
             f"clients={emulated_client}",
-            flush=True
+            flush=True,
         )
         return True
 
     return False
+
 
 def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
     return [
@@ -321,9 +304,9 @@ def generate_command(key, machines, num_replicas, updates_distributed, emulated_
         f"-s {machines[key][0]} "
         f"-r {num_replicas} "
         f"-c {updates_distributed} "
-        f"-n {emulated_client}"
+        f"-n {emulated_client}",
     ]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

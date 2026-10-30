@@ -103,7 +103,7 @@ def main():
                         # Conduct num_trials of the current config
                         for trial in range(1,num_trials+1):
                             # Get the machines used
-                            machines = aster_config[distribution]
+                            machines = aster_config[num_replicas]
                             # Get the updates per machine
                             updates_distributed = updates//distribution
                             # Start a driver program on all machines being used
@@ -114,3 +114,18 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+    
+#   10: {
+#         11: (1, "192.168.53.20"),
+#         12: (2, "192.168.53.21"),
+#         13: (3, "192.168.53.22"),
+#         14: (4, "192.168.53.23"),
+#         15: (5, "192.168.53.24"),
+#         16: (6, "192.168.53.25"),
+#         17: (7, "192.168.53.26"),
+#         18: (8, "192.168.53.27"),
+#         19: (9, "192.168.53.28"),
+#         20: (10, "192.168.53.29"),
+#     },

@@ -39,10 +39,8 @@ run(
 compose('up', '-d', '--force-recreate')
 
 for bandwidth in [100, 250, 500, 750]:
-    for trial in range(1, 6):
-        modes = (True, False) if trial % 2 else (False, True)
-
-        for encrypted in modes:
+    for encrypted in [True, False]:
+        for trial in range(1, 6):
             mode = 'on' if encrypted else 'off'
             print(
                 f'\nEncryption {mode.upper()} | '
@@ -111,7 +109,7 @@ for bandwidth in [100, 250, 500, 750]:
             filename = (
                 HERE / f'receiver-{mode}-{bandwidth}mbps-trial{trial}.log'
             )
-            deadline = time.monotonic() + 60
+            deadline = time.monotonic() + 120
 
             while True:
                 result = subprocess.run(

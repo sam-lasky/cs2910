@@ -24,7 +24,11 @@ def gen_keys(num_replicas):
         file.writelines(lines)
 
     # Generate Spines keys.
-    subprocess.run(["bash", "-e", "./gen_keys"], cwd=daemon_dir, check=True)
+    subprocess.run(
+        ["bash", "-e", "./gen_keys"],
+        cwd=daemon_dir,
+        check=True,
+    )
 
     # Save this set of keys.
     output_dir = f"spines_key_gen_dir/replicas_{num_replicas}"
@@ -44,6 +48,7 @@ def main():
     # Local execution.
     if mode == "L":
         host = f"sjl79@aster{machine_number}.cs.pitt.edu"
+
         subprocess.run(
             [
                 "ssh",
@@ -53,6 +58,7 @@ def main():
             ],
             check=True,
         )
+
         subprocess.run(
             ["scp", "-r", f"{host}:~/cs2910/spines_key_gen_dir", "."],
             check=True,
@@ -60,6 +66,41 @@ def main():
 
     # Aster execution.
     elif mode == "A":
+        spines_path = "prime/spines"
+
+        for path in [
+            "configure",
+            "stdutil/configure",
+            "libspread-util/configure",
+        ]:
+            subprocess.run(
+                ["chmod", "+x", path],
+                cwd=spines_path,
+                check=True,
+            )
+
+        for path in [
+            "stdutil/buildtools",
+            "libspread-util/buildtools",
+        ]:
+            subprocess.run(
+                ["chmod", "-R", "+x", path],
+                cwd=spines_path,
+                check=True,
+            )
+
+        # Build Spines once before generating the key sets.
+        for command in [
+            ["./configure"],
+            ["make", "-C", "daemon", "parser"],
+            ["make"],
+        ]:
+            subprocess.run(
+                command,
+                cwd=spines_path,
+                check=True,
+            )
+
         for num_replicas in configurations:
             gen_keys(num_replicas)
 

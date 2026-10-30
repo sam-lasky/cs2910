@@ -120,7 +120,17 @@ def main():
                         for trial in range(1, num_trials + 1):
                             machines = aster_config[num_replicas]
                             updates_distributed = updates // distribution
-
+                            print(
+                                f"\n[TEST CONFIG] "
+                                f"Replicas={num_replicas} | "
+                                f"Encrypted={encrypted} | "
+                                f"MAX_PO={max_po} | "
+                                f"Distribution={distribution} | "
+                                f"Emulated Clients={emulated_client} | "
+                                f"Trial={trial}/{num_trials} | "
+                                f"Updates per Driver={updates_distributed}",
+                                flush=True
+                            )
                             while True:
                                 processes = []
 

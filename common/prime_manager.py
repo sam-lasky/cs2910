@@ -48,6 +48,9 @@ def setup_prime(replica_ip:dict, num_replicas:int, max_po:int):
     # Path to Prime
     prime_path = "../prime"
 
+    # Build Prime
+    build_prime(prime_path)
+
     # Copy Prime keys for this replica count.
     subprocess.run(
         [

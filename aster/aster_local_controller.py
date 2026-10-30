@@ -64,6 +64,8 @@ def run(args_dict:dict):
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
     sessions = start_replicas(args_dict)
 
+    exit(0)
+
     for machine, process in sessions.items():
         output, _ = process.communicate()
         print(f"\n--- ASTER {machine} CONFIGURATION ---")
@@ -126,10 +128,17 @@ def start_replicas(args_dict):
         sessions[aster_machine_id] = subprocess.Popen(
                 ['ssh', '-T', f'sjl79@aster{aster_machine_id}.cs.pitt.edu', git_command+replica_startup_command],
                 stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
                 text=True
             )
+
+
+            #    sessions[aster_machine_id] = subprocess.Popen(
+            #             ['ssh', '-T', f'sjl79@aster{aster_machine_id}.cs.pitt.edu', git_command+replica_startup_command],
+            #             stdin=subprocess.DEVNULL,
+            #             stdout=subprocess.PIPE,
+            #             stderr=subprocess.STDOUT,
+            #             text=True
+            #         )
         id += 1
 
     return sessions

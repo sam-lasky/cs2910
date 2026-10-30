@@ -98,7 +98,7 @@ def start_replicas(args_dict):
             '{ if [ -d cs2910/.git ]; then '
             'git -C cs2910 pull; '
             'else git clone https://github.com/sam444555/cs2910.git; '
-            'fi; } '
+            'fi; } && '
         )
 
 # > /dev/null 2>&1 && 

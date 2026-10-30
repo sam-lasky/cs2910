@@ -127,14 +127,15 @@ def main():
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
                         # Skip all 21 completed configurations.
-                        if should_skip( num_replicas, encrypted, max_po, distribution, emulated_client):continue
+                        if should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):continue
                         # Conduct num_trials of the current configuration.
                         trial_results = []
                         min_test_seconds = 15
                         for trial in range(1, num_trials + 1):
+                            # gets machines being used
                             machines = aster_config[num_replicas]
+                            # gets update distribution (num updates per machine)
                             updates_distributed = updates // distribution
-
                             # Prints the current test configuration
                             print_test_config(num_replicas, encrypted, max_po, distribution, emulated_client, trial, num_trials, updates_distributed)
     
@@ -144,24 +145,8 @@ def main():
                                 for key in sorted(sorted(machines.keys(), reverse=True)[:distribution]):
                                     print(f'starting driver on aster {key}')
                                     driver_process = subprocess.Popen(
-                                    [
-                                        "ssh",
-                                        "-n",
-                                        "-T",
-                                        "-o", "BatchMode=yes",
-                                        "-o", "ServerAliveInterval=15",
-                                        "-o", "ServerAliveCountMax=2",
-                                        "-vv",
-                                        "-E", f"ssh_aster{key}.log",
-                                        f"sjl79@aster{key}.cs.pitt.edu",
-                                        f"cd ~/cs2910/prime/bin && "
-                                        f"./driver -l {machines[key][1]} "
-                                        f"-i {machines[key][0]} "
-                                        f"-s {machines[key][0]} "
-                                        f"-r {num_replicas} "
-                                        f"-c {updates_distributed} "
-                                        f"-n {emulated_client}"
-                                    ],
+                                        # Genereate SSH command (cleaner this way)
+                                        generate_command(key, machines, num_replicas, updates_distributed, emulated_client),
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT,
                                         text=True
@@ -309,6 +294,27 @@ def should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):
         return True
 
     return False
+
+def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
+    return [
+        "ssh",
+        "-n",
+        "-T",
+        "-o", "BatchMode=yes",
+        "-o", "ServerAliveInterval=15",
+        "-o", "ServerAliveCountMax=2",
+        "-vv",
+        "-E", f"ssh_aster{key}.log",
+        f"sjl79@aster{key}.cs.pitt.edu",
+        f"cd ~/cs2910/prime/bin && "
+        f"./driver -l {machines[key][1]} "
+        f"-i {machines[key][0]} "
+        f"-s {machines[key][0]} "
+        f"-r {num_replicas} "
+        f"-c {updates_distributed} "
+        f"-n {emulated_client}"
+    ]
+
 
 if __name__ == '__main__':
     main()

@@ -55,7 +55,7 @@ def run(args_dict:dict):
     print_machines(env=args_dict['env'])
 
     # Attempt to connect to all the machines being used. Terminates if all connections do not succeed
-    connection_test()
+    # connection_test()
 
     # Kill any old prime/spines/aster_replica.py processes on all aster machines
     # included in aster_machines_used

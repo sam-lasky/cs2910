@@ -149,7 +149,9 @@ def main():
                                 results = []
 
                                 for process in processes:
+                                    print("Waiting for driver...", flush=True)
                                     output, _ = process.communicate()
+                                    print("Driver finished.", flush=True)
 
                                     for line in output.splitlines():
                                         if line.startswith("RESULT,"):

@@ -114,7 +114,6 @@ def start_prime(replica_ip:dict, replica_id:int):
         )
 
     # Loop until all handshakes are completed
-    print('TESSSSSSSSSSST')
     while True:
         time.sleep(1)
         # Checkup on Spines
@@ -130,6 +129,6 @@ def start_prime(replica_ip:dict, replica_id:int):
             # Check log file for handshake msgs
             with open('prime_status.log', 'r') as prime_status_log:
                 for line in prime_status_log.readlines():
-                    if line.startswith('Called PR_Resume_Normal_operations'):
+                    if 'Called PR_Resume_Normal_operations' in line:
                         time.sleep(2)
                         return prime

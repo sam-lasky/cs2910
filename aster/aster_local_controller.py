@@ -21,9 +21,10 @@ def kill_all():
 
 
 def connection_test():
+    print(['TESTING CONNECTIONS TO ALL MACHINES'])
     for machine in sorted(aster_machines_used):
         p=subprocess.run(['ssh',f'sjl79@aster{machine}.cs.pitt.edu'],capture_output=True,text=True)
-        print(p.stdout)
+        print(p.stderr)
         exit(0)
 
 def run(args_dict:dict):

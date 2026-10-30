@@ -26,6 +26,7 @@ def startup():
             ["./spines", "-I", replica_ip[replica_id]],
             cwd="../prime/spines/daemon",
         )
+        print('test')
 
 
         time.sleep(10)

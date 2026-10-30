@@ -86,7 +86,7 @@
 
 
 /* This sets the maximum number of updates a client can submit */
-#define MAX_ACTIONS 100000 
+#define MAX_ACTIONS 1000001 
 
 /* This is the number of buckets used for the latency histogram */
 #define NUM_BUCKETS 21

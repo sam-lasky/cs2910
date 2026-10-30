@@ -18,8 +18,8 @@ from docker import docker_local_controller
 #   -p  MAX_PO_IN_FLIGHT            : Maximum number of pre-order requests in flight (integer > 0)
 #   -r  NUM_REPLICAS                : Total number of Prime replicas (integer > 0)
 #   -f  Patch                       : 0 (disabled) or 1 (enabled) ***OPTIONAL***
-#
-# All flags are required, unless explicitly labeled as optional, to run this script. 
+# All flags are required, unless explicitly labeled as optional, to run this script.            
+
 def main():
 
     # The environment variable UPDATE does not exist yet. It is only created 
@@ -43,6 +43,7 @@ def main():
         del os.environ['REBOOT']
         print('Script restarted successfully. Now using most up to date CS2910 repository.')
         print(f'Affected Directories/Files: {os.environ['UPDATED']}')
+
 
     # Using most up to date local CS2910 Github Repository. Parse the CLI arguments & store
     # them in the dictionary args_dict (keys:'env', 'encrypt', 'max_po', 'num_replicas', 'patch' (optional))

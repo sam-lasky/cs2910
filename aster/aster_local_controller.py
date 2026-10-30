@@ -147,8 +147,7 @@ def print_machines(env:str):
         machines = sorted(aster_machines_used)
         print(f"[ASTER MACHINES USED]")
         for aster_id in machines:
-            print(env)
-            LAN_TYPE = 'LAN_1' if env=='aster_1_LAN' else 'LAN_2'
-            LAN_IP_VAL = '53' if env=='aster_1_LAN' else '54'
+            LAN_TYPE = 'LAN_1' if env=='aster_LAN_1' else 'LAN_2'
+            LAN_IP_VAL = '53' if env=='aster_LAN_2' else '54'
             IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'
             print(f'ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')

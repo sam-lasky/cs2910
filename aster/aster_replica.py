@@ -4,6 +4,7 @@ import subprocess
 import time
 import os
 # local 
+sys.path.insert(0, "..")
 from configure.config import update_files, update_def_h
 
 

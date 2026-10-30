@@ -2,6 +2,8 @@ import subprocess
 import sys
 import shutil
 import os
+# local 
+sys.path.insert(0, "..")
 from common.file_ops import *
 
 # All possible configs

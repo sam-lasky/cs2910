@@ -1,0 +1,26 @@
+FROM base-img
+
+# Clone the CS2910 repository [in the root directory]
+WORKDIR /root
+RUN git clone https://github.com/sam444555/cs2910.git
+
+# update the configurations
+WORKDIR /root/cs2910/configure
+
+# Configure and compile spines
+WORKDIR /root/cs2910/prime/spines
+# Make the scripts used executable [Windows/Linux executable permission compatibility issue]
+RUN chmod +x configure && \
+    chmod +x stdutil/configure && \
+    chmod -R +x stdutil/buildtools && \
+    chmod +x libspread-util/configure && \
+    chmod -R +x libspread-util/buildtools
+RUN ./configure
+RUN make -C daemon parser
+RUN make
+
+# generate spines keys
+WORKDIR /root/cs2910/prime/spines/daemon
+RUN chmod +x gen_keys.sh && ./gen_keys.sh
+
+WORKDIR /root/cs2910/prime/spines

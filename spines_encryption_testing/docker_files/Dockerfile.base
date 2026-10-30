@@ -1,0 +1,18 @@
+# Using ubuntu 22.04 [replace with almalinux:9 if any issues]
+FROM ubuntu:22.04
+# FROM almalinux:9
+
+# Install dependencies [note: flex, bison, byacc required for spines parser]
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    g++ \
+    make \
+    libssl-dev \
+    flex \
+    bison \
+    git \
+    groff \
+    python3 \
+    iproute2 \
+    iputils-ping

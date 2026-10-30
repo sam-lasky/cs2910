@@ -108,7 +108,7 @@ def main():
             # Test different MAX_PO values
             for max_po in max_po_list:
                 # Distribution (Number of replicas running drivers, each assigned an equal share of total updates)
-                for distribution in [1, num_replicas // 2, num_replicas]:
+                for distribution in [num_replicas, num_replicas // 2, 1]:
                     # Execute run which runs num_replicas aster machines where each machine
                     # is using the current encryption status and max_po value 
                     subprocess.run([

@@ -121,6 +121,23 @@ def main():
     
                     # Test out different emulated client values in driver.c
                     for emulated_client in emulated_list:
+                        # Skip configurations already completed.
+                        if (
+                            num_replicas == 6
+                            and encrypted == 0
+                            and max_po == 20
+                            and distribution in (6, 3)
+                            and emulated_client in (
+                                20, 100, 500, 1000, 2500, 5000, 25000
+                            )
+                        ):
+                            print(
+                                f"Skipping completed config: replicas=6, "
+                                f"MAX_PO=20, distribution={distribution}, "
+                                f"clients={emulated_client}",
+                                flush=True
+                            )
+                            continue
                         # Conduct num_trials of the current configuration.
                         trial_results = []
                         min_test_seconds = 15

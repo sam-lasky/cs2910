@@ -21,14 +21,14 @@ def kill_all():
 
 
 def connection_test():
-    print('[TESTING CONNECTIONS TO ALL MACHINES]')
+    print('\n[TESTING CONNECTIONS TO ALL MACHINES]')
     for machine in sorted(aster_machines_used):
         p=subprocess.run(['ssh',f'sjl79@aster{machine}.cs.pitt.edu'],capture_output=True,text=True)
         message = f"ASTER_{machine} CONNECTION STATUS: {'SUCCESS' if p.returncode == 0 else 'FAILED'}"
         if p.returncode!=0:
             message+=f'\nERROR MESSAGE:{p.stderr}'
             if 'Connection timed out' in p.stderr:
-                message+='\nAre you connected to GlobalProtect?'
+                message+='Are you connected to GlobalProtect?'
             print(message)
             exit(1)
         print(message)
@@ -47,8 +47,8 @@ def run(args_dict:dict):
     # Generate Machine list 
     generate_machine_list(args_dict['num_replicas'], skip)
 
-    # Prints all machines being used 
-    print(f"[ASTER MACHINES USED]: {sorted(aster_machines_used)}")
+    # Prints all machines & ips being used 
+    print_machines(env=args_dict['env'])
 
     # Attempt to connect to all the machines being used. Terminates if all connections do not succeed
     connection_test()
@@ -143,3 +143,11 @@ def generate_machine_list(num_replicas, skipped_machines):
     if len(aster_machines_used)<num_replicas:
         raise ValueError("Not enough machines available. Exiting.")
 
+def print_machines(env:str):
+        machines = sorted(aster_machines_used)
+        print(f"[ASTER MACHINES USED]")
+        for aster_id in machines:
+            LAN_TYPE = 'LAN_1' if env=='aster_1_LAN' else 'LAN_2'
+            LAN_IP_VAL = '53' if env=='aster_1_LAN' else '54'
+            IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'
+            print(f'ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')

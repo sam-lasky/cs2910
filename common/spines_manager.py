@@ -21,16 +21,8 @@ def setup_spines(replica_ip:dict, encrypt:int):
     if not os.path.isfile(spines_exe):
         build_spines(spines_path)
 
-    # Copy Spines keys for this replica count.
-    subprocess.run(
-        [
-            "cp", "-a",
-            f"../keys/saved_keys/spines_keys/replicas_{len(replica_ip)}/keys/.",
-            spines_path + "/daemon/keys/",
-        ],
-        check=True,
-    )
-
+    # Handle keys for Spines
+    handle_keys(spines_path, num_replicas = len(replica_ip.keys()))
 
 
 # Builds Spines:
@@ -106,6 +98,8 @@ def start_spines(replica_ip:dict, replica_id:int):
                         handshake_replica_ids-={int(line.split()[3])}
                         if len(handshake_replica_ids)==0:
                             return spines
-        
 
+# Handles keys for Spines
+def handle_keys(spines_path, num_replicas):        
+    pass
 

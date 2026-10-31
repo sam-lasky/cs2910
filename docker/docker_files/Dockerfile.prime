@@ -20,8 +20,8 @@ RUN make clean && make
 # RUN make
 
 # generate prime keys
-WORKDIR /root/cs2910/prime/bin
-RUN ./gen_keys
+# WORKDIR /root/cs2910/prime/bin
+# RUN ./gen_keys
 
 
 

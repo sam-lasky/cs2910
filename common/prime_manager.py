@@ -5,43 +5,69 @@ import time
 # local imports
 from common.config import address_conf, def_h
 
-# Maps the total number of replicas (int) to (NUM_F, NUM_K).
+# Maps:  (KEY,type=INT)Total Number of Replicas: (VAL,type=INT TUPLE)(NUM_F, NUM_K)
+# such that the equation in prime/src/def.h NUM_SERVERS (3*NUM_F + 2*NUM_K + 1)
+# is satisfied 
 configurations = {
+    # 3(1) + 2(1) + 1 = 6
     6: (1, 1),
+    # 3(2) + 2(0) + 1 = 7
     7: (2, 0),
+    # 3(1) + 2(2) + 1 = 8
     8: (1, 2),
+    # 3(2) + 2(1) + 1 = 9
     9: (2, 1),
+    # 3(1) + 2(3) + 1 = 10
     10: (1, 3),
+    # 3(2) + 2(2) + 1 = 11
     11: (2, 2),
+    # 3(1) + 2(4) + 1 = 12
     12: (1, 4),
+    # 3(2) + 2(3) + 1 = 13
     13: (2, 3),
+    # 3(3) + 2(2) + 1 = 14
     14: (3, 2),
+    # 3(2) + 2(4) + 1 = 15
     15: (2, 4),
+    # 3(1) + 2(6) + 1 = 16
     16: (1, 6),
+    # 3(2) + 2(5) + 1 = 17
     17: (2, 5),
+    # 3(1) + 2(7) + 1 = 18
     18: (1, 7),
+    # 3(2) + 2(6) + 1 = 19
     19: (2, 6),
+    # 3(1) + 2(8) + 1 = 20
     20: (1, 8),
+    # 3(2) + 2(7) + 1 = 21
     21: (2, 7),
+    # 3(1) + 2(9) + 1 = 22
     22: (1, 9),
+    # 3(2) + 2(8) + 1 = 23
     23: (2, 8),
+    # 3(1) + 2(10) + 1 = 24
     24: (1, 10),
+    # 3(2) + 2(9) + 1 = 25
     25: (2, 9),
+    # 3(1) + 2(11) + 1 = 26
     26: (1, 11),
+    # 3(2) + 2(10) + 1 = 27
     27: (2, 10),
+    # 3(1) + 2(12) + 1 = 28
     28: (1, 12),
+    # 3(2) + 2(11) + 1 = 29
     29: (2, 11),
-    30: (1, 13),
+    # 3(1) + 2(13) + 1 = 30
+    30: (1, 13)
 }
 
 # Set up Prime
 def setup_prime(replica_ip:dict, num_replicas:int, max_po:int):
+
     # Update prime/bin/address.config
     address_conf(replica_ip)
    
     # Update prime/src/def.h
-    num_replicas = num_replicas
-    max_po = max_po
     num_f, num_k = configurations[num_replicas]
     def_h(NUM_F=num_f, NUM_K=num_k, MAX_PO=max_po)
     
@@ -51,15 +77,11 @@ def setup_prime(replica_ip:dict, num_replicas:int, max_po:int):
     # Build Prime
     build_prime(prime_path)
 
-    # Copy Prime keys for this replica count.
-    subprocess.run(
-        [
-            "cp", "-a",
-            f"../keys/saved_keys/prime_keys/replicas_{num_replicas}/keys/.",
-            prime_path + "/bin/keys/",
-        ],
-        check=True,
-    )
+    # Handles keys for Prime
+    handle_keys(prime_path,num_replicas)
+
+
+
 
 
 # Builds Prime:
@@ -132,3 +154,35 @@ def start_prime(replica_ip:dict, replica_id:int):
                     if 'Called PR_Resume_Normal_operations' in line:
                         time.sleep(2)
                         return prime
+
+# Copies keys to Prime's key folder iff it does not already have them. 
+def handle_keys(prime_path, num_replicas):
+    # Along with other keys,prime/bin/keys has num_replicas # of keys named sharex_1.pem where x=0,1,2,3,....,num_replicas-1 
+    # Use this to distinguish between which key set is being used. Check if share[0-->num_replicas-1] exists and that share[num_replicas].pem does not
+    for i in range(num_replicas+1):
+        path_name = prime_path+f"/bin/keys/share{i}_1.pem"
+
+        # Mismatch, copy keys & return
+        mismatch = (
+            # sharei_1.pem DNE and i < num_replicas
+           ( i < num_replicas and not os.path.exists(path_name))
+            # sharei_1.pem Exists and i==num_replicas
+            or (i==num_replicas and os.path.exists(path_name))
+        )
+
+        if mismatch:
+            keys_path = prime_path+"/bin/keys"
+            # Clear existing prime/bin/keys content
+            subprocess.run(["rm","-rf", keys_path])
+            # Make new keys dir 
+            os.makedirs(keys_path,exist_ok=True)
+            # Copy Prime keys for this replica count.
+            subprocess.run(
+                [
+                    "cp", "-a",
+                    f"../keys/saved_keys/prime_keys/replicas_{num_replicas}/.",
+                    prime_path + "/bin/keys/",
+                ],
+                check=True,
+            )
+            return

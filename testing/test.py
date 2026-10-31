@@ -5,12 +5,19 @@ from datetime import datetime
 
 # Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
 aster_config = {
+    # 6 Total Replicas
     6: {
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         15: (1, "192.168.53.24"),
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         16: (2, "192.168.53.25"),
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         17: (3, "192.168.53.26"),
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         18: (4, "192.168.53.27"),
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         19: (5, "192.168.53.28"),
+        # Aster 15, Replica ID 1, IP ADDR "192.168.53.24"
         20: (6, "192.168.53.29"),
     },
     7: {
@@ -77,10 +84,15 @@ HEADERS = [
 
 
 def main():
+    # originally 5
     num_trials = 1
+
     max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+
+    # originally 6,7,8,9,10
     total_replicas_used = [6]
     emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+    # originally 0,1
     encrypted_values = [0]
     updates = 25000
 
@@ -109,12 +121,7 @@ def main():
                     )
 
                     for emulated_client in emulated_list:
-                        if should_skip(
-                            num_replicas, encrypted, max_po,
-                            distribution, emulated_client
-                        ):
-                            continue
-
+          
                         trial_results = []
                         min_test_seconds = 15
 
@@ -267,29 +274,13 @@ def print_test_config(
         flush=True,
     )
 
-
-def should_skip(num_replicas, encrypted, max_po, distribution, emulated_client):
-    if (
-        num_replicas == 6
-        and encrypted == 0
-        and max_po == 20
-        and distribution in (1, 3, 6)
-        and emulated_client in (20, 100, 500, 1000, 2500, 5000, 25000)
-    ):
-        print(
-            f"Skipping completed config: replicas={num_replicas}, "
-            f"MAX_PO={max_po}, distribution={distribution}, "
-            f"clients={emulated_client}",
-            flush=True,
-        )
-        return True
-
-    return False
+e
 
 
 def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
     return [
         "ssh",
+        f"sjl79@aster{key}.cs.pitt.edu"
         "-n",
         "-T",
         "-o", "BatchMode=yes",

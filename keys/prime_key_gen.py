@@ -163,7 +163,7 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
     subprocess.run(["./gen_keys"], cwd="prime/bin", check=True)
 
     # Make a subdirectory for the generated set of keys in key_gen_dir
-    os.makedirs(f'key_gen_dir/replicas_{num_replicas}')
+    os.makedirs(f'{num_replicas}_keys')
 
     # Copy the generated keys to this directory
     subprocess.run(["cp", "-r", "prime/bin/keys", f"key_gen_dir/replicas_{num_replicas}"], check=True)
@@ -171,35 +171,14 @@ def gen_keys(NUM_F, NUM_K, num_replicas):
 # Usage: python key_gen.py <L|A> <ASTER_MACHINE_NUMBER>
 # Assumes LAN 1
 def main():
-    # Local execution
-    if sys.argv[1]=='L':
-        machine_number=sys.argv[2]
-        subprocess.run(
-            [
-                'ssh',
-                f'sjl79@aster{machine_number}.cs.pitt.edu',
-                'cd ~/cs2910 && git pull && '
-                f'PYTHONPATH=. python3 keys/prime_key_gen.py A {machine_number}',
-            ],
-            check=True,
-        )
-        # Retrieve the keys from the selected Aster machine and store locally
-        subprocess.run([
-            'scp',
-            '-r',
-            f'sjl79@aster{machine_number}.cs.pitt.edu:~/cs2910/key_gen_dir',
-            './'
-        ], check=True)
-        return
-   
-    # *** Aster execution ***
-    
+    print(os.getcwd())
+    exit(0)
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("key_gen_dir"):
         shutil.rmtree("key_gen_dir")
     os.makedirs("key_gen_dir")
 
-    # Generate all keys for number of replicas 1-->30
+    # Generate all keys for number of replicas 6 --> 30
     for config in configurations:
         NUM_F = config[0]
         NUM_K = config[1]

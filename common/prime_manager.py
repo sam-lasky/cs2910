@@ -132,27 +132,26 @@ def start_prime(replica_ip:dict, replica_id:int):
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
             stdout=prime_status_log,
-            stderr=prime_status_log
+            stderr= subprocess.PIPE,
+            text=True
         )
 
     # Loop until all handshakes are completed
     while True:
         time.sleep(1)
-        # Checkup on Spines
+        # Checkup on Prime
         #   poll() return values:
         #       None: Process still executing
         #       0: Process successfully exited
         #       Nonzero int: Process exited w/ error
         if prime.poll() is not None:
-            with open('prime_status.log', 'r') as log:
-                print(log.read(), flush=True)
-            raise RuntimeError(f'Prime exited during startup')
+            raise RuntimeError(f'Prime exited during startup: {prime.stderr}')
         else:
             # Check log file for handshake msgs
             with open('prime_status.log', 'r') as prime_status_log:
                 for line in prime_status_log.readlines():
                     if 'Called PR_Resume_Normal_operations' in line:
-                        time.sleep(2)
+                        time.sleep(1)
                         return prime
 
 # Copies keys to Prime's key folder iff it does not already have them. 

@@ -93,3 +93,30 @@ def def_h(NUM_F,NUM_K, MAX_PO):
         f.seek(0)
         f.write(new_file)
         f.truncate()
+
+# Using the passed dictionary where k=file_path, v=[lines to check],
+# verify that the lines exist in the file. If they do, return True
+# otherwise raise error and terminate. 
+def confirm_files(files_and_lines:dict):
+    # Iterate over all file paths
+    for fp in files_and_lines.keys():
+        # Try to open the file, raise FNF err if the file path does not exist
+        try:
+            with open(fp,'r') as f:
+                # Get the list of lines
+                lines_to_check:list = files_and_lines[fp]
+                # Iterate over each line
+                for line in f.readlines():
+                    if line in lines_to_check:
+                        # Remove line from the list
+                        lines_to_check.remove(line)
+        
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Invalid File Path: {fp}")
+        # List empty = all lines found, otherwise a line is missing from the file 
+        if lines_to_check:
+            raise RuntimeError("Lines: ".join(l for l in lines_to_check)+f" are not in {fp}") 
+    # All lines found in their associated files
+    return True
+
+

@@ -18,7 +18,7 @@ configurations = {}
 def gen_prime_keys():
 
     # Apply the Makefile fix in prime/OpenTC-1.1/TC-lib-1.0/Makefile
-    make_file_fix()
+    make_file_fix(fix_enabled=False)
 
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("prime_keys"):
@@ -46,13 +46,8 @@ def compile_prime_and_generate_keys():
         # Update NUM_F/K vals in prime/src/def.h
         def_h(num_f,num_k,20)
 
-
-        replica_ip={i:"dummy" for i in range(1, replica_num+1)}
-        print(replica_ip)
-        exit(0)
-
         # Update address conf?
-        address_conf(replica_ip)
+        address_conf({i:"dummy_ip" for i in range(1, replica_num+1)})
 
         # Make clean Prime
         subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
@@ -86,7 +81,7 @@ def compile_prime_and_generate_keys():
 # CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
 # in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
 # setting CFLAGS = -g -O0 seems to fix it. 
-def make_file_fix():
+def make_file_fix(fix_enabled:True):
     with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
         new_file = ""
         for line in f.readlines():
@@ -95,7 +90,9 @@ def make_file_fix():
                 # if action=="check": 
                 #     return True if line.strip()=="CFLAGS = -g -O0" else False
                 # updating the file
-                line = "CFLAGS = -g -O0\n"
+                if fix_enabled:
+                    line = "CFLAGS = -g -O0\n"
+                else: line = "CFLAGS = -g -O2\n"
             new_file+=line
         f.seek(0)
         f.write(new_file)

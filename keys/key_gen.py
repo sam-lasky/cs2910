@@ -12,17 +12,12 @@ from common.prime_manager import setup_prime
 replica_count= None
 # Dictionary where key = replica count, value = (NUM_F,NUM_K) tuple
 configurations = {}
-# Apply fix OpenTC Makefile (t/f)
-apply_fix_open_tc:bool=True
 
 # Make prime_keys directory in cs2910/keys, overwriting it 
 # if already there. Generate all num_f/num_k combos for all replicas
 # in range 6-->replica_count & store in dictionary configuration.
 # Generate the keys & store them in keys/prime_keys
 def gen_prime_keys():
-
-    # Apply the Makefile fix in prime/OpenTC-1.1/TC-lib-1.0/Makefile
-    make_file_fix()
 
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("prime_keys"):
@@ -35,12 +30,10 @@ def gen_prime_keys():
     # Generate & store keys using the generated configurations 
     compile_prime_and_generate_keys()
 
-
 # Generate all the Prime keys in the range [6,replica_count]. 
 # Store generated keys in cs2910/keys/prime_keys
 # Distinct replica keys are stored in prime_keys/replicas_[replica_number]
 def compile_prime_and_generate_keys():
-
 
     for replica_num in sorted(configurations.keys()):
         num_f = configurations[replica_num][0]
@@ -53,18 +46,6 @@ def compile_prime_and_generate_keys():
         #   (3) Builds prime 
         setup_prime(replica_ip={i:"dummy_ip" for i in range(1, replica_num+1)}, num_replicas=replica_num, max_po=20, keys=False)
 
-        # # Update NUM_F/K vals in prime/src/def.h
-        # def_h(num_f,num_k,20)
-
-        # # Update address conf?
-        # address_conf()
-
-        # # Make clean Prime
-        # subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
-        #             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # # Make Prime
-        # subprocess.run(["make"], cwd="../prime/src", check=True,
-        #             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Generate keys
         try:
             os.makedirs("../prime/bin/keys", exist_ok=True)
@@ -84,29 +65,6 @@ def compile_prime_and_generate_keys():
 
         # Success
         print(f"Keys for {replica_num} Replicas written to cs2910/keys/prime_keys/replicas_{replica_num}")
-
-# CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
-# in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
-# setting CFLAGS = -g -O0 seems to fix it. 
-def make_file_fix():
-    with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
-        new_file = ""
-        for line in f.readlines():
-            if line.strip().startswith("CFLAGS ="):
-                # checking if there
-                # if action=="check": 
-                #     return True if line.strip()=="CFLAGS = -g -O0" else False
-                # updating the file
-                if apply_fix_open_tc:
-                    line = "CFLAGS = -g -O0\n"
-                else: line = "CFLAGS = -g -O2\n"
-            new_file+=line
-        f.seek(0)
-        f.write(new_file)
-        f.truncate()
-
-    subprocess.run(["make", "clean"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True,stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-    subprocess.run(["make"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True,stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
@@ -184,11 +142,9 @@ def gen_spines_keys():
     shutil.rmtree("spines_keys/temp")
 
 # Creates <num_replicas> distinct keys for key_type <prime|spines|both>
-def main(key_type,num_replicas,fix="1"):
+def main(key_type,num_replicas):
     global replica_count
     replica_count=num_replicas
-    global apply_fix_open_tc
-    apply_fix_open_tc = bool(int(fix))
   
     keys_to_generate = [gen_prime_keys, gen_spines_keys]
     # Only gen Prime keys
@@ -202,5 +158,14 @@ def main(key_type,num_replicas,fix="1"):
     for func in keys_to_generate:
         func()
 
+    # Copy generated keys to linux-dev
+    if gen_prime_keys in keys_to_generate:
+        subprocess.run([
+            "docker", "cp",
+            "key-gen:/root/cs2910/keys/prime_keys",
+            "linux-dev:/root/cs2910/keys/"
+        ], check=True)
+
+
 if __name__ == '__main__':
-    main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 1)
+    main(sys.argv[1], int(sys.argv[2]))

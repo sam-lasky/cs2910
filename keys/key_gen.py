@@ -128,7 +128,7 @@ def gen_spines_keys():
     shutil.rmtree("spines_keys/temp")
 
 # Creates <num_replicas> distinct keys for key_type <prime|spines|both>
-def main(key_type='all',num_replicas=20):
+def main(key_type,num_replicas):
     global replica_count
     replica_count=num_replicas
 

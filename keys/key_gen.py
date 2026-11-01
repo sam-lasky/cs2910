@@ -14,7 +14,7 @@ configurations = {}
 # Generates keys using the passed NUM_F/K values. 
 # Updates prime/src/def.h using these values
 # Stores the generated keys in CS2910/keys/prime_keys
-def gen_keys(NUM_F, NUM_K ):
+def gen_keys(NUM_F, NUM_K,replica_num):
 
     # Update NUM_F/K vals in prime/src/def.h
     def_h(NUM_F,NUM_K,20)
@@ -29,10 +29,10 @@ def gen_keys(NUM_F, NUM_K ):
     subprocess.run(["./gen_keys"], cwd="prime/bin", check=True)
 
     # Make a subdirectory for the generated keys
-    os.makedirs(f'prime_keys/{replica_count}_keys')
+    os.makedirs(f'prime_keys/{replica_num}_keys')
 
     # Copy the generated keys to this directory
-    subprocess.run(["cp", "-r", "prime/bin/keys", f"prime_keys/replicas_{replica_count}/"], check=True)
+    subprocess.run(["cp", "-r", "prime/bin/keys", f"prime_keys/{replica_num}_replicas/"], check=True)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
@@ -46,8 +46,8 @@ def config_generator():
                     configurations[replica_num]=(num_f,num_k)
                     break
             if replica_num in configurations:break
-        if replica_num in configurations:break
-        else: raise RuntimeError(f'Cannot generate (NUM_F, NUM_K pair) for {replica_count} # of replicas')
+        if replica_num not in configurations:
+            raise RuntimeError(f'Cannot generate (NUM_F, NUM_K pair) for {replica_count} # of replicas')
         
 # Generate <replica_count> distinct # of keys for Prime, store them in keys/prime_keys/[replica_num]_keys
 def gen_prime_keys():
@@ -64,8 +64,8 @@ def gen_prime_keys():
     for replica_num in configurations:
         num_f = configurations[replica_num][0]
         num_k = configurations[replica_num][1]
-        print(f'GENERATING KEYS FOR {replica_count}')
-        gen_keys(num_f,num_k)
+        print(f'GENERATING KEYS FOR {replica_num}')
+        gen_keys(num_f,num_k,replica_num)
 
 # Generate <replica_count> distinct # of keys for Spines, store them in keys/spines_keys/[replica_num]_keys
 def gen_spines_keys():
@@ -118,11 +118,11 @@ def gen_spines_keys():
     # Copy the keys into each replica directory
     for i in range(6,replica_count+1):
         # Copy dhparam.pem
-        subprocess.run("cp","spines_keys/temp/dhparam.pem","spines_keys/")
+        subprocess.run(["cp","spines_keys/temp/dhparam.pem","spines_keys/"])
         # copy all priv/pub keys into the curr rep count subdirectory
-        for i in range(1,replica_count+1):
-            subprocess.run("cp", f"spines_keys/temp/private{i}.pem",f"spines_keys/{i}_replicas/")
-            subprocess.run("cp", f"spines_keys/temp/public{i}.pem",f"spines_keys/{i}_replicas/")
+        for j in range(1,replica_count+1):
+            subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/{i}_replicas/"])
+            subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/{i}_replicas/"])
 
     # Delete the temporary directory
     shutil.rmtree("spines_keys/temp")

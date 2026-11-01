@@ -93,6 +93,9 @@ def make_file_fix():
         f.write(new_file)
         f.truncate()
 
+    subprocess.run(["make", "clean"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True)
+    subprocess.run(["make"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True)
+
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
 # which satisfy the equation NUM_SERVERS=(3*NUM_F + 2*NUM_K+1) in prime/src/def.h

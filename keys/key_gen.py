@@ -28,14 +28,11 @@ def gen_keys(NUM_F, NUM_K,replica_num):
     # Generate keys
     subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
 
-    # Rename the keys folder in prime's bin to {replica_num}_replicas
-        
+    # Rename the keys folder in Prime's bin to {replica_num}_replicas
+    subprocess.run(["mv","../prime/bin/keys",f"../prime/bin/{replica_num}_replicas"])
 
-    # Make a subdirectory for the generated keys
-    os.makedirs(f'prime_keys/{replica_num}_replicas')
-
-    # Copy the generated keys to this directory
-    subprocess.run(["cp", "-r", "../prime/bin/keys", f"prime_keys/{replica_num}_replicas/"], check=True)
+    # Copy the key directory in Prime keys/prime_keys
+    subprocess.run(["cp", "-r", f"../prime/bin/{replica_num}_replicas", "prime_keys/"], check=True)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations

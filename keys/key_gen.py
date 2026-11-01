@@ -58,6 +58,7 @@ def compile_prime_and_generate_keys():
         except Exception as e:
             if "SIGSEGV: 11" in key_gen_results.stderr:
                 print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_count}")
+                exit(1)
 
 
         # Rename the keys folder in Prime's bin to {replica_num}_replicas

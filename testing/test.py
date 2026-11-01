@@ -279,17 +279,12 @@ e
 
 def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
     return [
+        # sh command
         "ssh",
-        f"sjl79@aster{key}.cs.pitt.edu"
-        "-n",
-        "-T",
-        "-o", "BatchMode=yes",
-        "-o", "ConnectTimeout=10",
-        "-o", "ConnectionAttempts=1",
-        "-o", "ServerAliveInterval=15",
-        "-o", "ServerAliveCountMax=2",
+        # aster server being ssh'd into
         f"sjl79@aster{key}.cs.pitt.edu",
-        f"cd ~/cs2910/prime/bin && "
+        # Go to the directory of the driver executable
+        f"cd ~/cs2910/prime/bin"
         f"exec ./driver -l {machines[key][1]} "
         f"-i {machines[key][0]} "
         f"-s {machines[key][0]} "

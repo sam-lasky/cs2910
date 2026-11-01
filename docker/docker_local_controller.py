@@ -2,7 +2,7 @@
 def run(args_dict:dict):
     # Update the docker_compose.yml file to account for all the replicas used
     build_compose_file(args_dict['num_replicas'])
-    print('compose buil')
+    print('compose build')
 
 # Expand docker_compose_base.yml into docker_compose.yml by including all the required
 # number of replicas 
@@ -13,7 +13,7 @@ def build_compose_file(num_replicas:int):
         # fill in compose template
         compose_template ='\n'+"""\
         prime{i}:
-            image: replica-img
+            image: prime-img
             container_name: prime{i}
             cap_add:
             - NET_ADMIN

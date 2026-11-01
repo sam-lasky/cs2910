@@ -1,27 +1,40 @@
-FROM spines-img
+# docker build -f Dockerfile.prime -t prime-img .
+# docker run -it --name prime-dev prime-img bash
 
-# the spines img clones the repo, get the most up to date version since
-# we will ideally only rebuild the img when we change spines 
-WORKDIR /root/cs2910
-RUN git pull
+FROM almalinux:9
 
-# Compile prime
+# Install dependencies
+RUN dnf install -y \
+    gcc gcc-c++ make openssl-devel \
+    flex bison byacc git groff python3 \
+    iproute iputils which tar gzip \
+    && dnf clean all
+
+# Clone repository
+WORKDIR /root
+RUN git clone https://github.com/sam444555/cs2910.git
+
+# Build Spines
+WORKDIR /root/cs2910/prime/spines
+RUN chmod +x configure stdutil/configure libspread-util/configure \
+    && chmod -R +x stdutil/buildtools libspread-util/buildtools
+RUN ./configure \
+    && make -C daemon parser \
+    && make
+
+# Generate Spines keys
+WORKDIR /root/cs2910/prime/spines/daemon
+RUN chmod +x gen_keys.sh && ./gen_keys.sh
+
+# Prepare Prime dependencies
 WORKDIR /root/cs2910/prime
-# Make the scripts used executable [Windows/Linux executable permission compatibility issue]
-RUN chmod +x stdutil/configure && \
-    chmod -R +x stdutil/buildtools && \
-    chmod +x libspread-util/configure && \
-    chmod -R +x libspread-util/buildtools && \
-    chmod +x OpenTC-1.1/TC-lib-1.0/configure && \
-    chmod +x OpenTC-1.1/TC-lib-1.0/missing
+RUN chmod +x stdutil/configure libspread-util/configure \
+    OpenTC-1.1/TC-lib-1.0/configure \
+    OpenTC-1.1/TC-lib-1.0/missing \
+    && chmod -R +x stdutil/buildtools libspread-util/buildtools
 
+# Build Prime
 WORKDIR /root/cs2910/prime/src
 RUN make clean && make
-# RUN make
 
-# generate prime keys
-# WORKDIR /root/cs2910/prime/bin
-# RUN ./gen_keys
-
-
-
+WORKDIR /root/cs2910

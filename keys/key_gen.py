@@ -29,7 +29,7 @@ def gen_keys(NUM_F, NUM_K,replica_num):
     subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
 
     # Make a subdirectory for the generated keys
-    os.makedirs(f'prime_keys/{replica_num}_keys')
+    os.makedirs(f'prime_keys/{replica_num}_replicas')
 
     # Copy the generated keys to this directory
     subprocess.run(["cp", "-r", "../prime/bin/keys", f"prime_keys/{replica_num}_replicas/"], check=True)
@@ -118,9 +118,9 @@ def gen_spines_keys():
     # Copy the keys into each replica directory
     for i in range(6,replica_count+1):
         # Copy dhparam.pem
-        subprocess.run(["cp","spines_keys/temp/dhparam.pem","spines_keys/{i}_replicas"])
+        subprocess.run(["cp",f"spines_keys/temp/dhparam.pem","spines_keys/{i}_replicas"])
         # copy all priv/pub keys into the curr rep count subdirectory
-        for j in range(1,replica_count+1):
+        for j in range(1,i+1):
             subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/{i}_replicas/"])
             subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/{i}_replicas/"])
 

@@ -1,6 +1,7 @@
-# Using ubuntu 24.04 [replace with almalinux:9 if any issues]
-FROM ubuntu:24.04
+# Using ubuntu 25.10 [replace with almalinux:9 if any issues]
+FROM ubuntu:25.10
 # FROM ubuntu:22.04
+# FROM ubuntu:24.04
 
 # FROM almalinux:9
 

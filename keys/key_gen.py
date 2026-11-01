@@ -54,12 +54,13 @@ def compile_prime_and_generate_keys():
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Generate keys
         try:
-            key_gen_results = subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True, stderr=subprocess.PIPE)
-        except Exception as e:
-            if "SIGSEGV: 11" in key_gen_results.stderr:
-                print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_count}")
-                exit(1)
-
+            subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as e:
+            # segfault
+            print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_count}")
+            sys.exit(1)
+            raise
+            
 
         # Rename the keys folder in Prime's bin to {replica_num}_replicas
         subprocess.run(["mv", "../prime/bin/keys", f"../prime/bin/replicas_{replica_num}"], check=True)

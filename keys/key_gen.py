@@ -190,7 +190,7 @@ def main(key_type,num_replicas,fix=1):
     global apply_fix_open_tc
     apply_fix_open_tc = bool(int(fix))
     print(apply_fix_open_tc)
-    
+    exit(0)    
 
     keys_to_generate = [gen_prime_keys, gen_spines_keys]
     # Only gen Prime keys

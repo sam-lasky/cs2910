@@ -64,7 +64,7 @@ def gen_prime_keys():
     for replica_num in configurations:
         num_f = configurations[replica_num][0]
         num_k = configurations[replica_num][1]
-        print(f'GENERATING KEYS FOR {replica_num}')
+        print(f'GENERATING KEYS FOR {replica_num}, NUM_F: {num_f} NUM_K: {num_k}')
         gen_keys(num_f,num_k,replica_num)
 
 # Generate <replica_count> distinct # of keys for Spines, store them in keys/spines_keys/[replica_num]_keys

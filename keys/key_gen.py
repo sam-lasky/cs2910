@@ -45,10 +45,6 @@ def compile_prime_and_generate_keys():
         # Update NUM_F/K vals in prime/src/def.h
         def_h(num_f,num_k,20)
 
-        # KEYGEN FIX: remove gen_keys
-        if os.path.exists("../prime/bin/gen_keys"):
-            os.remove("../prime/bin/gen_keys")
-
         # Make clean Prime
         subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -76,7 +72,7 @@ def compile_prime_and_generate_keys():
         subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
 
         # Success
-        print(f"Keys for 6 Replicas written to cs2910/keys/prime_keys/replicas__{replica_num}")
+        print(f"Keys for {replica_num} Replicas written to cs2910/keys/prime_keys/replicas_{replica_num}")
 
 # CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
 # in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
@@ -96,8 +92,8 @@ def make_file_fix():
         f.write(new_file)
         f.truncate()
 
-    subprocess.run(["make", "clean"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True)
-    subprocess.run(["make"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True)
+    subprocess.run(["make", "clean"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True,stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    subprocess.run(["make"], cwd="../prime/OpenTC-1.1/TC-lib-1.0", check=True,stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations

@@ -37,7 +37,7 @@ def gen_prime_keys():
 # Distinct replica keys are stored in prime_keys/replicas_[replica_number]
 def compile_prime_and_generate_keys():
 
-    replica_ip={i:"dummy" for i in range(1, len(configurations.keys()+1))}
+    replica_ip={i:"dummy" for i in range(1, len(configurations.keys())+1)}
     print(replica_ip)
     exit(0)
 

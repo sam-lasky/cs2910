@@ -57,7 +57,7 @@ def compile_prime_and_generate_keys():
             subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True,stdout=subprocess.DEVNULL ,stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             # segfault
-            print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_count}")
+            print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_num}")
             sys.exit(1)
             raise
             
@@ -70,6 +70,7 @@ def compile_prime_and_generate_keys():
 
         # Success
         print(f"Keys for 6 Replicas written to cs2910/keys/prime_keys/replicas__{replica_num}")
+
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
 # which satisfy the equation NUM_SERVERS=(3*NUM_F + 2*NUM_K+1) in prime/src/def.h

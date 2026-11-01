@@ -13,6 +13,7 @@ RUN dnf install -y \
     openssl-devel \
     flex \
     bison \
+    byacc \
     git \
     groff \
     python3 \

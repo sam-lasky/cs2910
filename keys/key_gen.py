@@ -149,4 +149,4 @@ def main(key_type,num_replicas):
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1], int(sys.argv[2]))

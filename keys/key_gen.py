@@ -92,7 +92,7 @@ def make_file_fix():
     with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
         new_file = ""
         for line in f.readlines():
-            if line.strip().startswith("CFLAGS"):
+            if line.strip().startswith("CFLAGS ="):
                 # checking if there
                 # if action=="check": 
                 #     return True if line.strip()=="CFLAGS = -g -O0" else False

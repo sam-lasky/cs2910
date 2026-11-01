@@ -28,6 +28,9 @@ def gen_keys(NUM_F, NUM_K,replica_num):
     # Generate keys
     subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
 
+    # Rename the keys folder in prime's bin to {replica_num}_replicas
+        
+
     # Make a subdirectory for the generated keys
     os.makedirs(f'prime_keys/{replica_num}_replicas')
 

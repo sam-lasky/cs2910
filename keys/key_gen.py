@@ -53,14 +53,18 @@ def compile_prime_and_generate_keys():
         subprocess.run(["make"], cwd="../prime/src", check=True,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Generate keys
-        subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
+        try:
+            key_gen_results = subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True, stderr=subprocess.PIPE)
+        except Exception as e:
+            if "SIGSEGV: 11" in key_gen_results.stderr:
+                print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_count}")
+
 
         # Rename the keys folder in Prime's bin to {replica_num}_replicas
         subprocess.run(["mv", "../prime/bin/keys", f"../prime/bin/replicas_{replica_num}"], check=True)
 
         # Copy the key directory in Prime keys/prime_keys
         subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
-
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
@@ -153,7 +157,6 @@ def main(key_type,num_replicas):
     # Gen keys 
     for func in keys_to_generate:
         func()
-
 
 if __name__ == '__main__':
     main(sys.argv[1], int(sys.argv[2]))

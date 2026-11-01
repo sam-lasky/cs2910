@@ -157,15 +157,7 @@ def main(key_type,num_replicas):
     # Gen keys 
     for func in keys_to_generate:
         func()
-
-    # Copy generated keys to linux-dev
-    if gen_prime_keys in keys_to_generate:
-        subprocess.run([
-            "docker", "cp",
-            "key-gen:/root/cs2910/keys/prime_keys",
-            "linux-dev:/root/cs2910/keys/"
-        ], check=True)
-
+    
 
 if __name__ == '__main__':
     main(sys.argv[1], int(sys.argv[2]))

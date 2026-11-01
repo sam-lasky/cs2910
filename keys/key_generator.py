@@ -184,7 +184,7 @@ def gen_spines_keys():
     # Delete the temporary directory
     shutil.rmtree("spines_keys/temp")
 
-# Creates num_replicas distinct keys for key_type <prime|spines|both>
+# Creates <num_replicas> distinct keys for key_type <prime|spines|both>
 def main(key_type='all',num_replicas=20):
     global replica_count
     replica_count=num_replicas

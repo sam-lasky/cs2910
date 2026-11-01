@@ -14,7 +14,7 @@ configurations = {}
 # Generates keys using the passed NUM_F/K values. 
 # Updates prime/src/def.h using these values
 # Stores the generated keys in CS2910/keys/prime_keys
-def gen_prime_keys(num_f, num_k,replica_num):
+def gen_prime_keys():
 
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("prime_keys"):
@@ -47,7 +47,7 @@ def gen_prime_keys(num_f, num_k,replica_num):
         subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
 
         # Rename the keys folder in Prime's bin to {replica_num}_replicas
-        subprocess.run(["mv","../prime/bin/keys",f"../prime/bin/{replica_num}_replicas"])
+        subprocess.run(["mv", "../prime/bin/keys", f"../prime/bin/replicas_{replica_num}"], check=True)
 
         # Copy the key directory in Prime keys/prime_keys
         subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
@@ -79,7 +79,7 @@ def gen_spines_keys():
 
     # Create all subdirectories for each replica count, 
     for i in range(6,replica_count+1):
-        os.makedirs(f"spines_keys/{i}_replicas")
+        os.makedirs(f"spines_keys/replicas_{i}")
 
     # dhparam keygen subprocess, can be used across different configs, make once & copy it to every dir
     subprocess.run(
@@ -118,11 +118,11 @@ def gen_spines_keys():
     # Copy the keys into each replica directory
     for i in range(6,replica_count+1):
         # Copy dhparam.pem
-        subprocess.run(["cp",f"spines_keys/temp/dhparam.pem","spines_keys/{i}_replicas"])
+        subprocess.run(["cp",f"spines_keys/temp/dhparam.pem",f"spines_keys/replicas_{i}/"])
         # copy all priv/pub keys into the curr rep count subdirectory
         for j in range(1,i+1):
-            subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/{i}_replicas/"])
-            subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/{i}_replicas/"])
+            subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/replicas_{i}/"])
+            subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/replicas_{i}/"])
 
     # Delete the temporary directory
     shutil.rmtree("spines_keys/temp")

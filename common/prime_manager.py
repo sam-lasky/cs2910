@@ -179,7 +179,7 @@ def handle_keys(prime_path, num_replicas):
             subprocess.run(
                 [
                     "cp", "-a",
-                    f"../keys/saved_keys/prime_keys/replicas_{num_replicas}/.",
+                    f"../keys/prime_keys/replicas_{num_replicas}/.",
                     prime_path + "/bin/keys/",
                 ],
                 check=True,

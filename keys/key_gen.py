@@ -45,13 +45,15 @@ def compile_prime_and_generate_keys():
         # Update NUM_F/K vals in prime/src/def.h
         def_h(num_f,num_k,20)
 
+        # KEYGEN FIX: remove gen_keys
+        if os.path.exists("../prime/bin/gen_keys"):
+            os.remove("../prime/bin/gen_keys")
+
         # Make clean Prime
-        try:
-            subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except subprocess.CalledProcessError as e:
-            print(f"Issue running ['make','clean'] in gen_keys: {e}")
-        
+        subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    
         # Make Prime
         subprocess.run(["make"], cwd="../prime/src", check=True,
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

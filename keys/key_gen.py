@@ -14,25 +14,43 @@ configurations = {}
 # Generates keys using the passed NUM_F/K values. 
 # Updates prime/src/def.h using these values
 # Stores the generated keys in CS2910/keys/prime_keys
-def gen_keys(NUM_F, NUM_K,replica_num):
+def gen_prime_keys(num_f, num_k,replica_num):
 
-    # Update NUM_F/K vals in prime/src/def.h
-    def_h(NUM_F,NUM_K,20)
+    # Make the keys directory in the root cs2910 file, replace it if it already exists
+    if os.path.exists("prime_keys"):
+        shutil.rmtree("prime_keys")
+    os.makedirs("prime_keys")
 
-    # Make clean Prime
-    subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    # Make Prime
-    subprocess.run(["make"], cwd="../prime/src", check=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    # Generate keys
-    subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
+    # Generate the configurations
+    config_generator()
 
-    # Rename the keys folder in Prime's bin to {replica_num}_replicas
-    subprocess.run(["mv","../prime/bin/keys",f"../prime/bin/{replica_num}_replicas"])
+    # Generate all keys for number of replicas 6 --> replica_num 
+    for replica_num in configurations:
+        num_f = configurations[replica_num][0]
+        num_k = configurations[replica_num][1]
+        print(f'GENERATING KEYS FOR {replica_num}, NUM_F: {num_f} NUM_K: {num_k}')
 
-    # Copy the key directory in Prime keys/prime_keys
-    subprocess.run(["cp", "-r", f"../prime/bin/{replica_num}_replicas", "prime_keys/"], check=True)
+        # Update NUM_F/K vals in prime/src/def.h
+        def_h(num_f,num_k,20)
+
+        # Make clean Prime
+        try:
+            subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError as e:
+            print(f"Issue running ['make','clean'] in gen_keys: {e}")
+        
+        # Make Prime
+        subprocess.run(["make"], cwd="../prime/src", check=True,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Generate keys
+        subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
+
+        # Rename the keys folder in Prime's bin to {replica_num}_replicas
+        subprocess.run(["mv","../prime/bin/keys",f"../prime/bin/{replica_num}_replicas"])
+
+        # Copy the key directory in Prime keys/prime_keys
+        subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
@@ -48,25 +66,7 @@ def config_generator():
             if replica_num in configurations:break
         if replica_num not in configurations:
             raise RuntimeError(f'Cannot generate (NUM_F, NUM_K pair) for {replica_count} # of replicas')
-        
-# Generate <replica_count> distinct # of keys for Prime, store them in keys/prime_keys/[replica_num]_keys
-def gen_prime_keys():
-
-    # Make the keys directory in the root cs2910 file, replace it if it already exists
-    if os.path.exists("prime_keys"):
-        shutil.rmtree("prime_keys")
-    os.makedirs("prime_keys")
-
-    # Generate the configurations
-    config_generator()
-
-    # Generate all keys for number of replicas 6 --> 30
-    for replica_num in configurations:
-        num_f = configurations[replica_num][0]
-        num_k = configurations[replica_num][1]
-        print(f'GENERATING KEYS FOR {replica_num}, NUM_F: {num_f} NUM_K: {num_k}')
-        gen_keys(num_f,num_k,replica_num)
-
+    
 # Generate <replica_count> distinct # of keys for Spines, store them in keys/spines_keys/[replica_num]_keys
 def gen_spines_keys():
     # Make the keys directory in the root cs2910 file, replace it if it already exists

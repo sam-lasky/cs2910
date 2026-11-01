@@ -17,6 +17,9 @@ configurations = {}
 # Generate the keys & store them in keys/prime_keys
 def gen_prime_keys():
 
+    # Apply the Makefile fix in prime/OpenTC-1.1/TC-lib-1.0/Makefile
+    make_file_fix()
+
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("prime_keys"):
         shutil.rmtree("prime_keys")
@@ -57,7 +60,9 @@ def compile_prime_and_generate_keys():
             subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True,stdout=subprocess.DEVNULL ,stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             # segfault
-            print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_num}")
+            if e.returncode==-11:
+                print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_num}")
+                exit(1)
             raise
             
 
@@ -69,6 +74,24 @@ def compile_prime_and_generate_keys():
 
         # Success
         print(f"Keys for 6 Replicas written to cs2910/keys/prime_keys/replicas__{replica_num}")
+
+# CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
+# in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
+# CFLAGS = -g -O0 seems to fix it. 
+def make_file_fix():
+    with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
+        new_file = ""
+        for line in f.readlines():
+            if line.strip().startswith("CFLAGS"):
+                # checking if there
+                # if action=="check": 
+                #     return True if line.strip()=="CFLAGS = -g -O0" else False
+                # updating the file
+                line = "CFLAGS = -g -O0\n"
+            new_file+=line
+        f.seek(0)
+        f.write(new_file)
+        f.truncate()
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations

@@ -37,6 +37,10 @@ def gen_prime_keys():
 # Distinct replica keys are stored in prime_keys/replicas_[replica_number]
 def compile_prime_and_generate_keys():
 
+    replica_ip={i:"dummy" for i in range(1, len(configurations.keys()+1))}
+    print(replica_ip)
+    exit(0)
+
     for replica_num in sorted(configurations.keys()):
         num_f = configurations[replica_num][0]
         num_k = configurations[replica_num][1]
@@ -44,6 +48,9 @@ def compile_prime_and_generate_keys():
 
         # Update NUM_F/K vals in prime/src/def.h
         def_h(num_f,num_k,20)
+
+        # Update address conf?
+        address_conf(replica_ip)
 
         # Make clean Prime
         subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
@@ -76,7 +83,7 @@ def compile_prime_and_generate_keys():
 
 # CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
 # in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
-# CFLAGS = -g -O0 seems to fix it. 
+# setting CFLAGS = -g -O0 seems to fix it. 
 def make_file_fix():
     with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
         new_file = ""

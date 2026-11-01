@@ -11,7 +11,6 @@
 
 import os
 from pathlib import Path
-from common.env_vars import get_env
 
 # **********************************************************************
 # ************************ SPINES CONFIG FILES *************************
@@ -67,7 +66,8 @@ def spines_conf(replica_ip_mapping:dict,encrypted):
 # **********************************************************************
 
 # Update prime/bin/address.config
-def address_conf(replica_ip_mapping):
+# replica_ip_mapping[replica ID]<-->"IP_ADDRESS_AS_STRING"
+def address_conf(replica_ip_mapping:dict[int,str]):
     # writes <replica id> <replica ip>
     with open('../prime/bin/address.config', 'w') as f:
         for key, value in replica_ip_mapping.items():

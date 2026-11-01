@@ -132,9 +132,6 @@ def main(key_type,num_replicas):
     global replica_count
     replica_count=num_replicas
 
-    print(key_type)
-    exit(0)
-
     keys_to_generate = [gen_prime_keys, gen_spines_keys]
     # Only gen Prime keys
     if key_type=='prime':

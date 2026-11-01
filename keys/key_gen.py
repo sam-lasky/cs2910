@@ -20,19 +20,19 @@ def gen_keys(NUM_F, NUM_K,replica_num):
     def_h(NUM_F,NUM_K,20)
 
     # Make clean Prime
-    subprocess.run(["make", "clean"], cwd="prime/src", check=True,
+    subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Make Prime
-    subprocess.run(["make"], cwd="prime/src", check=True,
+    subprocess.run(["make"], cwd="../prime/src", check=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Generate keys
-    subprocess.run(["./gen_keys"], cwd="prime/bin", check=True)
+    subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True)
 
     # Make a subdirectory for the generated keys
     os.makedirs(f'prime_keys/{replica_num}_keys')
 
     # Copy the generated keys to this directory
-    subprocess.run(["cp", "-r", "prime/bin/keys", f"prime_keys/{replica_num}_replicas/"], check=True)
+    subprocess.run(["cp", "-r", "../prime/bin/keys", f"prime_keys/{replica_num}_replicas/"], check=True)
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations

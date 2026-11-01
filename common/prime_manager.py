@@ -62,7 +62,7 @@ configurations = {
 }
 
 # Set up Prime
-def setup_prime(replica_ip:dict, num_replicas:int, max_po:int):
+def setup_prime(replica_ip:dict, num_replicas:int, max_po:int, keys=True):
 
     # Update prime/bin/address.config
     address_conf(replica_ip)
@@ -78,7 +78,7 @@ def setup_prime(replica_ip:dict, num_replicas:int, max_po:int):
     build_prime(prime_path)
 
     # Handles keys for Prime
-    handle_keys(prime_path,num_replicas)
+    if keys:handle_keys(prime_path,num_replicas)
 
 
 
@@ -121,7 +121,6 @@ def build_prime(prime_path):
     except Exception as e:
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
-
 
 # Start Prime
 def start_prime(replica_ip:dict, replica_id:int):

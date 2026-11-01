@@ -1,10 +1,12 @@
 import subprocess
 import sys
 import shutil
+from pathlib import Path
 import os
 # local 
 sys.path.insert(0, "..")
 from common.config import *
+from common.prime_manager import setup_prime
 
 # Number of Replicas being used
 replica_count= None
@@ -43,20 +45,24 @@ def compile_prime_and_generate_keys():
         num_k = configurations[replica_num][1]
         print(f'GENERATING KEYS FOR {replica_num}, NUM_F: {num_f} NUM_K: {num_k}')
 
-        # Update NUM_F/K vals in prime/src/def.h
-        def_h(num_f,num_k,20)
+        # Sets up Prime
+        #   (1) Updates addres_conf using {1-->replica_num, 'dummy_ips'}
+        #   (2) Updates def_f using hardcoded NUM_F/K values hardcoded in prime_manager.py
+        #   (3) Builds prime 
+        setup_prime(replica_ip={i:"dummy_ip" for i in range(1, replica_num+1)}, num_replicas=replica_num, max_po=20, keys=False)
 
-        # Update address conf?
-        address_conf({i:"dummy_ip" for i in range(1, replica_num+1)})
+        # # Update NUM_F/K vals in prime/src/def.h
+        # def_h(num_f,num_k,20)
 
-        # Make clean Prime
-        subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # # Update address conf?
+        # address_conf()
 
-    
-        # Make Prime
-        subprocess.run(["make"], cwd="../prime/src", check=True,
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # # Make clean Prime
+        # subprocess.run(["make", "clean"], cwd="../prime/src", check=True,
+        #             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # # Make Prime
+        # subprocess.run(["make"], cwd="../prime/src", check=True,
+        #             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Generate keys
         try:
             os.makedirs("../prime/bin/keys", exist_ok=True)
@@ -64,16 +70,15 @@ def compile_prime_and_generate_keys():
         except subprocess.CalledProcessError as e:
             # segfault
             if e.returncode==-11:
-                print(f"A segfault occurred when generating keys for: NUM_F={num_f}, NUM_K={num_k}, TOTAL REPLICAS={replica_num}")
+                print(f"A segfault occurred when generating keys for {replica_num} # of replicas")
                 exit(1)
             raise
-            
 
-        # Rename the keys folder in Prime's bin to {replica_num}_replicas
-        subprocess.run(["mv", "../prime/bin/keys", f"../prime/bin/replicas_{replica_num}"], check=True)
-
-        # Copy the key directory in Prime keys/prime_keys
-        subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
+        # Newly generated keys for replica_num # of replicas is located in prime's bin/keys folder, move them 
+        # to cs2910/keys/prime_keys/replicas_{replica_num}
+        new_keys_source = Path("../prime/bin/keys") 
+        new_keys_destination = Path(f"prime_keys/replicas_{replica_num}")
+        shutil.copytree(new_keys_source, new_keys_destination,dirs_exist_ok=True)
 
         # Success
         print(f"Keys for {replica_num} Replicas written to cs2910/keys/prime_keys/replicas_{replica_num}")

@@ -68,6 +68,8 @@ def compile_prime_and_generate_keys():
         # Copy the key directory in Prime keys/prime_keys
         subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
 
+        # Success
+        print(f"Keys for 6 Replicas written to cs2910/keys/prime_keys/replicas__{replica_num}")
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations
 # which satisfy the equation NUM_SERVERS=(3*NUM_F + 2*NUM_K+1) in prime/src/def.h

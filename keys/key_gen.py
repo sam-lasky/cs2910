@@ -205,4 +205,4 @@ def main(key_type,num_replicas,fix="1"):
         func()
 
 if __name__ == '__main__':
-    main(sys.argv[1], int(sys.argv[2]))
+    main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 1)

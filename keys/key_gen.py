@@ -118,7 +118,7 @@ def gen_spines_keys():
     # Copy the keys into each replica directory
     for i in range(6,replica_count+1):
         # Copy dhparam.pem
-        subprocess.run(["cp","spines_keys/temp/dhparam.pem","spines_keys/"])
+        subprocess.run(["cp","spines_keys/temp/dhparam.pem","spines_keys/{i}_replicas"])
         # copy all priv/pub keys into the curr rep count subdirectory
         for j in range(1,replica_count+1):
             subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/{i}_replicas/"])

@@ -37,11 +37,6 @@ def gen_prime_keys():
 # Distinct replica keys are stored in prime_keys/replicas_[replica_number]
 def compile_prime_and_generate_keys():
 
-    replica_ip={i:"dummy" for i in range(1, len(configurations.keys())+1)}
-    # print(replica_ip)
-    # print(len(configurations.keys()))
-    print(configurations)
-    exit(0)
 
     for replica_num in sorted(configurations.keys()):
         num_f = configurations[replica_num][0]
@@ -50,6 +45,11 @@ def compile_prime_and_generate_keys():
 
         # Update NUM_F/K vals in prime/src/def.h
         def_h(num_f,num_k,20)
+
+
+        replica_ip={i:"dummy" for i in range(1, replica_num+1)}
+        print(replica_ip)
+        exit(0)
 
         # Update address conf?
         address_conf(replica_ip)

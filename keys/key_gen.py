@@ -59,6 +59,7 @@ def compile_prime_and_generate_keys():
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # Generate keys
         try:
+            os.makedirs("../prime/bin/keys", exist_ok=True)
             subprocess.run(["./gen_keys"], cwd="../prime/bin", check=True,stdout=subprocess.DEVNULL ,stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as e:
             # segfault

@@ -92,7 +92,8 @@ libTC_la_LDFLAGS =
 libTC_la_LIBADD = 
 libTC_la_OBJECTS =  combineSig.lo genIndSig.lo generate.lo jacobi.lo \
 marshal.lo struct_func.lo verify.lo
-CFLAGS = -g -O2 ORIGINAL VERSION 
+# ORIGINAL VERSION 
+CFLAGS = -g -O2 
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)

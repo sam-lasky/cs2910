@@ -119,8 +119,8 @@ def gen_prime_keys():
 
     # Generate all keys for number of replicas 6 --> 30
     for config in configurations:
-        num_f = config[0]
-        num_k = config[1]
+        num_f = config(0)
+        num_k = config(1)
         print(f'GENERATING KEYS FOR {replica_count}')
         gen_keys(num_f,num_k)
 

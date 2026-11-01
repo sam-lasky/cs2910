@@ -12,6 +12,8 @@ from common.prime_manager import setup_prime
 replica_count= None
 # Dictionary where key = replica count, value = (NUM_F,NUM_K) tuple
 configurations = {}
+# Apply fix OpenTC Makefile (t/f)
+apply_fix_open_tc:bool=True
 
 # Make prime_keys directory in cs2910/keys, overwriting it 
 # if already there. Generate all num_f/num_k combos for all replicas
@@ -20,7 +22,7 @@ configurations = {}
 def gen_prime_keys():
 
     # Apply the Makefile fix in prime/OpenTC-1.1/TC-lib-1.0/Makefile
-    make_file_fix(fix_enabled=False)
+    make_file_fix()
 
     # Make the keys directory in the root cs2910 file, replace it if it already exists
     if os.path.exists("prime_keys"):
@@ -86,7 +88,7 @@ def compile_prime_and_generate_keys():
 # CFLAGS = -g -O2 is causing the Prime key gen script to segfault 
 # in prime/OpenTC-1.1/TC-lib-1.0/Makefile.
 # setting CFLAGS = -g -O0 seems to fix it. 
-def make_file_fix(fix_enabled:True):
+def make_file_fix():
     with open("../prime/OpenTC-1.1/TC-lib-1.0/Makefile","r+") as f:
         new_file = ""
         for line in f.readlines():
@@ -182,9 +184,12 @@ def gen_spines_keys():
     shutil.rmtree("spines_keys/temp")
 
 # Creates <num_replicas> distinct keys for key_type <prime|spines|both>
-def main(key_type,num_replicas):
+def main(key_type,num_replicas,fix=1):
     global replica_count
     replica_count=num_replicas
+    global apply_fix_open_tc
+    apply_fix_open_tc = bool(fix)
+    
 
     keys_to_generate = [gen_prime_keys, gen_spines_keys]
     # Only gen Prime keys

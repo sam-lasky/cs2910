@@ -11,9 +11,10 @@ replica_count= None
 # Dictionary where key = replica count, value = (NUM_F,NUM_K) tuple
 configurations = {}
 
-# Generates keys using the passed NUM_F/K values. 
-# Updates prime/src/def.h using these values
-# Stores the generated keys in CS2910/keys/prime_keys
+# Make prime_keys directory in cs2910/keys, overwriting it 
+# if already there. Generate all num_f/num_k combos for all replicas
+# in range 6-->replica_count & store in dictionary configuration.
+# Generate the keys & store them in keys/prime_keys
 def gen_prime_keys():
 
     # Make the keys directory in the root cs2910 file, replace it if it already exists
@@ -24,7 +25,15 @@ def gen_prime_keys():
     # Generate the configurations
     config_generator()
 
-    # Generate all keys for number of replicas 6 --> replica_num 
+    # Generate & store keys using the generated configurations 
+    compile_prime_and_generate_keys()
+
+
+# Generate all the Prime keys in the range [6,replica_count]. 
+# Store generated keys in cs2910/keys/prime_keys
+# Distinct replica keys are stored in prime_keys/replicas_[replica_number]
+def compile_prime_and_generate_keys():
+
     for replica_num in configurations:
         num_f = configurations[replica_num][0]
         num_k = configurations[replica_num][1]
@@ -51,6 +60,7 @@ def gen_prime_keys():
 
         # Copy the key directory in Prime keys/prime_keys
         subprocess.run(["cp", "-r", f"../prime/bin/replicas_{replica_num}", "prime_keys/"], check=True)
+
 
 
 # Generates replica_count number of distinct NUM_F/NUM_K comboniations

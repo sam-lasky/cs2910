@@ -34,7 +34,7 @@ def gen_prime_keys():
 # Distinct replica keys are stored in prime_keys/replicas_[replica_number]
 def compile_prime_and_generate_keys():
 
-    for replica_num in configurations:
+    for replica_num in sorted(configurations.keys()):
         num_f = configurations[replica_num][0]
         num_k = configurations[replica_num][1]
         print(f'GENERATING KEYS FOR {replica_num}, NUM_F: {num_f} NUM_K: {num_k}')

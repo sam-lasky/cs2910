@@ -135,10 +135,10 @@ def main(key_type,num_replicas):
     keys_to_generate = [gen_prime_keys, gen_spines_keys]
     # Only gen Prime keys
     if key_type=='prime':
-        keys_to_generate.remove(gen_prime_keys)
+        keys_to_generate.remove(gen_spines_keys)
     # Only gen Spines keys
     elif key_type=='spines':
-        keys_to_generate.remove(gen_spines_keys)
+        keys_to_generate.remove(gen_prime_keys)
 
     # Gen keys 
     for func in keys_to_generate:

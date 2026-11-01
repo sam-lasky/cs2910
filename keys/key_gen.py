@@ -97,7 +97,7 @@ def make_file_fix():
                 # if action=="check": 
                 #     return True if line.strip()=="CFLAGS = -g -O0" else False
                 # updating the file
-                if fix_enabled:
+                if apply_fix_open_tc:
                     line = "CFLAGS = -g -O0\n"
                 else: line = "CFLAGS = -g -O2\n"
             new_file+=line

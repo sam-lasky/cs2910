@@ -188,7 +188,7 @@ def main(key_type,num_replicas,fix=1):
     global replica_count
     replica_count=num_replicas
     global apply_fix_open_tc
-    apply_fix_open_tc = bool(fix)
+    apply_fix_open_tc = bool(int(fix))
     print(apply_fix_open_tc)
     
 

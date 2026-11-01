@@ -38,8 +38,9 @@ def gen_prime_keys():
 def compile_prime_and_generate_keys():
 
     replica_ip={i:"dummy" for i in range(1, len(configurations.keys())+1)}
-    print(replica_ip)
-    print(len(configurations.keys()))
+    # print(replica_ip)
+    # print(len(configurations.keys()))
+    print(configurations)
     exit(0)
 
     for replica_num in sorted(configurations.keys()):

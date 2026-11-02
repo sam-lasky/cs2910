@@ -13,7 +13,30 @@ SPINES_DAEMON_PATH = '/root/cs2910/prime/spines/daemon'
 SPINES_TEST_PROG_PATH = '/root/cs2910/prime/spines/testprogs'
 ENCRYPTION_TESTING_PATH = Path(__file__).parent
 
-test_number = None
+# =================================================
+# ==================== GLOBALS ====================
+# =================================================
+
+# Directory for the this test instance
+test_run_dir = None
+
+# Key: (bandwidth, encryption_enabled)
+# Value: {trial_num: {'sender_tp': Kbps, 'receiver_tp': Kbps, 'packets_received': count}}
+results_dict = {}
+
+# Test link speeds in Mbps
+link_speeds = [100,250,300,500,750]
+
+# Encryption values (T/F)
+encryption_values = [True,False]
+
+# Total Trials per link speed/encryption val combo
+total_trials= 5
+
+# =================================================
+# =================================================
+
+
 
 sys.path.insert(0, str(ROOT))
 
@@ -45,12 +68,6 @@ def manage_docker(*args,build:bool=True,compose:bool=True):
 
 
 def run_tests():
-
-    # link_speeds = [100,250,300,500,750]
-    link_speeds = [100]
-    encryption_values = [True]
-    # encryption_values = [True,False]
-    total_trials= 1
 
     # Use bandwidths 100 Mbps, 250 Mbps, 300 Mbps, 500 Mbps, 750 Mbps
     for bandwidth in link_speeds:
@@ -96,6 +113,10 @@ def run_tests():
                         'rate', f'{bandwidth}mbit',
                         'burst', '32kbit', 'latency', '400ms'
                     )
+                    # ensure it has been applied correctly
+                    run('docker', 'exec', container, 'tc', 'qdisc', 'show', 'dev', 'eth0')
+                    
+
 
                     # (3)
                     run(
@@ -109,6 +130,7 @@ def run_tests():
                         container, 'sh', '-c',
                         f'./spines -I {ip} > /tmp/spines.log 2>&1'
                     )
+
 
                 # Give Spines time to start
                 print("Sleeping 10 seconds to give Spines time to start")
@@ -124,51 +146,80 @@ def run_tests():
                 packet_size = 1000
                 opts = f"-P 8 -D 1 -n {packet_count} -b {packet_size}"
 
-                # receiver: Remove the receiver.log from previous runs 
-                run(
-                    'docker', 'exec', 'receiver',
-                    'rm', '-f', '/tmp/receiver.log'
-                )
+                # timeout initially 120, grows by 30 seconds every failure 
+                receiver_timeout=120
+                # Failure is not an option
+                while True:
 
-                # receiver: Start sp_bflooder using inputs opts CLI arguments
-                # writes log content to /root/cs2910/prime/spines/testprogs
-                receiver_process = subprocess.Popen([
-                    'docker', 'exec', 'receiver', 'sh', '-c',
-                    f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1'
-                ])
-                # Receiver container's sp_bflooder is 
+                    # receiver: Remove the receiver.log from previous runs 
+                    run(
+                        'docker', 'exec', 'receiver',
+                        'rm', '-f', '/tmp/receiver.log'
+                    )
 
-                time.sleep(2)
+                    # receiver: Start sp_bflooder using inputs opts CLI arguments
+                    # writes log content to /root/cs2910/prime/spines/testprogs
+                    receiver_process = subprocess.Popen([
+                        'docker', 'exec', 'receiver', 'sh', '-c',
+                        f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1'
+                    ])
+                    # Receiver container's sp_bflooder is 
 
-                # Print curr test config
-                status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet_count, packet_size)
+                    time.sleep(2)
 
-                # sender: Start sp_bflooder using inputs opts CLI arguments
-                sender_result = subprocess.run(
-                    [
-                        'docker', 'exec', 'sender', 'sh', '-c',
-                        f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -s {opts} '
-                        f'-a 172.20.0.3 -R {bandwidth * 1000}'
-                    ],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
-                # store sender's stdout to sender_output
-                sender_output = sender_result.stdout
+                    # Print curr test config
+                    status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet_count, packet_size)
 
-                # wait for receiver to finish before accessing log (ensure all contents written)
-                # NEED TO ADD LOGIC TO HANDLE INDEFINITE WAITS 
-                receiver_process.wait()
+                    # sender: Start sp_bflooder using inputs opts CLI arguments
+                    sender_result = subprocess.run(
+                        [
+                            'docker', 'exec', 'sender', 'sh', '-c',
+                            f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -s {opts} '
+                            f'-a 172.20.0.3 -R {bandwidth * 1000}'
+                        ],
+                        capture_output=True,
+                        text=True,
+                        check=True
+                    )
+                    # store sender's stdout to sender_output
+                    sender_output = sender_result.stdout
 
-                # Retrives/analyzes/saves test logs (receiver)
-                # Prints results 
-                # Parses & stores receiver/sender data for later analysis 
-                handle_output(test_number, bandwidth, encryption_enabled, trial_num,sender_output)
+                    # Wait for receiver to finish before accessing log (ensure all contents written)
+                    # Term package may be lost, timeout = 2 minutes
+                    try:
+                        receiver_process.wait(timeout=receiver_timeout)
+                    except subprocess.TimeoutExpired:
+                        print("\n ****************** RECEIVER CONTAINER TIMED OUT ******************")                    
+                        print(f"Trial {trial_num} | Bandwidth {bandwidth} | Encryption {'ENABLED' if encryption_enabled else 'DISABLED'}\n")
+                        print(f"TRYING AGAIN: ATTEMPT # {   ((receiver_timeout-120) // 30) +1         }\n")
+                        print(" ******************************************************************\n")
+                        # increase timeout by 30 secs for next attempt
+                        receiver_timeout+=30
+                        continue
 
+                    # Retrives/analyzes/saves test logs (receiver)
+                    # Prints results 
+                    # Parses & stores receiver/sender data for later analysis 
+                    handle_output(bandwidth, encryption_enabled, trial_num,sender_output)
+                    break
+
+# key:(bandwidth, encryption status), value: {Trial Num:}
 
 # Store & parse test results on host machine
-def handle_output(test_number, bandwidth, encryption_enabled, trial_num,sender_output:str):
+def handle_output(bandwidth, encryption_enabled, trial_num,sender_output:str):
+
+    global results_dict
+
+    # Key to the results dict 
+    key = (bandwidth, encryption_enabled)
+
+    # If it's the 1st trial initialize this configuration in the results dictionary
+    # k = (bandwidth, encryption status)
+    if trial_num==1:
+        results_dict[(bandwidth, encryption_enabled)]={}
+
+    # Get the sending container's throughput (Kbps)
+    sender_tp = float(sender_output.split("Sender: Avg transmit rate:")[1].split()[0])
     
     # Get the receiver's log and store it in stdout  
     result = subprocess.run(
@@ -176,26 +227,30 @@ def handle_output(test_number, bandwidth, encryption_enabled, trial_num,sender_o
         capture_output=True,
         text=True,
         check=True
-        )
+    )
 
-    # Get the sending container's sending rate (Kbps)
-    sender_rate = float(sender_output.split("Sender: Avg transmit rate:")[1].split()[0])
-    print(sender_rate)
-    exit(0)
+    # Get the receiving container's throughput (Kbps)
+    receiver_tp = float(result.stdout.split("- Throughput:")[1].split()[0])
+    # Get packets received 
+    packets_received = int(result.stdout.split("- Num Pkts Received:")[1].split()[0])
+
+    # Store this trial's results 
+    results_dict[key][trial_num]={
+        'sender_tp': sender_tp,
+        'receiver_tp':receiver_tp,
+        'packets_received':packets_received
+    }
+
 
     # In the current test_results directory, store the log inside of log_dir (if it exists, otherwise make it first)
-    log_dir = ROOT / 'spines_encryption_testing' / 'test_output' / f'test_results_{test_number}' / 'receiver_logs'
+    log_dir = ROOT / 'spines_encryption_testing' / 'test_output' / test_run_dir / 'receiver_logs'
     log_dir.mkdir(parents=True, exist_ok=True)
     
     # Customize log file name to the current test config 
     encryption = 'enabled' if encryption_enabled else 'disabled'
-    filename = f'{bandwidth}mbps_{encryption}_trial{trial_num}.log'
-    
+    filename = f'{bandwidth}mbps_{encryption}_trial{trial_num}.txt'    
     # Write it! 
     (log_dir / filename).write_text(result.stdout)
-
-
-
 
 
 def status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet_count, packet_size):
@@ -207,7 +262,10 @@ def status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet
         f"Total Data Transmitted: {packet_count*packet_size} Bytes\n"
     )
 
-    print(f"[Test Config for Trial {trial_num}/{total_trials}:"+config,flush=True)
+    print(f"\n[Test Config for Trial {trial_num}/{total_trials}:"+config+"\n",flush=True)
+
+# Export results in csv format for analysis & presentation 
+def export_results_csv():
 
 
 
@@ -217,14 +275,14 @@ def main():
     os.chdir(ROOT / 'spines_encryption_testing' / 'test_output')
     for i in range(1,500000):
         if not os.path.exists(f'test_results_{i}'):
-            os.mkdir(f'test_results_{i}')
-            global test_number
-            test_number=i
+            global test_run_dir
+            test_run_dir=f'test_results_{i}'
+            os.mkdir(test_run_dir)
             break
     os.chdir('..')
     manage_docker('up', '-d', '--force-recreate')
     run_tests()
-
+    export_results_csv()
 
 if __name__=='__main__':
     main()

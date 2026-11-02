@@ -8,6 +8,7 @@ RUN dnf install -y \
     gcc gcc-c++ make openssl-devel \
     flex bison byacc git groff python3 \
     iproute iputils which tar gzip \
+    iproute iproute-tc iputils \
     && dnf clean all
 
 # Clone repository

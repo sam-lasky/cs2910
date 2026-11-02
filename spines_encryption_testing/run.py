@@ -238,8 +238,7 @@ def handle_output(test_number, bandwidth, encryption_enabled, trial_num):
 
 def main():
     # Make a uniquely named subdirectory in test_output for this test 
-    print(ROOT / 'spines_encryption_testing' / 'test_output')
-    exit(0)
+
     os.chdir(ROOT / 'spines_encryption_testing' / 'test_output')
     for i in range(1,500000):
         if not os.path.exists(f'test_results_{i}'):

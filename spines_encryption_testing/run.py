@@ -192,9 +192,11 @@ def run_tests():
                         print("\n ****************** RECEIVER CONTAINER TIMED OUT ******************")                    
                         print(f"Trial {trial_num} | Bandwidth {bandwidth} | Encryption {'ENABLED' if encryption_enabled else 'DISABLED'}\n")
                         print(f"TRYING AGAIN: ATTEMPT # {   ((receiver_timeout-120) // 30) +1         }\n")
-                        print(" ******************************************************************\n")
                         # increase timeout by 30 secs for next attempt
                         receiver_timeout+=30
+                        print(f"THE CURRENT TIMEOUT VALUE IS: {receiver_timeout} SECONDS ! ! ! FAILURE IS NOT AN OPTION!!!!")
+                        print(" ******************************************************************\n")
+
                         continue
 
                     # Retrives/analyzes/saves test logs (receiver)

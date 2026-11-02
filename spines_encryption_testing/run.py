@@ -47,109 +47,121 @@ def run_tests():
 
     # link_speeds = [100,250,300,500,750]
     link_speeds = [100]
-
     encryption_values = [True]
     # encryption_values = [True,False]
+    total_trials= 1
 
     # Use bandwidths 100 Mbps, 250 Mbps, 300 Mbps, 500 Mbps, 750 Mbps
     for bandwidth in link_speeds:
         # For each bandwidth, run Spines with encryption enabled & disabled
         for encryption_enabled in encryption_values:
+            # Number of trials per bandwidth/encryption config
+            for trial_num in range(1, total_trials+1):
+                # Restart the containers to reset previous tc settings 
+                # and kill any leftover processes
+                manage_docker('restart',build=False)
 
-            # Restart the containers to reset previous tc settings 
-            # and kill any leftover processes
-            manage_docker('restart',build=False)
-
-            # Update spines.conf on host machine (must be done multiple times due to encryption_enabled changing)
-            os.chdir(ROOT / 'common')
-            # sender: <replica_id = 1> <ip = '172.20.0.2'>
-            # receiver: <replica_id = 2> <ip = '172.20.0.3'>
-            spines_conf(
-                {1: '172.20.0.2', 2: '172.20.0.3'},
-                encryption_enabled
-            )
-
-            # Change dir to spines daemon dir [HOST MACHINE]
-            # os.chdir(SPINES_DAEMON_PATH)
-            os.chdir(ROOT / 'prime/spines/daemon')
-
-            #   (1) Copy the updated spines.conf files to the containers
-            #   (2) Apply bandwidth limits using the loop iteration's bandwidth value  
-            #   (3) Remove leftover Spines IPC socket paths leftover from previous runs/crashes
-            #       (a) /tmp/spines8100 - Control Channel
-            #       (b) /tmp/spines8100data - Data channel
-            #  
-            for container,ip in [('sender','172.20.0.2'), ('receiver','172.20.0.3')]:
-
-                # (1)  
-                run(
-                    'docker', 'cp', 'spines.conf',
-                    f'{container}:{SPINES_DAEMON_PATH}'                
-                )
-                # (2)
-                run(
-                    'docker', 'exec', container,
-                    'tc', 'qdisc', 'replace',
-                    'dev', 'eth0', 'root', 'tbf',
-                    'rate', f'{bandwidth}mbit',
-                    'burst', '32kbit', 'latency', '400ms'
+                # Update spines.conf on host machine (must be done multiple times due to encryption_enabled changing)
+                os.chdir(ROOT / 'common')
+                # sender: <replica_id = 1> <ip = '172.20.0.2'>
+                # receiver: <replica_id = 2> <ip = '172.20.0.3'>
+                spines_conf(
+                    {1: '172.20.0.2', 2: '172.20.0.3'},
+                    encryption_enabled
                 )
 
-                # (3)
+                # Change dir to spines daemon dir [HOST MACHINE]
+                # os.chdir(SPINES_DAEMON_PATH)
+                os.chdir(ROOT / 'prime/spines/daemon')
+
+                #   (1) Copy the updated spines.conf files to the containers
+                #   (2) Apply bandwidth limits using the loop iteration's bandwidth value  
+                #   (3) Remove leftover Spines IPC socket paths leftover from previous runs/crashes
+                #       (a) /tmp/spines8100 - Control Channel
+                #       (b) /tmp/spines8100data - Data channel
+                #  
+                for container,ip in [('sender','172.20.0.2'), ('receiver','172.20.0.3')]:
+
+                    # (1)  
+                    run(
+                        'docker', 'cp', 'spines.conf',
+                        f'{container}:{SPINES_DAEMON_PATH}'                
+                    )
+                    # (2)
+                    run(
+                        'docker', 'exec', container,
+                        'tc', 'qdisc', 'replace',
+                        'dev', 'eth0', 'root', 'tbf',
+                        'rate', f'{bandwidth}mbit',
+                        'burst', '32kbit', 'latency', '400ms'
+                    )
+
+                    # (3)
+                    run(
+                        'docker', 'exec', container, 'rm', '-f',
+                        '/tmp/spines8100', '/tmp/spines8100data'
+                    )
+
+                    # (4)
+                    run(
+                        'docker', 'exec', '-d', '-w', SPINES_DAEMON_PATH,
+                        container, 'sh', '-c',
+                        f'./spines -I {ip} > /tmp/spines.log 2>&1'
+                    )
+
+                # Give Spines time to start
+                print("Sleeping 10 seconds to give Spines time to start")
+                time.sleep(10)
+
+                '''
+                    -P: Overlay Link Protocol = 8 (intrusion tolerant)
+                    -D: Dissemination Algorithm = 1 (intrustion tolerant priority)
+                    -n: Number of packets to sent = 1 million
+                    -b: Packet size in bytes = 1,000 bytes (default value, included for readablility)
+                '''
+                packet_count = 1000000
+                packet_size = 1000
+                opts = f"-P 8 -D 1 -n {packet_count} -b {packet_size}"
+
+                # receiver: Remove the receiver.log from previous runs 
                 run(
-                    'docker', 'exec', container, 'rm', '-f',
-                    '/tmp/spines8100', '/tmp/spines8100data'
+                    'docker', 'exec', 'receiver',
+                    'rm', '-f', '/tmp/receiver.log'
                 )
 
-                # (4)
-                run(
-                    'docker', 'exec', '-d', '-w', SPINES_DAEMON_PATH,
-                    container, 'sh', '-c',
-                    f'./spines -I {ip} > /tmp/spines.log 2>&1'
+                # receiver: Start sp_bflooder using inputs opts CLI arguments
+                # writes log content to /root/cs2910/prime/spines/testprogs
+                receiver_process = subprocess.Popen([
+                    'docker', 'exec', 'receiver', 'sh', '-c',
+                    f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1'
+                ])
+                # Receiver container's sp_bflooder is 
+
+                time.sleep(2)
+
+                config = (
+                    f"\nBandwidth: {bandwidth} Mbps\n"
+                    f"Encryption Status: {'ENABLED' if encryption_enabled else 'DISABLED'}\n"
+                    f"Trial number {trial_num}/{total_trials}\n"
+                    f"Total Packets being sent: {packet_count}\n"
+                    f"Packet Size: {packet_size}\n"
+                    f"Total Data Transmitted: {packet_count*packet_size} Bytes\n"
                 )
 
-            # Give Spines time to start
-            print("Sleeping 10 seconds to give Spines time to start")
-            time.sleep(10)
+                print("Running Test Config:"+config,flush=True)
 
-            '''
-                -P: Overlay Link Protocol = 8 (intrusion tolerant)
-                -D: Dissemination Algorithm = 1 (intrustion tolerant priority)
-                -n: Number of packets to sent = 1 million
-                -b: Packet size in bytes = 1,000 bytes (default value, included for readablility)
-            '''
-            opts = '-P 8 -D 1 -n 1000000 -b 1000'
+                # sender: Start sp_bflooder using inputs opts CLI arguments
+                run(
+                    'docker', 'exec', 'sender', 'sh', '-c',
+                    f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -s {opts} '
+                    f'-a 172.20.0.3 -R {bandwidth * 1000}'
+                )
 
-            # receiver: Remove the receiver.log from previous runs 
-            run(
-                'docker', 'exec', 'receiver',
-                'rm', '-f', '/tmp/receiver.log'
-            )
-
-            # receiver: Start sp_bflooder using inputs opts CLI arguments
-            # writes log content to /root/cs2910/prime/spines/testprogs
-            receiver_process = subprocess.Popen([
-                'docker', 'exec', 'receiver', 'sh', '-c',
-                f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1'
-            ])
-            # Receiver container's sp_bflooder is 
-
-            time.sleep(2)
-
-            # sender: Start sp_bflooder using inputs opts CLI arguments
-            run(
-                'docker', 'exec', 'sender', 'sh', '-c',
-                f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -s {opts} '
-                f'-a 172.20.0.3 -R {bandwidth * 1000}'
-            )
-
-            # wait for receiver to finish before accessing log (ensure all contents written)
-            # NEED TO ADD LOGIC TO HANDLE INDEFINITE WAITS 
-            receiver_process.wait()
-            # Print receiver log contents
-            with open("receiver.log", "r") as f:
-                print(f.read())
-
+                # wait for receiver to finish before accessing log (ensure all contents written)
+                # NEED TO ADD LOGIC TO HANDLE INDEFINITE WAITS 
+                receiver_process.wait()
+                # Print receiver log contents
+                run('docker', 'exec', 'receiver', 'cat', '/tmp/receiver.log')
 
             # filename = (
             #     HERE / f'receiver-{mode}-{bandwidth}mbps-trial{trial}.log'

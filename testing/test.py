@@ -90,7 +90,7 @@ def main():
     max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
 
     # originally 6,7,8,9,10
-    total_replicas_used = [6]
+    total_replicas_used = [6,7,8]
     emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
     # originally 0,1
     encrypted_values = [0]
@@ -274,9 +274,16 @@ def print_test_config(
         flush=True,
     )
 
-e
-
-
+'''
+    Driver Usage: ./client"
+        -l IP (A.B.C.D)
+            >> IP address 
+        -c count_of_transactions_to_benchmark
+        -i client_id, indexed base 1
+        -s server_id, indexed base 1
+        -n num_clients_to_emulate]
+        -r num_prime_replicas
+'''
 def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
     return [
         # sh command

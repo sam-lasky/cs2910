@@ -5,13 +5,20 @@ import time
 from pathlib import Path
 from sys import path
 
-ROOT = Path(__file__).resolve().parent.parent
-HERE = Path(__file__).resolve().parent
-DAEMON = '/root/cs2910/prime/spines/daemon'
-TEST = '/root/cs2910/prime/spines/testprogs'
+
+# ROOT = Path(__file__).resolve().parent.parent
+# HERE = Path(__file__).resolve().parent
+# DAEMON = '/root/cs2910/prime/spines/daemon'
+
+ROOT= Path(__file__).parent.parent
+SPINES_DAEMON_PATH = '/root/cs2910/prime/spines/daemon'
+SPINES_TEST_PROG_PATH = '/root/cs2910/prime/spines/testprogs'
+ENCRYPTION_TESTING_PATH = Path(__file__).parent
 
 path.insert(0, str(ROOT))
+
 from common.config import spines_conf
+
 
 
 def run(*args):
@@ -19,26 +26,27 @@ def run(*args):
 
 
 def compose(*args):
+
     run(
-        'docker', 'compose', '-p', 'spines-encryption',
-        '-f', HERE / 'docker-compose_base.yml', *args
+        'docker', 'build',
+        '-f', ENCRYPTION_TESTING_PATH / 'docker_files/Dockerfile.spines',
+        '-t', 'spines-img', ROOT
     )
 
 
-run(
-    'docker', 'build',
-    '-f', HERE / 'docker_files/Dockerfile.base',
-    '-t', 'base-img', ROOT
-)
-run(
-    'docker', 'build',
-    '-f', HERE / 'docker_files/Dockerfile.spines',
-    '-t', 'spines-img', ROOT
-)
+    # run(
+    #     'docker', 'compose', '-p', 'spines-encryption',
+    #     '-f', ENCRYPTION_TESTING_PATH / 'docker-compose_base.yml', *args
+    # )
+
+
+
+
 
 compose('up', '-d', '--force-recreate')
+exit(0)
 
-for bandwidth in [750]:
+for bandwidth in [100,250,300,500,750]:
     for encrypted in [True, False]:
         for trial in range(1, 6):
             mode = 'on' if encrypted else 'off'

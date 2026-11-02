@@ -180,31 +180,17 @@ void clean_exit(int signum)
 
 int main(int argc, char** argv) 
 {
-
-  /* char buf[128]; */
-
-
-
   Usage(argc, argv);
   Alarm_set_types(PRINT);
   Alarm_set_types(STATUS);
   //Alarm_set_types(DEBUG);
   Alarm_enable_timestamp_high_res(NULL);
 
-  NET.program_type = NET_CLIENT_PROGRAM_TYPE;  
-  update_count     = 0;
-  curr_seq_num       = 0;
-  total_time       = 0;
-  //MS2022
+  NET.program_type  = NET_CLIENT_PROGRAM_TYPE;  
+  update_count      = 0;
+  curr_seq_num      = 0;
+  total_time        = 0;
 
-  /*
-    This line changes the number of servers set in usage to 18. I commented it out and instead
-    replaced it to 6 for testing purposes. TODO: remove all together. 
-  */
-  // VAR.Num_Servers=18;
-  // VAR.Num_Servers=8;
-  
-  
   
   //UTIL_Client_Load_Addresses(); 
   UTIL_Load_Addresses(); 
@@ -608,19 +594,20 @@ void Usage(int argc, char **argv)
       }
       argc--; argv++;
     }
-  /* [-c count] */
+  /* Number of updates the driver program sends to the Prime daemon [-c count] */
     else if((argc > 1)&&(!strncmp(*argv, "-c", 2))) {
       sscanf(argv[1], "%d", &tmp);
       total_required_updates = tmp;
       argc--; argv++;
     } 
-  /* [-n number of clients to emulate]*/
+  /* Number of clients the driver program is emulating  [-n number of clients to emulate]*/
     else if((argc > 1)&&(!strncmp(*argv, "-n", 2))) 
     {
       sscanf(argv[1], "%d", &tmp);
       num_clients_to_emulate = tmp;
       argc--; argv++;
     }
+    /* Number of Prime [r]eplicas (servers) */
     else if ((argc > 1) && (!strncmp(*argv, "-r", 2))) {
     VAR.Num_Servers = atoi(argv[1]);
     argc--; argv++;
@@ -652,13 +639,13 @@ void Usage(int argc, char **argv)
 void Print_Usage()
 {
   Alarm(PRINT, "Usage: ./client\n"
-	"\t -l IP (A.B.C.D) \n"
-	"\t -c count_of_transactions_to_benchmark \n"
-        "\t -i client_id, indexed base 1\n"
-	"\t[-s server_id, indexed base 1]\n"
-" \t[-c num_cliens_to_emulate]\n"
-);
-
+      "\t -l IP (A.B.C.D)\n"
+      "\t -c count_of_transactions_to_benchmark\n"
+      "\t -i client_id, indexed base 1\n"
+      "\t[-s server_id, indexed base 1]\n"
+      "\t[-n num_clients_to_emulate]\n"
+      "\t[-r num_prime_replicas]\n"
+  );
 
   exit(0);
 }

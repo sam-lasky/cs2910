@@ -37,7 +37,7 @@ def manage_docker(*args,build:bool=True,compose:bool=True):
     # Creates sender/2 containers & creates spines-net bridge network & remaining args in *args
     if compose:run(
         'docker', 'compose', '-p', 'spines-encryption',
-        '-f', ENCRYPTION_TESTING_PATH / 'docker-compose_base.yml', *args
+        '-f', ENCRYPTION_TESTING_PATH / 'docker_files/docker-compose_base.yml', *args
     )
 
 

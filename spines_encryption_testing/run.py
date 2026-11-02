@@ -96,6 +96,8 @@ def run_tests():
                 # timeout initially 120, grows by 30 seconds every failure 
                 receiver_timeout=120
 
+                print("\nSTATUS: CONFIGURING CONTAINERS....")
+
                 # Failure is not an option: Recv container may never get the term packet (gets dropped)
                 # and will run indefinitely. A timer is used so this does not happen, which gets incremented
                 # by 30 seconds on every failure until it eventually succeeds 
@@ -189,6 +191,8 @@ def run_tests():
 
                     # Print curr test config
                     status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet_count, packet_size)
+
+                    print("STATUS: CONTAINERS HAVE BEEN SUCCESSFULLY CONFIGURED!!!\n\n")
 
                     # sender: Start sp_bflooder using inputs opts CLI arguments
                     sender_result = subprocess.run(
@@ -309,7 +313,7 @@ def status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet
         f"Total Data Transmitted: {packet_count*packet_size} Bytes\n"
     )
 
-    print(f"\n[Test Config for Trial {trial_num}/{total_trials}:"+config+"\n",flush=True)
+    print(f"\n[Test Config for Trial {trial_num}/{total_trials}:"+config+"]\n",flush=True)
 
 
 # Key: (bandwidth, encryption_enabled)
@@ -339,7 +343,7 @@ def status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet
 
 # Export results in csv format for analysis & presentation 
 def export_results_csv(encryption_status):
-    
+
     # This is for the host's machine 
     output_path = ROOT / 'spines_encryption_testing' / 'test_output' / test_run_dir / f'results_{"ENCRYPTED" if encryption_status else "PLAIN"}.csv'
 
@@ -354,16 +358,17 @@ def export_results_csv(encryption_status):
 
             # Bandwidth/encryption title (single csv cell/row in excel tbl)
             writer.writerow([f'{bandwidth} Mbps | Encryption {"ENABLED" if encryption_status else "DISABLED"} | Total Trials: {total_trials}'])
-            
+
             # Test configuration (single CSV cell /row in excel tbl)
             writer.writerow([f'Total Packets Sent: {packet_count:,} | Packet Size: {packet_size:,} Bytes | Total Data Sent: {packet_count * packet_size / 1e9:g} GB'])
-            
+
             # Column names
             writer.writerow([
                 'Trial',
                 'Sender Throughput (Mbps)',
                 'Receiver Throughput (Mbps)',
-                'Utilization (%)',
+                'Utilization (%) Sender',
+                'Utilization (%) Receiver',
                 'Packets Received',
                 'Delivery (%)'
             ])
@@ -404,6 +409,7 @@ def export_results_csv(encryption_status):
                     trial_num,
                     round(sender_tp, 2),
                     round(receiver_tp, 2),
+                    round(util_send, 2),
                     round(util_rec, 2),
                     packets_received,
                     round(delivery, 2)
@@ -424,12 +430,13 @@ def export_results_csv(encryption_status):
             avg_util_send /= total_trials
             avg_rec /= total_trials
             avg_delivery /= total_trials
-            
+
             # Write avgs (own row) 
             writer.writerow([
             'AVERAGE',
             round(avg_st, 2),
             round(avg_rt, 2),
+            round(avg_util_send, 2),
             round(avg_util_rec, 2),
             round(avg_rec, 2),
             round(avg_delivery, 2)

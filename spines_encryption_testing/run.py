@@ -179,7 +179,7 @@ def handle_output(test_number, bandwidth, encryption_enabled, trial_num,sender_o
         )
 
     # Get the sending container's sending rate (Kbps)
-    sender_rate = float(sender_output.split("Sender: Avg transmit rate:")[0].split())
+    sender_rate = float(sender_output.split("Sender: Avg transmit rate:")[1].split()[0])
     print(sender_rate)
     exit(0)
 
@@ -202,38 +202,13 @@ def status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet
     config = (
         f"\nBandwidth: {bandwidth} Mbps\n"
         f"Encryption Status: {'ENABLED' if encryption_enabled else 'DISABLED'}\n"
-        f"Trial number {trial_num}/{total_trials}\n"
         f"Total Packets being sent: {packet_count}\n"
         f"Packet Size: {packet_size}\n"
         f"Total Data Transmitted: {packet_count*packet_size} Bytes\n"
     )
 
-    print("Running Test Config:"+config,flush=True)
+    print(f"[Test Config for Trial {trial_num}/{total_trials}:"+config,flush=True)
 
-# Store & parse test results on host machine
-def handle_output(test_number, bandwidth, encryption_enabled, trial_num):
-    
-    # Get the receiver's log and store it in stdout  
-    result = subprocess.run(
-        ['docker', 'exec', 'receiver', 'cat', '/tmp/receiver.log'],
-        capture_output=True,
-        text=True,
-        check=True
-        )
-
-    print(result.stdout, flush=True)
-    sys.exit(0)
-    
-    # In the current test_results directory, store the log inside of log_dir (if it exists, otherwise make it first)
-    log_dir = ROOT / 'spines_encryption_testing' / 'test_output' / f'test_results_{test_number}' / 'receiver_logs'
-    log_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Customize log file name to the current test config 
-    encryption = 'enabled' if encryption_enabled else 'disabled'
-    filename = f'{bandwidth}mbps_{encryption}_trial{trial_num}.log'
-    
-    # Write it! 
-    (log_dir / filename).write_text(result.stdout)
 
 
 def main():

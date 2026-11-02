@@ -24,19 +24,19 @@ def spines_address_config(replica_ip_mapping):
             f.write(f"{key} {value}\n")
 
 # Update prime/spines/daemon/spines.conf
-def spines_conf(replica_ip_mapping:dict,encrypted):
+def spines_conf(replica_ip_mapping:dict,encryption_enabled:bool):
     new_file=''
     with open('../prime/spines/daemon/spines_template.conf', 'r') as f:
         for line in f.readlines():
             # ENCRYPTION SETTING 1
             if line.startswith('IT_LinkCrypto'):
-                if encrypted:
+                if encryption_enabled:
                     line='IT_LinkCrypto = True\n'
                 else:
                     line='IT_LinkCrypto = False\n'
             # ENCRYPTION SETTING 2
             elif line.startswith('IT_LinkEncrypt'):
-                if encrypted:
+                if encryption_enabled:
                     line = 'IT_LinkEncrypt = True\n'
                 else:
                     line = 'IT_LinkEncrypt = False\n'

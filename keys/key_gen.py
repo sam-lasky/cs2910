@@ -108,7 +108,7 @@ def gen_spines_keys():
 
     # Generate public/private keys in range 1-->replica_count
     for i in range(1,replica_count + 1):
-        # private
+        # private keygen
         subprocess.run(
             [
                 "openssl", "genrsa",
@@ -117,7 +117,7 @@ def gen_spines_keys():
             ],
             check=True,
         )
-        # public
+        # public keygen
         subprocess.run(
             [
                 "openssl", "rsa",
@@ -135,8 +135,8 @@ def gen_spines_keys():
         subprocess.run(["cp",f"spines_keys/temp/dhparam.pem",f"spines_keys/replicas_{i}/"])
         # copy all priv/pub keys into the curr rep count subdirectory
         for j in range(1,i+1):
-            subprocess.run(["cp", f"spines_keys/temp/private{j}.pem",f"spines_keys/replicas_{i}/"])
-            subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/replicas_{i}/"])
+            shutil.copy(f"spines_keys/temp/private{j}.pem", f"spines_keys/replicas_{i}/")
+            shutil.copy(f"spines_keys/temp/public{j}.pem", f"spines_keys/replicas_{i}/")
 
     # Delete the temporary directory
     shutil.rmtree("spines_keys/temp")

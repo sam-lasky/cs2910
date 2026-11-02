@@ -1,23 +1,23 @@
 services:
   spines1:
     image: spines-img
-    container_name: spines1
+    container_name: sender
     cap_add: [NET_ADMIN]
     command: sleep infinity
     networks:
-      prime-net:
+      spines-net:
         ipv4_address: 172.20.0.2
   spines2:
     image: spines-img
-    container_name: spines2
+    container_name: receiver
     cap_add: [NET_ADMIN]
     command: sleep infinity
     networks:
-      prime-net:
+      spines-net:
         ipv4_address: 172.20.0.3
 networks:
-  prime-net:
-    name: prime-net
+  spines-net:
+    name: spines-net
     driver: bridge
     ipam:
       config:

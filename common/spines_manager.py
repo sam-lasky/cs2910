@@ -2,6 +2,7 @@ import subprocess
 import os
 import sys
 import time
+
 # local imports
 from common.config import spines_address_config, spines_conf
 
@@ -65,7 +66,6 @@ def build_spines(spines_path):
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
-
 # Start Spines
 def start_spines(replica_ip:dict, replica_id:int):
 
@@ -99,7 +99,26 @@ def start_spines(replica_ip:dict, replica_id:int):
                         if len(handshake_replica_ids)==0:
                             return spines
 
-# Handles keys for Spines
-def handle_keys(spines_path, num_replicas):        
-    pass
+# Handles keys for Spines >>TODO:UPDATE THIS SO 8 REPS ISNT HARD CODED>>
+def handle_keys(spines_path, num_replicas):
+    # Path to where spines keys are stored 
+    spines_keys_path = "../prime/spines/daemon/keys"        
+    
+    # If the keys path doesn't exist
+    if not os.path.exists():
+        os.makedirs(spines_keys_path)
+
+    # Expected Contents @ keypath
+    expected = [f"{key_type}{i}.pem" for i in range(1,num_replicas+1) for key_type in ['private','public']]
+    expected.append('dhparam.pem')
+
+    # Actual contents @ keypath
+    actual = os.listdir(spines_keys_path)
+
+    ############# FINIHS ME #############################
+
+    
+#  /root/cs2910/prime/spines/daemon
+            # subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/replicas_{i}/"])
+
 

@@ -69,8 +69,9 @@ def run_tests():
             )
 
             # Change dir to spines daemon dir [HOST MACHINE]
-            os.chdir(SPINES_DAEMON_PATH)
-           
+            # os.chdir(SPINES_DAEMON_PATH)
+            os.chdir(ROOT / 'prime/spines/daemon')
+
             #   (1) Copy the updated spines.conf files to the containers
             #   (2) Apply bandwidth limits using the loop iteration's bandwidth value  
             #   (3) Remove leftover Spines IPC socket paths leftover from previous runs/crashes

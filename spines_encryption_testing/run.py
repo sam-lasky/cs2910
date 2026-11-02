@@ -45,6 +45,11 @@ def manage_docker(*args,build:bool=True,compose:bool=True):
 
 def run_tests():
 
+    # link_speeds = [100,250,300,500,750]
+    link_speeds = [100]
+    encryption_values = [True]
+    # encryption_values = [True,False]
+
     # Use bandwidths 100 Mbps, 250 Mbps, 300 Mbps, 500 Mbps, 750 Mbps
     for bandwidth in [100,250,300,500,750]:
         # For each bandwidth, run Spines with encryption enabled & disabled

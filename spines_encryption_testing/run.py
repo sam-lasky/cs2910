@@ -8,7 +8,7 @@ from sys import path
 
 
 
-ROOT= Path(__file__).parent.parent
+ROOT= Path(__file__).resolve().parent.parent
 SPINES_DAEMON_PATH = '/root/cs2910/prime/spines/daemon'
 # Using sp_bflooder.c for the tests
 SPINES_TEST_PROG_PATH = '/root/cs2910/prime/spines/testprogs'
@@ -47,13 +47,14 @@ def run_tests():
 
     # link_speeds = [100,250,300,500,750]
     link_speeds = [100]
+
     encryption_values = [True]
     # encryption_values = [True,False]
 
     # Use bandwidths 100 Mbps, 250 Mbps, 300 Mbps, 500 Mbps, 750 Mbps
-    for bandwidth in [100,250,300,500,750]:
+    for bandwidth in link_speeds:
         # For each bandwidth, run Spines with encryption enabled & disabled
-        for encryption_enabled in [True, False]:
+        for encryption_enabled in encryption_values:
 
             # Restart the containers to reset previous tc settings 
             # and kill any leftover processes
@@ -108,6 +109,7 @@ def run_tests():
                 )
 
             # Give Spines time to start
+            print("Sleeping 10 seconds to give Spines time to start")
             time.sleep(10)
 
             '''
@@ -130,6 +132,7 @@ def run_tests():
                 'docker', 'exec', 'receiver', 'sh', '-c',
                 f'cd {SPINES_TEST_PROG_PATH} && ./sp_bflooder -v {opts} > /tmp/receiver.log 2>&1'
             ])
+            # Receiver container's sp_bflooder is 
 
             time.sleep(2)
 
@@ -143,6 +146,9 @@ def run_tests():
             # wait for receiver to finish before accessing log (ensure all contents written)
             # NEED TO ADD LOGIC TO HANDLE INDEFINITE WAITS 
             receiver_process.wait()
+            # Print receiver log contents
+            with open("receiver.log", "r") as f:
+                print(f.read())
 
 
             # filename = (

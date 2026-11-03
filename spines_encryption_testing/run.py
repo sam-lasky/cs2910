@@ -192,7 +192,7 @@ def run_tests():
                     # Print curr test config
                     status_update(bandwidth, encryption_enabled, trial_num, total_trials, packet_count, packet_size)
 
-                    print("STATUS: CONTAINERS HAVE BEEN SUCCESSFULLY CONFIGURED!!!\n\n")
+                    print("STATUS: CONTAINERS HAVE BEEN SUCCESSFULLY CONFIGURED!!!\n\n",flush=True)
 
                     # sender: Start sp_bflooder using inputs opts CLI arguments
                     sender_result = subprocess.run(

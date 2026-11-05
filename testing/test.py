@@ -2,6 +2,8 @@ import sys
 from pathlib import Path
 import subprocess
 import csv
+import select
+from time import sleep
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -174,22 +176,36 @@ def main():
         'num_replicas':6
     })
 
+    status = {i:'Unknown' for i in range(1,7)}
+    ready_count = 0
+    while True:
+        for machine, process in sessions.items():
+            ready, _, _ = select.select([process.stdout], [], [], 0)
+            if ready:
+                status[machine]=process.stdout.readline().strip()
 
-    print("Aster machines are starting up....")
-    for machine, process in sessions.items():
-        while True:
-            line = process.stdout.readline()
+        print("\033[2J\033[H", end="", flush=True)
+        printout=''
+        for i in sorted(status.keys()):
+            printout+=f"Aster {i} status: {status[i]}"
+        print(printout)
+        sleep(1)
 
-            if not line:
-                raise RuntimeError(f"Aster {machine} disconnected")
+    # print("Aster machines are starting up....")
+    # for machine, process in sessions.items():
+    #     while True:
+    #         line = process.stdout.readline()
 
-            status = line.strip()
+    #         if not line:
+    #             raise RuntimeError(f"Aster {machine} disconnected")
 
-            if status == "READY":
-                print(f"Aster {machine} is ready and awaiting input")
-                break
-            else: print(f"\rAster {machine}: {status}", end="", flush=True)
-    print("All machines are ready & are awaiting input...")
+    #         status = line.strip()
+
+    #         if status == "READY":
+    #             print(f"Aster {machine} is ready and awaiting input")
+    #             break
+    #         else: print(f"\rAster {machine}: {status}", end="", flush=True)
+    # print("All machines are ready & are awaiting input...")
 
 
 

@@ -2,6 +2,9 @@ import subprocess
 import os
 import sys
 import time
+import shutil
+from pathlib import Path
+
 
 # local imports
 from common.config import spines_address_config, spines_conf
@@ -109,24 +112,31 @@ def start_spines(replica_ip:dict, replica_id:int):
 
 # Handles keys for Spines >>TODO:UPDATE THIS SO 8 REPS ISNT HARD CODED>>
 def handle_keys(spines_path, num_replicas):
-    # Path to where spines keys are stored 
-    spines_keys_path = "../prime/spines/daemon/keys"        
-    
-    # If the keys path doesn't exist
-    if not os.path.exists():
-        os.makedirs(spines_keys_path)
+    # Directory containing pre-generated keys for this replica count
+    source = Path(f"../keys/spines_keys/replicas_{num_replicas}")
 
-    # Expected Contents @ keypath
-    expected = [f"{key_type}{i}.pem" for i in range(1,num_replicas+1) for key_type in ['private','public']]
-    expected.append('dhparam.pem')
+    # Active Spines keys directory
+    destination = Path(spines_path) / "daemon/keys"
 
-    # Actual contents @ keypath
-    actual = os.listdir(spines_keys_path)
+    if not source.is_dir():
+        raise FileNotFoundError(f"Missing Spines keys: {source}")
 
-    ############# FINIHS ME #############################
+    # Expected key files
+    expected = {
+        f"{key_type}{i}.pem"
+        for i in range(1, num_replicas + 1)
+        for key_type in ("private", "public")
+    }
+    expected.add("dhparam.pem")
 
-    
-#  /root/cs2910/prime/spines/daemon
-            # subprocess.run(["cp", f"spines_keys/temp/public{j}.pem",f"spines_keys/replicas_{i}/"])
+    # Validate generated keys
+    if not expected.issubset({p.name for p in source.iterdir()}):
+        raise RuntimeError(f"Incomplete Spines keys: {source}")
+
+    # Replace active keys with the correct configuration
+    if destination.exists():
+        shutil.rmtree(destination)
+
+    shutil.copytree(source, destination)
 
 

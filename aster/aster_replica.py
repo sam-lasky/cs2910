@@ -54,22 +54,30 @@ def main():
 
     # Build the aster machine id <--> replica ip mapping
     build_id_to_ip_map()
-    
+    print("id_to_ip_map successfully built (SETUP 1/5 COMPLETED)",flush=True)
+
     # Sets up Spines
     setup_spines(id_to_ip,encrypt)
+    print("Spines successfully setup (SETUP 2/5 COMPLETED)",flush=True)
+
 
     # Set up Prime
-    setup_prime(id_to_ip,num_replicas=len(id_to_ip.keys()),max_po=max_po) 
+    setup_prime(id_to_ip,num_replicas=len(id_to_ip.keys()),max_po=max_po)
+    print("Prime successfully setup (SETUP 3/5 COMPLETED)",flush=True)
 
     # Start Spines
     
     start_spines(id_to_ip, replica_id)
+    print("Spines successfully started (SETUP 4/5 COMPLETED)",flush=True)
     
     # Start Prime
     start_prime(id_to_ip, replica_id)
+    print("Everything is up and running, waiting for a command (SETUP 5/5 COMPLETED)",flush=True)
 
-    # Signal successful startup to the controller
-    print("READY", flush=True)
+    kill_prime()
+    kill_spines()
+    kill_driver()
+    exit(0)
 
     # Listen for commands from test.py through the SSH session
     for command in sys.stdin:
@@ -93,7 +101,7 @@ def main():
             kill_prime()
             kill_spines()
             kill_driver()
-            print("SUCCESS", flush=True)
+            print("ALL PROCESSES HAVE BEEN TERMINATED, GOODBYE!", flush=True)
             break
 
     

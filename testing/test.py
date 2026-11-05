@@ -174,15 +174,31 @@ def main():
         'num_replicas':6
     })
 
-    print('now we are here')
 
+    print("Aster machines are starting up....")
     for machine, process in sessions.items():
-        process.stdin.write("terminate\n")
-        process.stdin.flush()
+        while True:
+            line = process.stdout.readline()
 
-    for machine, process in sessions.items():
-        print(machine, process.stdout.readline().strip())
-        print("Exit status:", process.wait(timeout=10))
+            if not line:
+                raise RuntimeError(f"Aster {machine} disconnected")
+
+            status = line.strip()
+
+            if status == "READY":
+                print(f"Aster {machine} is ready and awaiting input")
+                break
+    print("All machines are ready & are awaiting input...")
+
+
+
+    # for machine, process in sessions.items():
+    #     process.stdin.write("terminate\n")
+    #     process.stdin.flush()
+
+    # for machine, process in sessions.items():
+    #     print(machine, process.stdout.readline().strip())
+    #     print("Exit status:", process.wait(timeout=10))
 
 
         # # If aster start the local controller & pass args_dict 

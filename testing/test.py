@@ -188,7 +188,7 @@ def main():
             if status == "READY":
                 print(f"Aster {machine} is ready and awaiting input")
                 break
-            else:print(status)
+            else: print(f"\rAster {machine}: {status}", end="", flush=True)
     print("All machines are ready & are awaiting input...")
 
 

@@ -122,8 +122,16 @@ def build_prime(prime_path):
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
+# Terminate any spines process
+def kill_prime():
+    subprocess.run(["pkill", "-x", "prime"], check=False)
+
+
 # Start Prime
 def start_prime(replica_ip:dict, replica_id:int):
+
+    # Kill any active Prime processes on this replica
+    kill_prime()
 
     with open('prime_status.log', 'w') as prime_status_log:
         # Start the Prime Process, write stdout/err to prime_status_log

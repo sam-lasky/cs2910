@@ -35,7 +35,6 @@ def build_id_to_ip_map():
     for i,aster_id in enumerate(aster_machines_used,start=1):
         id_to_ip[i]=f'192.168.{LAN}.{aster_id+9}'
 
-
 # Args: aster_replica.py <arg_replica_id> <arg_aster_machine_id> <arg_aster_machines_used> <arg_env> <arg_max_po> <arg_encrypt>
 def main(arg_replica_id, arg_aster_machine_id, arg_aster_machines_used, arg_env, arg_max_po, arg_encrypt):
     # <--- Set up global variables --->
@@ -69,7 +68,40 @@ def main(arg_replica_id, arg_aster_machine_id, arg_aster_machines_used, arg_env,
     # Start Prime
     start_prime(id_to_ip, replica_id)
 
-    return
+    # Signal successful startup to the controller
+    print("READY", flush=True)
+
+    # Listen for commands from test.py through the SSH session
+    for command in sys.stdin:
+        command = command.strip()
+
+        # Max PO has changed: passed in form po,<int>
+        if command.startswith("po,"):
+            max_po = int(command.split(",")[1])
+            setup_prime(id_to_ip, len(id_to_ip), max_po)
+            start_prime(id_to_ip, replica_id)
+            print("SUCCESS", flush=True)
+
+        # Encryption value has changed: passed in form spines,<0|1>
+        elif command.startswith("spines,"):
+            encrypt = int(command.split(",")[1])
+            setup_spines(id_to_ip, encrypt)
+            start_spines(id_to_ip, replica_id)
+            print("SUCCESS", flush=True)
+
+        elif command == "terminate":
+            kill_prime()
+            kill_spines()
+            kill_driver()
+            print("SUCCESS", flush=True)
+            break
+
+    
+
+# Kills the driver process on this replica
+def kill_driver():
+    subprocess.run(["pkill", "-x", "driver"], check=False)
+
 
 if __name__ == "__main__":
     main()

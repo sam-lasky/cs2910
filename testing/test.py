@@ -1,8 +1,15 @@
 import sys
+from pathlib import Path
 import subprocess
 import csv
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+
 from datetime import datetime
 from common.git import update_repo
+from aster import aster_local_controller
 
 
 # Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
@@ -134,10 +141,6 @@ global total_replicas_used, spines_encryption_status, max_po_list, emulated_list
 
 # Total number of replicas being used in the test 
 total_replicas_used = [6,7,8]
-# Spines encryption <disabled = 0, enabled = 1>
-spines_encryption_status = [0,1]
-# Maximum number of preorder requests Prime allows to be in flight simultaneously 
-max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
 # Number of clients the driver program is emulating 
 emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
 # Number of updates each driver program sends
@@ -154,10 +157,35 @@ def main():
     '''
     update_repo()
 
+    '''
+        Call the Aster local controller to start all replicas per num replicas with the initial test configuration.
+        Retain the active SSH subprocesses to communicate with the replicas and modify Prime/Spines during testing.
+    '''
+    # for num_replicas in total_replicas_used:
+    # Spines encryption <disabled = 0, enabled = 1>
+    spines_encryption_status = [0,1]
+    # Maximum number of preorder requests Prime allows to be in flight simultaneously 
+    max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+
+    sessions:dict = aster_local_controller.run(args_dict={
+        'env':'aster_LAN_1',
+        'encrypt':spines_encryption_status[0],
+        'max_po':max_po_list[0],
+        'num_replicas':6
+    })
+
+    print('now we are here')
+
+    for machine, process in sessions.items():
+        process.stdin.write("terminate\n")
+        process.stdin.flush()
+
+    for machine, process in sessions.items():
+        print(machine, process.stdout.readline().strip())
+        print("Exit status:", process.wait(timeout=10))
 
 
-
-    # # If aster start the local controller & pass args_dict 
+        # # If aster start the local controller & pass args_dict 
     # if args_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
     #     aster_local_controller.run(args_dict)
 

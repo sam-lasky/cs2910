@@ -66,8 +66,16 @@ def build_spines(spines_path):
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
         sys.exit(1)
 
+# Terminate Spines Process
+def kill_spines():
+    subprocess.run(["pkill", "-x", "spines"], check=False)
+
+
 # Start Spines
 def start_spines(replica_ip:dict, replica_id:int):
+
+    # Kill any active Spines processes on this replica
+    kill_spines()
 
     with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log

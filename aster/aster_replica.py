@@ -72,10 +72,10 @@ def main():
     start_prime(id_to_ip, replica_id)
     print("READY",flush=True)
 
-    # kill_prime()
-    # kill_spines()
-    # kill_driver()
-    # exit(0)
+    kill_prime()
+    kill_spines()
+    kill_driver()
+    exit(0)
 
     # Listen for commands from test.py through the SSH session
     for command in sys.stdin:

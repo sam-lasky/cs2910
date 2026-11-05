@@ -132,7 +132,7 @@ def start_prime(replica_ip:dict, replica_id:int):
 
     # Kill any active Prime processes on this replica
     kill_prime()
-    time.sleep(3)
+    time.sleep(1)
 
     with open('prime_status.log', 'w') as prime_status_log:
         # Start the Prime Process, write stdout/err to prime_status_log

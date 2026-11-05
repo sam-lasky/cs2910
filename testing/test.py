@@ -187,7 +187,7 @@ def main():
         print("\033[2J\033[H", end="", flush=True)
         printout=''
         for i in sorted(status.keys()):
-            printout+=f"Aster {i} status: {status[i]}"
+            printout+=f"Aster {i} status: {status[i]}\n"
         print(printout)
         sleep(1)
 

@@ -46,24 +46,24 @@ def build_spines(spines_path):
             ["./configure"],
             cwd=spines_path,
             check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
         )
 
         subprocess.run(
             ["make", "-C", "daemon", "parser"],
             cwd=spines_path,
             check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
         )
 
         subprocess.run(
             ["make"],
             cwd=spines_path,
             check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
         )
     except Exception as e:
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)

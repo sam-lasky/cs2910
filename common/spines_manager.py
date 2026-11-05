@@ -46,24 +46,24 @@ def build_spines(spines_path):
             ["./configure"],
             cwd=spines_path,
             check=True,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
 
         subprocess.run(
             ["make", "-C", "daemon", "parser"],
             cwd=spines_path,
             check=True,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
 
         subprocess.run(
             ["make"],
             cwd=spines_path,
             check=True,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
         )
     except Exception as e:
         print(f"ERROR: Spines setup failed: {type(e).__name__}: {e}", flush=True)
@@ -78,7 +78,7 @@ def kill_spines():
 def start_spines(replica_ip:dict, replica_id:int):
 
     # Kill any active Spines processes on this replica
-    kill_spines()
+    # kill_spines()
 
     with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log

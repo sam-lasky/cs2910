@@ -36,7 +36,7 @@ def build_id_to_ip_map():
         id_to_ip[i]=f'192.168.{LAN}.{aster_id+9}'
 
 # Args: aster_replica.py <arg_replica_id> <arg_aster_machine_id> <arg_aster_machines_used> <arg_env> <arg_max_po> <arg_encrypt>
-def main(arg_replica_id, arg_aster_machine_id, arg_aster_machines_used, arg_env, arg_max_po, arg_encrypt):
+def main():
     # <--- Set up global variables --->
     global replica_id, aster_machine_id, aster_machines_used, env, max_po, encrypt
     # Integer (>0) that uniquely identifies the replica

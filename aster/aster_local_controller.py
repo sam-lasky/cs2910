@@ -77,8 +77,6 @@ def start_replicas(args_dict:dict):
     # unique id of the replica
     id=1
     for aster_machine_id in aster_machines_used:
-        print(f'Starting session with Aster {aster_machine_id}')
-
         # Updates the repo if it exists, otherwise clones it. 
         # Purges stdout/err by writing to dev/null
         git_command = (

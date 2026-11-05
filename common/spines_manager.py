@@ -94,21 +94,19 @@ def start_spines(replica_ip:dict, replica_id:int):
     # Loop until all handshakes are completed
     while True:
         time.sleep(1)
-        # Checkup on Spines
-        #   poll() return values:
-        #       None: Process still executing
-        #       0: Process successfully exited
-        #       Nonzero int: Process exited w/ error
+
         if spines.poll() is not None:
-            raise RuntimeError(f'Spines exited during startup')
-        else:
-            # Check log file for handshake msgs
-            with open('spines_status.log', 'r') as spines_status_log:
-                for line in spines_status_log.readlines():
-                    if line.startswith('Completed handshake with'):
-                        handshake_replica_ids-={int(line.split()[3])}
-                        if len(handshake_replica_ids)==0:
-                            return spines
+            with open("spines_status.log") as log:
+                print(log.read())
+            raise RuntimeError("Spines exited during startup")
+
+        with open("spines_status.log") as log:
+            for line in log:
+                if line.startswith("Completed handshake with"):
+                    handshake_replica_ids.discard(int(line.split()[3]))
+
+        if not handshake_replica_ids:
+            return spines
 
 # Handles keys for Spines >>TODO:UPDATE THIS SO 8 REPS ISNT HARD CODED>>
 def handle_keys(spines_path, num_replicas):

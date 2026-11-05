@@ -106,17 +106,17 @@ def build_prime(prime_path):
             ["make", "clean"],
             cwd=prime_path + "/src",
             check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
         )
 
-        # subprocess.run(
-        #     ["make", "-j1"],
-        #     cwd=prime_path + "/src",
-        #     check=True,
-        #     stdout=subprocess.DEVNULL,
-        #     stderr=subprocess.DEVNULL
-        # )
+        subprocess.run(
+            ["make", "-j1"],
+            cwd=prime_path + "/src",
+            check=True,
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL
+        )
 
     except Exception as e:
         print(f"ERROR: Prime setup failed: {type(e).__name__}: {e}", flush=True)

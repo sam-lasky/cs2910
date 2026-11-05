@@ -176,8 +176,7 @@ def main():
         'num_replicas':6
     })
 
-    status = {i:'Unknown' for i in range(1,7)}
-    ready_count = 0
+    status = {machine: "Unknown" for machine in sessions}    
     while True:
         for machine, process in sessions.items():
             ready, _, _ = select.select([process.stdout], [], [], 0)

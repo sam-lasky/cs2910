@@ -78,7 +78,8 @@ def kill_spines():
 def start_spines(replica_ip:dict, replica_id:int):
 
     # Kill any active Spines processes on this replica
-    # kill_spines()
+    kill_spines()
+    time.sleep(3)
 
     with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log

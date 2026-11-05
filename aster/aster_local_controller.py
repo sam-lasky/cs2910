@@ -72,33 +72,58 @@ def connection_test():
             print(message)
             exit(1)
         print(message)
-        
 
+'''
+    args_dict{
+        'env':                  <'aster_LAN_1' | 'aster_LAN_2',
+        'encrypt':              < 0 | 1 >,
+        'MAX_PO_IN_FLIGHT':     int value > 0,
+        'NUM_REPLICAS':         int value > 0
+    }
+'''
 def run(args_dict:dict):
 
     # List of aster machine IDs to skip
+    # (Being used, do not work, etc.)
     skip=[3]
 
-    # Output configuration to console
-    print("\n" + "═" * 46)
-    print("           ASTER LOCAL CONTROLLER")
-    print("═" * 46 + "\n")
+    # Clear the terminal for readability
+    print('\033[2J\033[H', end='')
 
-    # Generate Machine list 
+    '''
+        STEP 1: GENERATE MACHINE LIST 
+
+        There are 20 total aster machines. Generate the list of 
+        machines that will be used starting at 20 and descending 
+        until the machine list has num_replicas of elements
+    '''
     generate_machine_list(args_dict['num_replicas'], skip)
 
-    # Prints all machines & ips being used 
-    print_machines(env=args_dict['env'])
+    '''
+        STEP 2: CONNECT TO THE ASTER MACHINES IN MACHINE LIST
 
-    # Attempt to connect to all the machines being used. Terminates if all connections do not succeed
-    # connection_test()
+            SSH into each Aster machine and perform the following:
 
-    # Kill any old prime/spines/aster_replica.py processes on all aster machines
-    # included in aster_machines_used
+            (2.A) In the home directory (/home/your_pitt_id), clone the CS2910
+                GitHub repository if it does not already exist. Otherwise,
+                update the existing repository to the latest version.
+
+            (2.B) Launch aster_replica.py on the remote machine to configure
+                and start Spines and Prime.
+
+            Store each SSH subprocess in a dictionary, mapping the Aster
+            machine name to its corresponding subprocess.Popen object.
+
+            Return the dictionary so the caller can monitor the subprocesses
+            and check their exit statuses.
+    ''' 
+    sessions = start_replicas(args_dict)
+
+    
+    
     kill_all()
 
     # Connect to the aster machines, <clone|update> cs2910 repo, launch startup script
-    sessions = start_replicas(args_dict)
 
     successful_starts = 0
     print("\n[REPLICA STATUS]")
@@ -181,11 +206,3 @@ def generate_machine_list(num_replicas, skipped_machines):
     if len(aster_machines_used)<num_replicas:
         raise ValueError("Not enough machines available. Exiting.")
 
-# Prints all aster machines used <ID> <LAN_1|2> <IP>
-def print_machines(env:str):
-        print(f"[ASTER MACHINES USED]")
-        for i, aster_id in enumerate(aster_machines_used):
-            LAN_TYPE = 'LAN_1' if env=='aster_LAN_1' else 'LAN_2'
-            LAN_IP_VAL = '53' if env=='aster_LAN_1' else '54'
-            IP = f'192.168.{LAN_IP_VAL}.{aster_id+9}'
-            print(f'[{i+1}] ASTER_{aster_id}\tLAN:{LAN_TYPE}\tIP:{IP}')

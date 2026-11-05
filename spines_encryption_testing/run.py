@@ -6,13 +6,14 @@ from pathlib import Path
 import sys
 import csv
 
-
-
 ROOT= Path(__file__).resolve().parent.parent
 SPINES_DAEMON_PATH = '/root/cs2910/prime/spines/daemon'
 # Using sp_bflooder.c for the tests
 SPINES_TEST_PROG_PATH = '/root/cs2910/prime/spines/testprogs'
 ENCRYPTION_TESTING_PATH = Path(__file__).parent
+
+sys.path.insert(0, str(ROOT))
+from common.config import spines_conf
 
 # =================================================
 # ==================== GLOBALS ====================
@@ -43,8 +44,7 @@ packet_size = 1000
 # =================================================
 # =================================================
 
-sys.path.insert(0, str(ROOT))
-from common.config import spines_conf
+
 
 
 # Helper func that executes shell commands using Py's subprocess module
@@ -69,7 +69,8 @@ def manage_docker(*args,build:bool=True,compose:bool=True):
         '-t', 'spines-img', ROOT
     )
 
-    # Creates sender/2 containers & creates spines-net bridge network & remaining args in *args
+    # Creates 2 containers: (1)sender & (2)receiver, the bridge network connection them, and
+    # executes any remaining commands passed in args 
     if compose:run(
         'docker', 'compose', '-p', 'spines-encryption',
         '-f', ENCRYPTION_TESTING_PATH / 'docker_files/docker-compose_base.yml', *args
@@ -100,7 +101,8 @@ def run_tests():
 
                 # Failure is not an option: Recv container may never get the term packet (gets dropped)
                 # and will run indefinitely. A timer is used so this does not happen, which gets incremented
-                # by 30 seconds on every failure until it eventually succeeds 
+                # by 30 seconds on every failure until it eventually succeeds (im not sure why i did this, maybe
+                # the thought process was the timer is too premature? Reduced to 15)
                 while True:
                     # Restart the containers to reset previous tc settings 
                     # and kill any leftover processes

@@ -19,8 +19,6 @@ def update_repo():
 
     # Does not exist, no update has occurred, check for updates.
     if not get_env('UPDATED'):
-        # Update the git repo, cwd should already be CS2910
-        print("Checking for updates in CS2910 repository...")
         # Spawn a subprocess that executes the update, its 
         # output is then analyzed to check if one has occurred 
         # and track any modified directories. 
@@ -39,9 +37,6 @@ def update_repo():
             if updated_directories():
                 # Reboot the calling script
                 reboot(True)
-            # no update
-            else:
-                print('No updates detected, using the most up to date version.')
         # Error, pass the subprocess's stderr
         else:
             handle_error('git.py',p.stderr)
@@ -77,7 +72,6 @@ def updated_directories():
             #   spines/example/example.h 
             #   .....
             # Below would set the environment variable UPDATED to string 'prime,spines'
-            os.environ['UPDATED'] = ','.join(set(line.split('/')[0] for line in p.stdout.splitlines()))
             return True
     # Subprocess encountered errors
     else:
@@ -85,17 +79,7 @@ def updated_directories():
 
 
 # Reboot the calling script
-# test_mode used for quicker testing, reboot time becomes 0
 def reboot(test_mode:bool=False):
-    # Create & set the REBOOT env variable to 1
-    os.environ['REBOOT']='1'
-    reboot_time = 3 if not test_mode else 0
-    # Print reboot msg
-    for i in range(reboot_time, 0, -1):
-        print(f"\rUpdate detected & applied, rebooting in {i} seconds...", end="", flush=True)
-        time.sleep(1)
-    # additional spaces
-    print("\rUpdate applied. Restarting script...                 ", flush=True)    
     # On Windows use subprocess to resolve console formatting bug - child reboots and 
     # parent exits, child takes over, fixes powershell output bug
     if os.name == "nt":

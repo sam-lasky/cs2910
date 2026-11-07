@@ -63,6 +63,10 @@ def main():
     wait_time = .5 # time the kill method waits until it returns 
     kill_all(wait_time)
 
+
+    # Prints READY to stdout so parent knows SSH connection was a success 
+    print("READY\n",flush=True)
+
     '''
         [STEP 2] Listen for commands from test.py 
     '''

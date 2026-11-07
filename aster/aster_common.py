@@ -1,5 +1,10 @@
 
 import subprocess
+import sys
+
+# local 
+sys.path.insert(0, "..")
+import threads
 
 # Stores the aster machine id of any that should not be used
 skipped_machines = [3]
@@ -58,8 +63,11 @@ def start_replicas(sessions:dict):
                  text=True
             )
 
-            # Update the list's started value to true
-            machine[1]=True
+            # Create a thread that monitors the SSH subprocess associated with aster # machine id 
+            # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
+            # Otherwise TIMEOUT/FAILURE (returns T/F, respectively)
+            machine[1] = threads.create_thread(target_fn='read_ssh_output',ssh_process=sessions[machine_id],timeout=3,response=[])
+
     
 '''
     Starting at aster machine w/ id 20, iterate backwards and add each machine that is not in skipped_machines +

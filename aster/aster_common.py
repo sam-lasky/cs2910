@@ -4,7 +4,7 @@ import sys
 
 # local 
 sys.path.insert(0, "..")
-import threads
+from common import threads
 
 # Stores the aster machine id of any that should not be used
 skipped_machines = [3]

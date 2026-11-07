@@ -70,17 +70,16 @@ def build_spines(spines_path):
         sys.exit(1)
 
 # Terminate Spines Process
-def kill_spines():
+def kill_spines(wait_time:float):
     subprocess.run(["pkill", "-x", "spines"], check=False)
-
+    time.sleep(wait_time)
 
 # Start Spines
 def start_spines(replica_ip:dict, replica_id:int):
 
     # Kill any active Spines processes on this replica
     kill_spines()
-    time.sleep(1)
-
+    
     with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log
         spines = subprocess.Popen(

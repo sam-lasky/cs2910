@@ -109,9 +109,9 @@ def build_prime(prime_path):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-
+        # switch back to -j1 if there are any issues
         subprocess.run(
-            ["make", "-j1"],
+            ["make", "-j8"],
             cwd=prime_path + "/src",
             check=True,
             stdout=subprocess.DEVNULL,
@@ -123,16 +123,19 @@ def build_prime(prime_path):
         sys.exit(1)
 
 # Terminate any spines process
-def kill_prime():
+def kill_prime(wait_time:float):
     subprocess.run(["pkill", "-x", "prime"], check=False)
+    # Add a time buffer between stopping and starting prime, otherwise 
+    # inconsistent behavior occurs 
+    time.sleep(wait_time) 
 
 
-# Start Prime
+
+# Kills any active leftover Prime processes & restarts prime
 def start_prime(replica_ip:dict, replica_id:int):
 
     # Kill any active Prime processes on this replica
     kill_prime()
-    time.sleep(1)
 
     with open('prime_status.log', 'w') as prime_status_log:
         # Start the Prime Process, write stdout/err to prime_status_log

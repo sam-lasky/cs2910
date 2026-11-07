@@ -35,79 +35,108 @@ def build_id_to_ip_map():
     for i,aster_id in enumerate(aster_machines_used,start=1):
         id_to_ip[i]=f'192.168.{LAN}.{aster_id+9}'
 
-# Args: aster_replica.py <arg_replica_id> <arg_aster_machine_id> <arg_aster_machines_used> <arg_env> <arg_max_po> <arg_encrypt>
+'''
+    Kills any leftover driver processes on the replica, waits
+    for wait_time before returning control in order to avoid 
+    buggy behavior if the caller attempts to run drive directly
+    after
+'''
+def kill_driver(wait_time):
+    subprocess.run(["pkill", "-x", "driver"], check=False)
+    time.sleep(wait_time)
+
+'''
+    Kills all processes on the replica 
+'''
+def kill_all(wait_time:float):
+    kill_driver(wait_time=0)
+    kill_spines(wait_time=0)
+    kill_prime(wait_time=0)
+    time.sleep(wait_time)
+
 def main():
-    # <--- Set up global variables --->
-    global replica_id, aster_machine_id, aster_machines_used, env, max_po, encrypt
-    # Integer (>0) that uniquely identifies the replica
-    replica_id =                int(sys.argv[1])
-    # Integer (1-->20) that uniquely identifies the aster machine
-    aster_machine_id =          int(sys.argv[2])
-    # List of aster ID's being used
-    aster_machines_used =       list(map(int, sys.argv[3].split(',')))
-    # Environment (aster LAN 1 | aster LAN 2)
-    env =                       sys.argv[4]
-    # Max preorder requests in flight (prime/src/def.h)
-    max_po =                    int(sys.argv[5])
-    # Spines encryption (enabled=1, disabled=0)
-    encrypt =                   int(sys.argv[6])
+    '''
+        [STEP 1] As soon as the replica launches, terminate 
+        any leftover Driver/Spines/Prime processes from previous
+        runs 
+    '''
+    wait_time = .5 # time the kill method waits until it returns 
+    kill_all(wait_time)
 
-    # Build the aster machine id <--> replica ip mapping
-    build_id_to_ip_map()
-    print("Setting up Spines...",flush=True)
-
-    # Sets up Spines
-    setup_spines(id_to_ip,encrypt)
-    print("Setting up Prime...",flush=True)
-
-    # Set up Prime
-    setup_prime(id_to_ip,num_replicas=len(id_to_ip.keys()),max_po=max_po)
-    print("Starting up Spines...",flush=True)
-
-    # Start Spines
-    start_spines(id_to_ip, replica_id)
-    print("Starting up Prime...",flush=True)
-    
-    # Start Prime
-    start_prime(id_to_ip, replica_id)
-    print("READY",flush=True)
-
-    kill_prime()
-    kill_spines()
-    kill_driver()
-    exit(0)
-
-    # Listen for commands from test.py through the SSH session
+    '''
+        [STEP 2] Listen for commands from test.py 
+    '''
     for command in sys.stdin:
         command = command.strip()
 
         # Max PO has changed: passed in form po,<int>
         if command.startswith("po,"):
-            max_po = int(command.split(",")[1])
-            setup_prime(id_to_ip, len(id_to_ip), max_po)
-            start_prime(id_to_ip, replica_id)
-            print("SUCCESS", flush=True)
-
+            pass
         # Encryption value has changed: passed in form spines,<0|1>
         elif command.startswith("spines,"):
-            encrypt = int(command.split(",")[1])
-            setup_spines(id_to_ip, encrypt)
-            start_spines(id_to_ip, replica_id)
-            print("SUCCESS", flush=True)
-
-        elif command == "terminate":
-            kill_prime()
-            kill_spines()
-            kill_driver()
-            print("ALL PROCESSES HAVE BEEN TERMINATED, GOODBYE!", flush=True)
-            break
+            pass
+        # Kill all active processes & disconnect 
+        elif command == "disconnect":
+            exit(0)
+        # Status of all active processes (Spines, Prime, Driver)
+        elif command == 'active':
+            all_active = subprocess.run(["ps", "aux"], capture_output=True, text=True)
+            print(all_active.stdout, flush=True)
+        elif command == 'hello':
+            print('hello', flush=True)
 
     
 
-# Kills the driver process on this replica
-def kill_driver():
-    subprocess.run(["pkill", "-x", "driver"], check=False)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        # << CLEANUP >> 
+        # kills all active processes on this replica before exiting
+        kill_all(wait_time=0)
+
+
+
+
+
+  # # <--- Set up global variables --->
+    # global replica_id, aster_machine_id, aster_machines_used, env, max_po, encrypt
+    # # Integer (>0) that uniquely identifies the replica
+    # replica_id =                int(sys.argv[1])
+    # # Integer (1-->20) that uniquely identifies the aster machine
+    # aster_machine_id =          int(sys.argv[2])
+    # # List of aster ID's being used
+    # aster_machines_used =       list(map(int, sys.argv[3].split(',')))
+    # # Environment (aster LAN 1 | aster LAN 2)
+    # env =                       sys.argv[4]
+    # # Max preorder requests in flight (prime/src/def.h)
+    # max_po =                    int(sys.argv[5])
+    # # Spines encryption (enabled=1, disabled=0)
+    # encrypt =                   int(sys.argv[6])
+
+    # # Build the aster machine id <--> replica ip mapping
+    # build_id_to_ip_map()
+    # print("Setting up Spines...",flush=True)
+
+    # # Sets up Spines
+    # setup_spines(id_to_ip,encrypt)
+    # print("Setting up Prime...",flush=True)
+
+    # # Set up Prime
+    # setup_prime(id_to_ip,num_replicas=len(id_to_ip.keys()),max_po=max_po)
+    # print("Starting up Spines...",flush=True)
+
+    # # Start Spines
+    # start_spines(id_to_ip, replica_id)
+    # print("Starting up Prime...",flush=True)
+    
+    # # Start Prime
+    # start_prime(id_to_ip, replica_id)
+    # print("READY",flush=True)
+
+    # kill_prime()
+    # kill_spines()
+    # kill_driver()
+    # exit(0)

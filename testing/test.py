@@ -4,15 +4,14 @@ import subprocess
 import csv
 import select
 from time import sleep
+from datetime import datetime
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 
-from datetime import datetime
 from common.git import update_repo
-from aster import aster_local_controller
-
+from aster import aster_common
 
 # Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
 aster_config = {
@@ -137,7 +136,9 @@ HEADERS = [
 
 
 # # # # # # # # # # # # # #  
-# # TEST CONFIGURATIONS # #
+# #{TEST CONFIGURATIONS}# #
+# #   VARIABLES USED    # #
+# #   & OTHER STUFF     # #
 # # # # # # # # # # # # # #  
 global total_replicas_used, spines_encryption_status, max_po_list, emulated_list,updates
 
@@ -147,12 +148,144 @@ total_replicas_used = [6,7,8]
 emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
 # Number of updates each driver program sends
 updates = 25000
-# How many replicas the updates will be distributed across 
-distribution = [1]
 # Number of trials per test configuration
 num_trials = 5 
+# Spines encryption <disabled = 0, enabled = 1>
+spines_encryption_status = [0,1]
+# Maximum number of preorder requests Prime allows to be in flight simultaneously 
+max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+
+# List of all test configurations where each config is stored as a tuple
+# Each tuple has the following ordering:    
+#   [i][0] = max_po
+#   [i][1] = replica_count
+#   [i][2] = encryption_value
+#   [i][3] = distribution (number of machines the updates are distributed across (i.e. num machines running the driver program)) 
+#   [i][4] = number of clients to emulate 
+all_test_configs = []
+# TOTAL TESTS TO BE PERFORMED
+all_test_count = 0
+
+    # Dictionary that holds all SSH subprocesses 
+
+'''
+    DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
+    KEY = machine/replica id, VALUE  = reference to ssh subprocess associated with that machine
+
+    FOR SIMPLICITY MACHINE_ID AND REPLICA_ID ARE THE SAME
+'''
+sessions = {}
+
+'''
+Generate all possible test configurations using the global variables:
+
+(1) total_replicas_used
+    - Prime: Modify def.h and config files, recompile and restart
+    - Spines: Modify config files and restart
+
+(2) max_po_list
+    - Prime: Modify def.h, recompile and restart
+
+(3) spines_encryption_status
+    - Spines: Modify config files and restart
+    - Prime: Restart to reestablish connections
+
+(4) distribution
+    - No file modifications or restarts required
+
+(5) emulated_list
+    - No file modifications or restarts required
+
+The test variables are ordered to minimize restarts (config file changes)
+and recompilations (def.h changes) to minimize testing time.
+'''
+def generate_all_test_configurations():
+        for replica_count in total_replicas_used:
+            for max_po in max_po_list:
+                for encryption_value in spines_encryption_status:
+                    for dist in range(1,replica_count+1):
+                        for num_emulated in emulated_list:
+                            all_test_configs.append((max_po, replica_count, encryption_value, dist, num_emulated))
+
+
+'''
+    Creates num_to_allocate SSH subprocesses where each 
+    connects to its own distinct aster machine. 
+
+    Returns a list of newly allocated machines (SSH subprocesses connected to those aster machines) 
+'''
+def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
+    
+    # Update the machines_in_use global in aster_common
+    aster_common.generate_machine_list(replica_count)
+    
+    # Start all the newly allocated machines & return the 
+    # list of subprocesses associated with these machines 
+    return aster_common.start_replicas(sessions)
+
+
+'''
+    Prints a status update
+'''
+def print_status(sessions:dict, curr_test:tuple,test_number:int,assigned_driver_list:list):
+    print('\033[2J\033[H', end='')
+    print('\n')
+    print("=" * 48)
+    print("              ASTER TESTING STATUS")
+    print(f"                 TEST {test_number+1:,} OF {len(all_test_configs):,}")
+    print("=" * 48)
+    print("  CURRENT CONFIGURATION")
+    print("-" * 48)
+    print(f"  MAX PO           : {curr_test[0]:,}")
+    print(f"  Replicas         : {curr_test[1]}")
+    print(f"  Encryption       : {'ENABLED' if curr_test[2] else 'DISABLED'}")
+    print(f"  Distribution     : {curr_test[3]}")
+    print(f"  Emulated Clients : {curr_test[4]:,}")
+    print("=" * 48)
+
+    for key in sorted(sessions.keys()):
+        # print(f'[ASTER {key} ({"ACTIVE" if sessions[key].poll() is None else "INACTIVE"})]')
+        # print(talk_to_replica('hello', sessions[key]))
+        print(sessions[16].stderr.read())
+        print(sessions[16].returncode)
+        exit(0)
+# Communicate w/ the replica associated w/ the passed ssh_process
+# using the passed message & return its response 
+def talk_to_replica(message:str, ssh_process:subprocess.Popen):
+    ssh_process.stdin.write(message + "\n")
+    ssh_process.stdin.flush()    
+
+    response = ssh_process.stdout.readline().strip()
+    return response
+
+'''
+    Runs each test configuration stored in all_test_configs
+'''
+def run_tests_aster():
+
+    # Holds the previous test tuple configuration
+    previous_test = None
+
+    # Iterate through all test configurations & execute each one
+    for test_number,current_test in enumerate(all_test_configs):
+        # Set test parameters 
+        max_po:int =                    current_test[0]
+        replica_count:int =             current_test[1]
+        encryption_status:int =         current_test[2]
+        distribution:int =              current_test[3]
+        num_clients_to_Emulate:int =    current_test[4]
+
+        # Allocates more aster machines if sessions < replica_count
+        if len(sessions)<replica_count: 
+            allocate_machines(replica_count, len(sessions), sessions)
+
+        # Print a status update
+        print_status(sessions,current_test,test_number,[])
+        break
+
 
 def main():
+
     '''
         Get the most up to date CS2910 Github Repo. 
         The script will restart if an update is applied. 
@@ -160,280 +293,27 @@ def main():
     update_repo()
 
     '''
-        Call the Aster local controller to start all replicas per num replicas with the initial test configuration.
-        Retain the active SSH subprocesses to communicate with the replicas and modify Prime/Spines during testing.
+        Generate all test configurations (generate_all_test_configurations())
+        and store them in all_test_count
+
+        Get the total number of tests that will run & store this value in all_test_count
     '''
-    # for num_replicas in total_replicas_used:
-    # Spines encryption <disabled = 0, enabled = 1>
-    spines_encryption_status = [0,1]
-    # Maximum number of preorder requests Prime allows to be in flight simultaneously 
-    max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+    global all_test_count
+    generate_all_test_configurations()
+    all_test_count = len(all_test_configs)*num_trials
 
-    sessions:dict = aster_local_controller.run(args_dict={
-        'env':'aster_LAN_1',
-        'encrypt':spines_encryption_status[0],
-        'max_po':max_po_list[0],
-        'num_replicas':6
-    })
-
-    status = {machine: "Unknown" for machine in sessions}    
-    while True:
-        for machine, process in sessions.items():
-            ready, _, _ = select.select([process.stdout], [], [], 0)
-            if ready:
-                status[machine]=process.stdout.readline().strip()
-
-        print("\033[2J\033[H", end="", flush=True)
-        printout=''
-        for i in sorted(status.keys()):
-            printout+=f"Aster {i} status: {status[i]}\n"
-        print(printout)
-        sleep(1)
-
-    # print("Aster machines are starting up....")
-    # for machine, process in sessions.items():
-    #     while True:
-    #         line = process.stdout.readline()
-
-    #         if not line:
-    #             raise RuntimeError(f"Aster {machine} disconnected")
-
-    #         status = line.strip()
-
-    #         if status == "READY":
-    #             print(f"Aster {machine} is ready and awaiting input")
-    #             break
-    #         else: print(f"\rAster {machine}: {status}", end="", flush=True)
-    # print("All machines are ready & are awaiting input...")
-
-
-
-    # for machine, process in sessions.items():
-    #     process.stdin.write("terminate\n")
-    #     process.stdin.flush()
-
-    # for machine, process in sessions.items():
-    #     print(machine, process.stdout.readline().strip())
-    #     print("Exit status:", process.wait(timeout=10))
-
-
-        # # If aster start the local controller & pass args_dict 
-    # if args_dict['env'] in ['aster_LAN_1','aster_LAN_2']:
-    #     aster_local_controller.run(args_dict)
-
-
-
+    '''
+        Run all test configurations in Aster
+    '''
+    run_tests_aster()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        for process in sessions.values():
+            process.stdin.write("disconnect\n")
+            process.stdin.flush()
 
 
-
-
-
-
-    
-#     run_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-#     csv_file = f"throughput_results_{run_id}.csv"
-#     with open(csv_file, "x", newline="") as f:
-#         csv.writer(f).writerow(HEADERS)
-
-#     for num_replicas in total_replicas_used:
-#         for encrypted in encrypted_values:
-#             for max_po in max_po_list:
-#                 if num_replicas == 6 and encrypted == 0 and max_po == 20:
-#                     print("Skipping completed replicas=6, MAX_PO=20", flush=True)
-#                     continue
-
-#                 for distribution in [1]:
-#                     subprocess.run(
-#                         [
-#                             sys.executable, "../run.py",
-#                             "-e", "aster_LAN_1",
-#                             "-x", str(encrypted),
-#                             "-p", str(max_po),
-#                             "-r", str(num_replicas),
-#                         ],
-#                         check=True,
-#                     )
-
-#                     for emulated_client in emulated_list:
-          
-#                         trial_results = []
-#                         min_test_seconds = 15
-
-#                         for trial in range(1, num_trials + 1):
-#                             machines = aster_config[num_replicas]
-#                             updates_distributed = updates // distribution
-
-#                             print_test_config(
-#                                 num_replicas, encrypted, max_po,
-#                                 distribution, emulated_client, trial,
-#                                 num_trials, updates_distributed
-#                             )
-
-#                             while True:
-#                                 processes = []
-
-#                                 for key in sorted(
-#                                     sorted(machines.keys(), reverse=True)[:distribution]
-#                                 ):
-#                                     print(f"starting driver on aster {key}")
-#                                     driver_process = subprocess.Popen(
-#                                         generate_command(
-#                                             key, machines, num_replicas,
-#                                             updates_distributed, emulated_client
-#                                         ),
-#                                         stdout=subprocess.PIPE,
-#                                         stderr=subprocess.STDOUT,
-#                                         text=True,
-#                                     )
-#                                     processes.append(driver_process)
-
-#                                 results = []
-
-#                                 for process in processes:
-#                                     print("Waiting for driver...", flush=True)
-#                                     output, _ = process.communicate()
-#                                     print("Driver finished.", flush=True)
-
-#                                     for line in output.splitlines():
-#                                         if line.startswith("RESULT,"):
-#                                             fields = line.split(",")
-#                                             results.append({
-#                                                 "clients": int(fields[1]),
-#                                                 "updates": int(fields[2]),
-#                                                 "elapsed": float(fields[3]),
-#                                                 "stalls": int(fields[4]),
-#                                                 "expected": float(fields[5]),
-#                                                 "actual": float(fields[6]),
-#                                                 "min": float(fields[7]),
-#                                                 "max": float(fields[8]),
-#                                                 "avg": float(fields[9]),
-#                                                 "start": float(fields[10]),
-#                                                 "end": float(fields[11]),
-#                                             })
-
-#                                 if len(results) != distribution:
-#                                     raise RuntimeError(
-#                                         "One or more drivers failed to return results"
-#                                     )
-
-#                                 elapsed = (
-#                                     max(r["end"] for r in results)
-#                                     - min(r["start"] for r in results)
-#                                 )
-
-#                                 if elapsed < min_test_seconds:
-#                                     updates_distributed *= 2
-#                                     print(
-#                                         f"Trial {trial}: {elapsed:.2f}s "
-#                                         f"< {min_test_seconds}s. Doubling updates "
-#                                         f"to {updates_distributed} per driver.",
-#                                         flush=True,
-#                                     )
-#                                     continue
-
-#                                 total_updates = sum(r["updates"] for r in results)
-#                                 if total_updates <= 0:
-#                                     raise RuntimeError(
-#                                         "Drivers reported no completed updates"
-#                                     )
-
-#                                 throughput = total_updates / elapsed
-#                                 total_stalls = sum(r["stalls"] for r in results)
-#                                 min_latency = min(r["min"] for r in results)
-#                                 max_latency = max(r["max"] for r in results)
-#                                 avg_latency = (
-#                                     sum(r["avg"] * r["updates"] for r in results)
-#                                     / total_updates
-#                                 )
-
-#                                 trial_results.append({
-#                                     "total_updates": total_updates,
-#                                     "elapsed": elapsed,
-#                                     "throughput": throughput,
-#                                     "total_stalls": total_stalls,
-#                                     "min_latency": min_latency,
-#                                     "max_latency": max_latency,
-#                                     "avg_latency": avg_latency,
-#                                 })
-
-#                                 print(
-#                                     f"Finished trial {trial}: "
-#                                     f"{throughput:.2f} updates/sec",
-#                                     flush=True,
-#                                 )
-#                                 break
-
-#                         averages = {
-#                             name: sum(r[name] for r in trial_results)
-#                             / len(trial_results)
-#                             for name in METRIC_NAMES
-#                         }
-
-#                         with open(csv_file, "a", newline="") as f:
-#                             csv.writer(f).writerow([
-#                                 num_replicas,
-#                                 encrypted,
-#                                 max_po,
-#                                 distribution,
-#                                 emulated_client,
-#                                 len(trial_results),
-#                                 *[averages[name] for name in METRIC_NAMES],
-#                             ])
-
-#                         print(
-#                             f"Saved average of {len(trial_results)} trials: "
-#                             f"{averages['throughput']:.2f} updates/sec",
-#                             flush=True,
-#                         )
-
-#         print(
-#             f"Completed {num_replicas} replicas. Results saved to: {csv_file}",
-#             flush=True,
-#         )
-
-
-# def print_test_config(
-#     num_replicas, encrypted, max_po, distribution,
-#     emulated_client, trial, num_trials, updates_distributed
-# ):
-#     print(
-#         f"\n[TEST CONFIG] "
-#         f"Replicas={num_replicas} | "
-#         f"Encrypted={encrypted} | "
-#         f"MAX_PO={max_po} | "
-#         f"Distribution={distribution} | "
-#         f"Emulated Clients={emulated_client} | "
-#         f"Trial={trial}/{num_trials} | "
-#         f"Updates per Driver={updates_distributed}",
-#         flush=True,
-#     )
-
-# '''
-#     Driver Usage: ./client"
-#         -l IP (A.B.C.D)
-#             >> IP address 
-#         -c count_of_transactions_to_benchmark
-#         -i client_id, indexed base 1
-#         -s server_id, indexed base 1
-#         -n num_clients_to_emulate]
-#         -r num_prime_replicas
-# '''
-# def generate_command(key, machines, num_replicas, updates_distributed, emulated_client):
-#     return [
-#         # sh command
-#         "ssh",
-#         # aster server being ssh'd into
-#         f"sjl79@aster{key}.cs.pitt.edu",
-#         # Go to the directory of the driver executable
-#         f"cd ~/cs2910/prime/bin"
-#         f"exec ./driver -l {machines[key][1]} "
-#         f"-i {machines[key][0]} "
-#         f"-s {machines[key][0]} "
-#         f"-r {num_replicas} "
-#         f"-c {updates_distributed} "
-#         f"-n {emulated_client}",
-#     ]

@@ -4,7 +4,8 @@ import subprocess
 # local 
 sys.path.insert(0, "..")
 
-def create_thread(target_fn:str,ssh_process:subprocess.Popen,timeout:int, response:list):
+def create_thread(target_fn:str,ssh_process:subprocess.Popen,timeout:int):
+    response=[]
     thread =threading.Thread(
         target=target_fn,
         args=(ssh_process,response),

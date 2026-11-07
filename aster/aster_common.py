@@ -66,7 +66,7 @@ def start_replicas(sessions:dict):
             # Create a thread that monitors the SSH subprocess associated with aster # machine id 
             # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
             # Otherwise TIMEOUT/FAILURE (returns T/F, respectively)
-            machine[1] = threads.create_thread(target_fn='read_ssh_output',ssh_process=sessions[machine_id],timeout=3,response=[])
+            machine[1] = threads.create_thread(target_fn='read_ssh_output',ssh_process=sessions[machine_id],timeout=3)
 
     
 '''

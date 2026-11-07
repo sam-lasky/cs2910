@@ -246,7 +246,7 @@ def print_status(sessions:dict, curr_test:tuple,test_number:int,assigned_driver_
     for key in sorted(sessions.keys()):
         # print(f'[ASTER {key} ({"ACTIVE" if sessions[key].poll() is None else "INACTIVE"})]')
         # print(talk_to_replica('hello', sessions[key]))
-        print(sessions[key].stderr.read())
+        # print(sessions[key].stderr.read())
         print(sessions[key].returncode)
         exit(0)
 # Communicate w/ the replica associated w/ the passed ssh_process

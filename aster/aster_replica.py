@@ -180,7 +180,7 @@ def main(machine_id_arg: int):
                 MAX_PO setting, assigned driver (Yes/No) ,all active processes, 
             '''
             response = (
-                f"Replica ID: {replica_id} | "
+                f"Replica ID: {local_replica_id} | "
                 f"Aster Machine: {aster_machine_id} | "
                 f"Total Replicas: {num_replicas} | "
                 f"Encryption: {encrypt} | "

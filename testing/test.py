@@ -172,8 +172,6 @@ all_test_count = 0
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
     KEY = machine id, VALUE  = reference to ssh subprocess associated with that machine
-
-    FOR SIMPLICITY MACHINE_ID AND REPLICA_ID ARE THE SAME
 '''
 sessions = {}
 
@@ -325,7 +323,8 @@ def run_tests_aster():
                 print(f"ASTER {machine_id} STDERR:")
                 print(process.stderr.read())
                 raise RuntimeError(f"ASTER {machine_id}: No response")
-            print(f"ASTER {machine_id}: {response}")
+
+        # Handle Driver Assignment & execute test 
 
         exit(0)
 

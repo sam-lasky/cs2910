@@ -43,7 +43,7 @@ driver_out = None
 def build_id_to_ip_map():
     # 53 if LAN_1, 54 if LAN_2
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for aster_id in generate_machine_list(num_replicas):
+    for aster_id, _ in generate_machine_list(num_replicas):
             id_to_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
 
 '''

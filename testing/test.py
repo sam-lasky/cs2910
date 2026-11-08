@@ -324,6 +324,8 @@ def run_tests_aster():
                 print(process.stderr.read())
                 raise RuntimeError(f"ASTER {machine_id}: No response")
 
+        print_status(current_test, test_number,failures)
+        sleep(5)
         # Handle Driver Assignment & execute test 
 
         exit(0)

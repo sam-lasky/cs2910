@@ -324,6 +324,7 @@ def run_tests_aster():
                 raise RuntimeError(f"ASTER {machine_id}: No response")
             print(f"ASTER {machine_id}: {response}")
 
+        exit(0)
 
 def main():
 

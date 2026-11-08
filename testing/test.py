@@ -270,9 +270,9 @@ def print_replica_statuses(sessions: dict):
             continue
 
         parts = response.strip().split(" | ")
-        print(f"ASTER {machine_id}: {' | '.join(parts[:6])}")
+        print(f"ASTER {machine_id}: {' | '.join(parts[:5])}")
         print(f"  {parts[6]}")
-        print(f"  {parts[7]}")
+        print(f"  {parts[5]} | Driver Status: {parts[7].split(': ', 1)[1]}")
         print()
 
 '''

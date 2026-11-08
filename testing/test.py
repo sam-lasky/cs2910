@@ -265,8 +265,16 @@ def print_replica_statuses(sessions: dict):
     results = threads.wait_for_threads(active_threads, timeout=3)
 
     for machine_id, response in sorted(results.items()):
-        print(f"ASTER {machine_id}: {response.strip() if response else 'No response'}")
+        if not response:
+            print(f"ASTER {machine_id}: No response")
+            continue
 
+        parts = response.strip().split(" | ")
+
+        print(f"ASTER {machine_id}: {' | '.join(parts[:6])}")
+        print(f"  {parts[6]}")
+        print(f"  {parts[7]} | {parts[8]}")
+        print()
 
 '''
     Runs each test configuration stored in all_test_configs

@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from common.git import update_repo
 from aster import aster_common
+from common import threads 
 
 # Structure: {total_replicas: {aster_machine_number: (replica_id, ip_address)}}
 aster_config = {
@@ -225,14 +226,15 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 
 
 '''
-    Prints a status update
+    Prints the current test 
 '''
-def print_status(sessions:dict, curr_test:tuple,test_number:int,assigned_driver_list:list):
+def print_status(curr_test: tuple, test_number: int, failure_count: int, sessions:dict):
     print('\033[2J\033[H', end='')
     print('\n')
     print("=" * 48)
     print("              ASTER TESTING STATUS")
     print(f"                 TEST {test_number+1:,} OF {len(all_test_configs):,}")
+    print(f"                 FAILURES: {failure_count:,}")
     print("=" * 48)
     print("  CURRENT CONFIGURATION")
     print("-" * 48)
@@ -243,11 +245,24 @@ def print_status(sessions:dict, curr_test:tuple,test_number:int,assigned_driver_
     print(f"  Emulated Clients : {curr_test[4]:,}")
     print("=" * 48)
 
-    for key in sorted(sessions.keys()):
-        # print(f'[ASTER {key} ({"ACTIVE" if sessions[key].poll() is None else "INACTIVE"})]')
-        # print(talk_to_replica('hello', sessions[key]))
-        # print(sessions[key].stderr.read())
-        print(sessions[key].returncode)
+def print_replica_statuses(sessions: dict):
+    active_threads = []
+
+    for machine_id in sorted(sessions.keys()):
+        process = sessions[machine_id]
+
+        aster_common.write_to_aster(process, "CURRENT_STATUS")
+
+        thread, response = threads.create_thread(
+            aster_common.read_from_aster, process
+        )
+
+        active_threads.append((machine_id, thread, response))
+
+    results = threads.wait_for_threads(active_threads, timeout=3)
+
+    for machine_id, response in sorted(results.items()):
+        print(f"ASTER {machine_id}: {response.strip() if response else 'No response'}")
 
 
 '''
@@ -266,13 +281,14 @@ def run_tests_aster():
         encryption_status:int =         current_test[2]
         distribution:int =              current_test[3]
         num_clients_to_Emulate:int =    current_test[4]
+        failures = 0 # num times this test has failed (disconnects, crashes, etc.)
 
         # Allocates more aster machines if sessions < replica_count
         if len(sessions)<replica_count: 
             allocate_machines(replica_count, len(sessions), sessions)
 
-        # Print a status update
-        print_status(sessions,current_test,test_number,[])
+
+        print_status(current_test, test_number,failures)
         break
 
 

@@ -29,10 +29,14 @@ env = 'Aster_1_LAN'
 max_po = None
 # Encrypted or Plain (prime/spines/daemon/spines.conf, IT_LinkCrypto, IT_LinkEncrypt)
 encrypt = None
+# Assigned a driver (yes/no)
+assigned_driver=False
 # k,v = REPLICA id (int), replica ip (str)
 id_to_ip={}
 # Tracks make counts (spines/prime) initialized to 0
 make_count_spines, make_count_prime = 0,0
+# Driver program output
+driver_out = None
 
 # Populates the id_to_ip dictionary where the >> REPLICA ID<< is passed as the
 # key and its IP is assigned as the value 
@@ -60,6 +64,19 @@ def kill_all(wait_time:float):
     kill_spines(wait_time=0)
     kill_prime(wait_time=0)
     time.sleep(wait_time)
+
+
+'''
+    Spawns a subprocess on the replica that checks if the
+    prime, spines and driver processes are running
+'''
+def get_active_processes():
+    active_processes=""
+    for process_name in ['spines','prime','driver']:
+        result = subprocess.run(["pgrep", "-x", process_name], capture_output=True)
+        active_processes += (process_name if result.returncode == 0 else "None") + " "
+    return active_processes 
+
 
 def main(machine_id_arg: int, num_replicas_arg: int):
     '''
@@ -95,6 +112,22 @@ def main(machine_id_arg: int, num_replicas_arg: int):
         # STARTUP_STATUS
         if command == 'STARTUP_STATUS':
             response=EXPECTED_ASTER_RESPONSES[command][0]
+
+        elif command == 'CURRENT_STATUS':
+            '''
+                Gets replica id, aster machine id, total replicas, encryption setting,
+                MAX_PO setting, assigned driver (Yes/No) ,all active processes, 
+            '''
+            response = (
+                f"Replica ID: {replica_id} | "
+                f"Aster Machine: {aster_machine_id} | "
+                f"Total Replicas: {num_replicas} | "
+                f"Encryption: {encrypt} | "
+                f"MAX PO: {max_po} | "
+                f"Assigned Driver: {assigned_driver} | "
+                f"Processes: {get_active_processes().strip()} | "
+                f"Driver Output: {driver_out if assigned_driver else 'N/A'}"
+            )
 
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)

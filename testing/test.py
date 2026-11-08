@@ -320,7 +320,7 @@ def run_tests_aster():
         # Thread Results
         results = threads.wait_for_threads(active_threads,timeout=30)
         for machine_id, response in sorted(results.items()):
-            if response is None:
+            if not response:
                 raise RuntimeError(f"ASTER {machine_id}: No response")
             print(f"ASTER {machine_id}: {response}")
 

@@ -61,8 +61,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
 
             # cd into the aster directory and run the aster_replica script on the replica
             # which will run until the parent process issues a termination message.
-            #   aster_replica.py takes machine_id num_replicas
-            #   For simplicity aster_id == replica_id
+            #   aster_replica.py takes machine_id 
             replica_startup_command = (
                 'cd cs2910/aster && '
                 f'python3 -u aster_replica.py {machine_id}'
@@ -133,6 +132,9 @@ def read_from_aster(ssh_process:subprocess.Popen, response:list):
     If there are not enough available machines to fufill num_replicas, raise a runtime error  
 '''
 def generate_machine_list(num_replicas:int):
+    # All machines already acquired 
+    if len(machines_in_use)==num_replicas:
+        return machines_in_use
 
     # Total list of skips (in use & skipped)
     total_skip_list = skipped_machines + [machine[0] for machine in machines_in_use]

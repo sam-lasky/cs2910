@@ -148,6 +148,7 @@ def start_prime(replica_ip:dict, replica_id:int):
         #   poll() return values:
         #       None: Process still executing
         #       0: Process successfully exited
+        #           BUT PRIME ALSO RETURNS 0 FOR INVALID REPLICA ID SO DOUBLE CHECK!!!
         #       Nonzero int: Process exited w/ error
         if prime.poll() is not None:
             # raise RuntimeError(f'Prime exited during startup: {prime.stderr}')

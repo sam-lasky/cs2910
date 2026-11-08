@@ -171,7 +171,7 @@ all_test_count = 0
 
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
-    KEY = machine/replica id, VALUE  = reference to ssh subprocess associated with that machine
+    KEY = machine id, VALUE  = reference to ssh subprocess associated with that machine
 
     FOR SIMPLICITY MACHINE_ID AND REPLICA_ID ARE THE SAME
 '''

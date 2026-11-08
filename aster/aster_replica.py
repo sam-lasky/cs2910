@@ -15,7 +15,7 @@ from aster_common import EXPECTED_ASTER_RESPONSES, generate_machine_list
 
 
 # Unique integer identifier of the Replica 
-replica_id = None
+local_replica_id = None
 # Unique integer identifer of the Aster Machine
 aster_machine_id = None
 # Total # of replicas being used
@@ -38,10 +38,13 @@ driver_out = None
 # Populates the id_to_ip dictionary where the >> REPLICA ID<< is passed as the
 # key and its IP is assigned as the value 
 def build_id_to_ip_map():
+    global local_replica_id
     # 53 if LAN_1, 54 if LAN_2
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for replica_id,aster_id, _ in enumerate(generate_machine_list(num_replicas),start=1):
+    for replica_id, (aster_id, _) in enumerate(generate_machine_list(num_replicas),start=1):
             id_to_ip[replica_id]=f'192.168.{LAN}.{aster_id+9}'
+            if aster_id==aster_machine_id:
+                local_replica_id=replica_id
 
 '''
     Kills any leftover driver processes on the replica, waits
@@ -88,7 +91,7 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     max_po = passed_po
     num_replicas=passed_rep_count
     encrypt=passed_encrypt
-    # Update id_to_ip mapping [machine/replica ID -> IP address].
+    # Update id_to_ip mapping [replica ID -> IP address].
     # Uses generate_machine_list() which produces the same machine list on every replica
     # when given the same num_replicas value
     build_id_to_ip_map()
@@ -127,7 +130,7 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
 
     # START SPINES! (start spines exits out the curr spines process & starts it up again)
     if restart_spines:
-        start_spines(id_to_ip, replica_id)
+        start_spines(id_to_ip, local_replica_id)
 
     # SETUP PRIME!
     if rebuild_prime:
@@ -135,12 +138,12 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
 
     # START PRIME! (start prime exits out the curr prime process & starts it up again)
     if restart_prime:
-        start_prime(id_to_ip, replica_id)
+        start_prime(id_to_ip, local_replica_id)
 
 
 def main(machine_id_arg: int):
     # Update globals with passed args 
-    global replica_id, aster_machine_id
+    global aster_machine_id
     aster_machine_id = machine_id_arg
 
     '''

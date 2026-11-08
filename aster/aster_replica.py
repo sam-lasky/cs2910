@@ -83,6 +83,7 @@ def main(machine_id_arg: int, num_replicas_arg: int):
         Update globals. Replica & Machine id are set to the same value
         for simplicity. 
     '''
+    global replica_id, aster_machine_id, num_replicas
     replica_id = machine_id_arg
     aster_machine_id = machine_id_arg
     num_replicas = num_replicas_arg

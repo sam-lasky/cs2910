@@ -88,6 +88,17 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
             # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)
             machine[1] = threads.create_thread(target_fn=read_from_aster,ssh_process=sessions[machine_id],timeout=3,msg='STARTUP_STATUS')
 
+    # Check to see if all machines have successfully connected. If so return, otherwise print and 
+    # raise a runtime error.
+    # RECALL machines_in_use = [aster_id:int, started:Bool]
+    err_msg = ''
+    for id,status in machines_in_use:
+        if not status:
+            err_msg+=f'Failed to connec to {id}\n'
+    if err_msg:
+        raise RuntimeError(err_msg)
+
+
 '''
     Writes a message to the aster replica 
 '''

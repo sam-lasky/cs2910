@@ -13,10 +13,7 @@ from aster_common import EXPECTED_ASTER_RESPONSES, generate_machine_list
 # * * * * GLOBALS * * * *
 # * * * ** * * ** * * * *
 
-''' REPLICA ID AND MACHINE ID ARE IDENTICAL
-        E.G if replica_id=x then aster_machine_id=x
-        for sanity and consistency purposes 
-'''
+
 # Unique integer identifier of the Replica 
 replica_id = None
 # Unique integer identifer of the Aster Machine
@@ -43,8 +40,8 @@ driver_out = None
 def build_id_to_ip_map():
     # 53 if LAN_1, 54 if LAN_2
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for aster_id, _ in generate_machine_list(num_replicas):
-            id_to_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
+    for replica_id,aster_id, _ in enumerate(generate_machine_list(num_replicas),start=1):
+            id_to_ip[replica_id]=f'192.168.{LAN}.{aster_id+9}'
 
 '''
     Kills any leftover driver processes on the replica, waits
@@ -142,12 +139,8 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
 
 
 def main(machine_id_arg: int):
-    '''
-        Update globals. Replica & Machine id are set to the same value
-        for simplicity. 
-    '''
+    # Update globals with passed args 
     global replica_id, aster_machine_id
-    replica_id = machine_id_arg
     aster_machine_id = machine_id_arg
 
     '''

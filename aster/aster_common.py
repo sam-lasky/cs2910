@@ -100,7 +100,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
     err_msg=''
     for machine_id, response in sorted(results.items()):
         if not response:
-            err_msg+=f'{machine_id} failed to connect.\n'
+            err_msg+=f'Aster {machine_id} failed to connect.\n'
     if err_msg:
         raise RuntimeError(err_msg)
 

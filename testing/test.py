@@ -303,6 +303,7 @@ def run_tests_aster():
         # Output Status
         print_status(current_test, test_number,failures)
 
+
         # Setup the test - send the configuration information to each replica 
         active_threads=[]
         command = f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
@@ -318,7 +319,7 @@ def run_tests_aster():
 
         # Thread Results
         results = threads.wait_for_threads(active_threads,timeout=30)
-
+        print('turkeys')
 
         break
 

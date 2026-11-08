@@ -37,4 +37,4 @@ def wait_for_threads(active_threads, timeout=3):
     for machine_id, thread, response in active_threads:
         thread.join(timeout=timeout)
         results[machine_id]=response[0] if not thread.is_alive() and response else None
-        
+    return results

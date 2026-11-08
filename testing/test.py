@@ -321,6 +321,9 @@ def run_tests_aster():
         results = threads.wait_for_threads(active_threads,timeout=30)
         for machine_id, response in sorted(results.items()):
             if not response:
+                process = sessions[machine_id]
+                print(f"ASTER {machine_id} STDERR:")
+                print(process.stderr.read())
                 raise RuntimeError(f"ASTER {machine_id}: No response")
             print(f"ASTER {machine_id}: {response}")
 

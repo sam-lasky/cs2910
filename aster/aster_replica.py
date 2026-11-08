@@ -71,12 +71,11 @@ def kill_all(wait_time:float):
     prime, spines and driver processes are running
 '''
 def get_active_processes():
-    active_processes=""
-    for process_name in ['spines','prime','driver']:
+    active_processes = ""
+    for process_name in ['spines', 'prime', 'driver']:
         result = subprocess.run(["pgrep", "-x", process_name], capture_output=True)
-        active_processes += (process_name if result.returncode == 0 else "None") + " "
-    return active_processes 
-
+        active_processes += f"{process_name.capitalize()}: {'Running' if result.returncode == 0 else 'None'} | "
+    return active_processes.rstrip(" |")
 
 def main(machine_id_arg: int, num_replicas_arg: int):
     '''
@@ -126,7 +125,7 @@ def main(machine_id_arg: int, num_replicas_arg: int):
                 f"Encryption: {encrypt} | "
                 f"MAX PO: {max_po} | "
                 f"Assigned Driver: {assigned_driver} | "
-                f"Processes: {get_active_processes().strip()} | "
+                f"Active Processes: {get_active_processes().strip()} | "
                 f"Driver Output: {driver_out if assigned_driver else 'N/A'}"
             )
 

@@ -75,7 +75,7 @@ def main(machine_id_arg: int, num_replicas_arg: int):
         any leftover Driver/Spines/Prime processes from previous
         runs 
     '''
-    wait_time = .5 # time the kill method waits until it returns 
+    wait_time = 0 # time the kill method waits until it returns 
     kill_all(wait_time)
 
     '''

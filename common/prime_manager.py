@@ -150,7 +150,9 @@ def start_prime(replica_ip:dict, replica_id:int):
         #       0: Process successfully exited
         #       Nonzero int: Process exited w/ error
         if prime.poll() is not None:
-            raise RuntimeError(f'Prime exited during startup: {prime.stderr}')
+            # raise RuntimeError(f'Prime exited during startup: {prime.stderr}')
+            raise RuntimeError(f'Prime exited during startup: {prime.stderr.read()}')
+
         else:
             # Check log file for handshake msgs
             with open('prime_status.log', 'r') as prime_status_log:

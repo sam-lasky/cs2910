@@ -7,6 +7,7 @@ import os
 sys.path.insert(0, "..")
 from common.spines_manager import *
 from common.prime_manager import *
+from aster_common import EXPECTED_ASTER_RESPONSES
 
 # * * * ** * * ** * * * *
 # * * * * GLOBALS * * * *
@@ -63,31 +64,44 @@ def main():
     wait_time = .5 # time the kill method waits until it returns 
     kill_all(wait_time)
 
-
-    # Prints READY to stdout so parent knows SSH connection was a success 
-    print("READY\n",flush=True)
-
     '''
-        [STEP 2] Listen for commands from test.py 
+        [STEP 2] Listen for commands from test.py & respond accordingly (as described beneath)
+
+        EXPECTED COMMANDS: 
+        (1) 'STARTUP_STATUS':['READY']
+        (2) 
+
     '''
     for command in sys.stdin:
+        # remove whitespace
         command = command.strip()
+        # response
+        response = None
 
-        # Max PO has changed: passed in form po,<int>
-        if command.startswith("po,"):
-            pass
-        # Encryption value has changed: passed in form spines,<0|1>
-        elif command.startswith("spines,"):
-            pass
-        # Kill all active processes & disconnect 
-        elif command == "disconnect":
-            exit(0)
-        # Status of all active processes (Spines, Prime, Driver)
-        elif command == 'active':
-            all_active = subprocess.run(["ps", "aux"], capture_output=True, text=True)
-            print(all_active.stdout, flush=True)
-        elif command == 'hello':
-            print('hello', flush=True)
+        # STARTUP_STATUS
+        if command == 'STARTUP_STATUS':
+            response=EXPECTED_ASTER_RESPONSES[command][0]
+
+
+
+        # # Max PO has changed: passed in form po,<int>
+        # if command.startswith("po,"):
+        #     pass
+        # # Encryption value has changed: passed in form spines,<0|1>
+        # elif command.startswith("spines,"):
+        #     pass
+        # # Kill all active processes & disconnect 
+        # elif command == "disconnect":
+        #     exit(0)
+        # # Status of all active processes (Spines, Prime, Driver)
+        # elif command == 'active':
+        #     all_active = subprocess.run(["ps", "aux"], capture_output=True, text=True)
+        #     print(all_active.stdout, flush=True)
+        # elif command == 'hello':
+        #     print('hello', flush=True)
+
+        # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
+        print(response,flush=True)
 
     
 

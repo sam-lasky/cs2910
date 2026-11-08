@@ -2,7 +2,7 @@
 import subprocess
 import sys
 
-# local 
+# local imports
 sys.path.insert(0, "..")
 from common import threads
 
@@ -15,11 +15,24 @@ skipped_machines = [3]
 machines_in_use = []
 
 '''
+    This is the dictionary of messages sent to the aster replicas from the
+    local host process and the expected response from the remote aster machine
+    based on the host's message.
+
+    KEY='HOST_MESSAGE_SENT', VALUE='ASTER_RESPONSE_EXPECTED'
+'''
+EXPECTED_ASTER_RESPONSES={
+    'STARTUP_STATUS':['READY\n'],
+}
+
+
+
+'''
     Starts an SSH subprocess that is connects to the aster machine
     identified by the machine_id argument passed to the function & 
     updates the passed sessions dict 
 '''
-def start_replicas(sessions:dict):
+def start_replicas(sessions: dict[int, subprocess.Popen]):
 
     # Git command sent to the machine: Clone the repo if it is not in
     # the home directory, otherwise update the repo. 
@@ -63,12 +76,38 @@ def start_replicas(sessions:dict):
                  text=True
             )
 
+            # Write to the replica on the machine requesting its status (startup)
+            # Note: No delay is required after starting the SSH subprocess.
+            # Input written to stdin is buffered locally until SSH establishes
+            # the connection and can forward it to the remote aster machine
+            sessions[machine_id]
+            write_to_aster(ssh_subprocess=sessions[machine_id], msg='STARTUP_STATUS')
+
             # Create a thread that monitors the SSH subprocess associated with aster # machine id 
             # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
-            # Otherwise TIMEOUT/FAILURE (returns T/F, respectively)
-            machine[1] = threads.create_thread(target_fn='read_ssh_output',ssh_process=sessions[machine_id],timeout=3)
+            # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)
+            machine[1] = threads.create_thread(target_fn=threads.read_ssh_output,ssh_process=sessions[machine_id],timeout=3,msg='STARTUP_STATUS')
 
-    
+'''
+    Writes a message to the aster replica 
+'''
+def write_to_aster(ssh_subprocess:subprocess.Popen, msg:str):
+    # Need a newline at the end for this to work, to be consistent
+    # remove any whitespace in msg and append a newline at the end
+    # just to play it safe 
+    msg = msg.strip()+'\n'
+
+    # Request startup status from the aster machine associated w/ the passed ssh_subprocess
+    ssh_subprocess.stdin.write('STARTUP_STATUS')
+
+'''
+    Read the response from aster replica 
+'''
+def read_from_aster(ssh_process:subprocess.Popen, response:list):
+    response.append(ssh_process.stdout.readline())
+
+
+
 '''
     Starting at aster machine w/ id 20, iterate backwards and add each machine that is not in skipped_machines +
     machines_in_use to machines_in_use until num_replicas number of machines have been assigned. 

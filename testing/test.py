@@ -226,9 +226,9 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 
 
 '''
-    Prints the current test 
+    Prints the current test information & replica status
 '''
-def print_status(curr_test: tuple, test_number: int, failure_count: int, sessions:dict):
+def print_status(curr_test: tuple, test_number: int, failure_count: int):
     print('\033[2J\033[H', end='')
     print('\n')
     print("=" * 48)
@@ -244,7 +244,10 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, session
     print(f"  Distribution     : {curr_test[3]}")
     print(f"  Emulated Clients : {curr_test[4]:,}")
     print("=" * 48)
-
+    print_replica_statuses(sessions)
+'''
+    Prints replica status 
+'''
 def print_replica_statuses(sessions: dict):
     active_threads = []
 

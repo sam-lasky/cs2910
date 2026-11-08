@@ -248,15 +248,7 @@ def print_status(sessions:dict, curr_test:tuple,test_number:int,assigned_driver_
         # print(talk_to_replica('hello', sessions[key]))
         # print(sessions[key].stderr.read())
         print(sessions[key].returncode)
-        exit(0)
-# Communicate w/ the replica associated w/ the passed ssh_process
-# using the passed message & return its response 
-def talk_to_replica(message:str, ssh_process:subprocess.Popen):
-    ssh_process.stdin.write(message + "\n")
-    ssh_process.stdin.flush()    
 
-    response = ssh_process.stdout.readline().strip()
-    return response
 
 '''
     Runs each test configuration stored in all_test_configs

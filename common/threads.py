@@ -1,11 +1,10 @@
 import threading
 import sys
 import subprocess
-# local 
-sys.path.insert(0, "..")
-from aster.aster_common import read_from_aster
+from collections.abc import Callable
 
-def create_thread(target_fn:str,ssh_process:subprocess.Popen,timeout:int,msg:str):
+
+def create_thread(target_fn:Callable,ssh_process:subprocess.Popen,timeout:int):
     response=[]
     thread =threading.Thread(
         target=target_fn,
@@ -15,11 +14,8 @@ def create_thread(target_fn:str,ssh_process:subprocess.Popen,timeout:int,msg:str
     thread.start()
     thread.join(timeout=timeout)
 
-    # Thread is dead && response is not empty && the first entry 
-    if not thread.is_alive() and response and response[0].strip()=='READY':
-        return True
-    else: return False
-
-
-# def read_ssh_output(ssh_process:subprocess.Popen, response:list):
-#     response.append(ssh_process.stdout.readline())
+    # Thread is dead && response is not empty: return response
+    if not thread.is_alive() and response:
+        return response[0]
+    # Return None (thread still running (timeout) OR empty response list)
+    else: return None

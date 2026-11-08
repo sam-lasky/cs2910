@@ -86,7 +86,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
             # Create a thread that monitors the SSH subprocess associated with aster # machine id 
             # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
             # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)
-            machine[1] = threads.create_thread(target_fn=threads.read_ssh_output,ssh_process=sessions[machine_id],timeout=3,msg='STARTUP_STATUS')
+            machine[1] = threads.create_thread(target_fn=read_from_aster,ssh_process=sessions[machine_id],timeout=3,msg='STARTUP_STATUS')
 
 '''
     Writes a message to the aster replica 
@@ -98,7 +98,9 @@ def write_to_aster(ssh_subprocess:subprocess.Popen, msg:str):
     msg = msg.strip()+'\n'
 
     # Request startup status from the aster machine associated w/ the passed ssh_subprocess
-    ssh_subprocess.stdin.write('STARTUP_STATUS')
+    ssh_subprocess.stdin.write(msg)
+    # Write it ASAP rocky
+    ssh_subprocess.stdin.flush()
 
 '''
     Read the response from aster replica 
@@ -117,7 +119,7 @@ def read_from_aster(ssh_process:subprocess.Popen, response:list):
 def generate_machine_list(num_replicas:int):
 
     # Total list of skips (in use & skipped)
-    total_skip_list = skipped_machines + machines_in_use
+    total_skip_list = skipped_machines + [machine[0] for machine in machines_in_use]
 
     # Starting at machine 20, iterate backwards
     for aster_id in range(20,0,-1):

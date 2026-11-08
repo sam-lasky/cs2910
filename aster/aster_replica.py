@@ -7,33 +7,39 @@ import os
 sys.path.insert(0, "..")
 from common.spines_manager import *
 from common.prime_manager import *
-from aster_common import EXPECTED_ASTER_RESPONSES
+from aster_common import EXPECTED_ASTER_RESPONSES, generate_machine_list
 
 # * * * ** * * ** * * * *
 # * * * * GLOBALS * * * *
 # * * * ** * * ** * * * *
 
+''' REPLICA ID AND MACHINE ID ARE IDENTICAL
+        E.G if replica_id=x then aster_machine_id=x
+        for sanity and consistency purposes 
+'''
 # Unique integer identifier of the Replica 
 replica_id = None
 # Unique integer identifer of the Aster Machine
 aster_machine_id = None
-# List of all machines being used
-aster_machines_used = []
-# Environment being used <Docker | Aster_1_LAN | Aster_2_LAN>
-env = None
+# Total # of replicas being used
+num_replicas = None
+# Assume Aster_1_LAN in all cases (for now, TODO: EXPAND TO ALL ENVs)
+env = 'Aster_1_LAN'
 # MAX_PO_IN_FLIGHT (prime/src/def.h)
 max_po = None
 # Encrypted or Plain (prime/spines/daemon/spines.conf, IT_LinkCrypto, IT_LinkEncrypt)
 encrypt = None
 # k,v = REPLICA id (int), replica ip (str)
 id_to_ip={}
+# Tracks make counts (spines/prime) initialized to 0
+make_count_spines, make_count_prime = 0,0
 
 # Populates the id_to_ip dictionary where the >> REPLICA ID<< is passed as the
 # key and its IP is assigned as the value 
 def build_id_to_ip_map():
     # 53 if LAN_1, 54 if LAN_2
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for i,aster_id in enumerate(aster_machines_used,start=1):
+    for i,aster_id in enumerate(generate_machine_list(num_replicas),start=1):
         id_to_ip[i]=f'192.168.{LAN}.{aster_id+9}'
 
 '''
@@ -55,7 +61,15 @@ def kill_all(wait_time:float):
     kill_prime(wait_time=0)
     time.sleep(wait_time)
 
-def main():
+def main(machine_id_arg: int, num_replicas_arg: int):
+    '''
+        Update globals. Replica & Machine id are set to the same value
+        for simplicity. 
+    '''
+    replica_id = machine_id_arg
+    aster_machine_id = machine_id_arg
+    num_replicas = num_replicas_arg
+
     '''
         [STEP 1] As soon as the replica launches, terminate 
         any leftover Driver/Spines/Prime processes from previous
@@ -82,34 +96,17 @@ def main():
         if command == 'STARTUP_STATUS':
             response=EXPECTED_ASTER_RESPONSES[command][0]
 
-
-
-        # # Max PO has changed: passed in form po,<int>
-        # if command.startswith("po,"):
-        #     pass
-        # # Encryption value has changed: passed in form spines,<0|1>
-        # elif command.startswith("spines,"):
-        #     pass
-        # # Kill all active processes & disconnect 
-        # elif command == "disconnect":
-        #     exit(0)
-        # # Status of all active processes (Spines, Prime, Driver)
-        # elif command == 'active':
-        #     all_active = subprocess.run(["ps", "aux"], capture_output=True, text=True)
-        #     print(all_active.stdout, flush=True)
-        # elif command == 'hello':
-        #     print('hello', flush=True)
-
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)
 
     
 
-
-
+'''
+    python aster_replica <machine_id:int> <num_replicas:int>
+'''
 if __name__ == "__main__":
     try:
-        main()
+        main(int(sys.argv[1]), int(sys.argv[2]))
     finally:
         # << CLEANUP >> 
         # kills all active processes on this replica before exiting

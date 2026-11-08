@@ -62,7 +62,7 @@ configurations = {
 }
 
 # Set up Prime
-def setup_prime(replica_ip:dict, num_replicas:int, max_po:int, keys=True):
+def setup_and_build_prime(replica_ip:dict, num_replicas:int, max_po:int, keys=True):
 
     # Update prime/bin/address.config
     address_conf(replica_ip)
@@ -79,10 +79,6 @@ def setup_prime(replica_ip:dict, num_replicas:int, max_po:int, keys=True):
 
     # Handles keys for Prime
     if keys:handle_keys(prime_path,num_replicas)
-
-
-
-
 
 # Builds Prime:
 # 1. Sets execute permissions on dependency configure scripts and build tools.
@@ -129,13 +125,11 @@ def kill_prime(wait_time:float):
     # inconsistent behavior occurs 
     time.sleep(wait_time) 
 
-
-
 # Kills any active leftover Prime processes & restarts prime
 def start_prime(replica_ip:dict, replica_id:int):
 
     # Kill any active Prime processes on this replica
-    kill_prime()
+    kill_prime(wait_time=1)
 
     with open('prime_status.log', 'w') as prime_status_log:
         # Start the Prime Process, write stdout/err to prime_status_log

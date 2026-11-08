@@ -147,7 +147,7 @@ def generate_machine_list(num_replicas:int):
             if len(machines_in_use)==num_replicas:
                 # sort in ascending order
                 machines_in_use.sort()
-                return
+                return machines_in_use
             
     # Not enough machines are available to fufill num_replicas 
     if len(machines_in_use)<num_replicas:

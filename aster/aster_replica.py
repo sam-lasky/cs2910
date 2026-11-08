@@ -34,7 +34,7 @@ assigned_driver=False
 # k,v = REPLICA id (int), replica ip (str)
 id_to_ip={}
 # Tracks make counts (spines/prime) initialized to 0
-make_count_spines, make_count_prime = 0,0
+make_count_prime = 0
 # Driver program output
 driver_out = None
 
@@ -43,8 +43,8 @@ driver_out = None
 def build_id_to_ip_map():
     # 53 if LAN_1, 54 if LAN_2
     LAN = '53' if env == 'aster_LAN_1' else '54'
-    for i,aster_id in enumerate(generate_machine_list(num_replicas),start=1):
-        id_to_ip[i]=f'192.168.{LAN}.{aster_id+9}'
+    for aster_id in generate_machine_list(num_replicas):
+            id_to_ip[aster_id]=f'192.168.{LAN}.{aster_id+9}'
 
 '''
     Kills any leftover driver processes on the replica, waits
@@ -79,29 +79,67 @@ def get_active_processes():
 
 
 '''
-    Sets up the environment for the testing
+    Sets up the environment for the current testing configuration
 '''
 def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     global max_po, num_replicas, encrypt, make_count_prime, make_count_spines
-    # Get old globals 
+    # Preserve old global values 
     old_max_po = max_po
     old_num_replicas = num_replicas
     old_encrypt = encrypt
-    # Update them 
+    # Update globals to reflect current test config 
     max_po = passed_po
     num_replicas=passed_rep_count
     encrypt=passed_encrypt
+    # Update id_to_ip mapping [machine/replica ID -> IP address].
+    # Uses generate_machine_list() which produces the same machine list on every replica
+    # when given the same num_replicas value
+    build_id_to_ip_map()
+    # All possibilties actions
+    #   Note: Spines only needs to be made once regardless of what changes. This is handled by default when the first setup_spines is 
+    #   run which checks if Spines has already been made, otherwise it makes it. 
+    rebuild_prime = False
+    configure_spines = False
+    restart_prime = False
+    restart_spines = False
 
-    
-    # old_make_count_spines=make_count_spines
-    # old_make_count_prime = make_count_prime
+    if make_count_prime == 0:
+        rebuild_prime = True
+        restart_prime = True
+        configure_spines = True
+        restart_spines = True
 
+    if max_po != old_max_po:
+        rebuild_prime = True
+        restart_prime = True
 
+    if num_replicas != old_num_replicas:
+        rebuild_prime = True
+        configure_spines = True
+        restart_prime = True
+        restart_spines = True
 
+    if encrypt != old_encrypt:
+        configure_spines = True
+        restart_spines = True
+        restart_prime = True
 
-# build_id_to_ip_map
+    # SETUP SPINES!
+    if configure_spines:
+        setup_spines(id_to_ip, encrypt)
 
-    pass
+    # START SPINES! (start spines exits out the curr spines process & starts it up again)
+    if restart_spines:
+        start_spines(id_to_ip, replica_id)
+
+    # SETUP PRIME!
+    if rebuild_prime:
+        setup_and_build_prime(id_to_ip, num_replicas, max_po)
+
+    # START PRIME! (start prime exits out the curr prime process & starts it up again)
+    if restart_prime:
+        start_prime(id_to_ip, replica_id)
+
 
 def main(machine_id_arg: int):
     '''
@@ -158,7 +196,7 @@ def main(machine_id_arg: int):
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
-
+            response='READY'
 
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)

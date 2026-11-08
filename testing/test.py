@@ -315,7 +315,10 @@ def run_tests_aster():
             aster_common.write_to_aster,
             aster_common.read_from_aster
         )
-                        
+
+        # Thread Results
+        results = threads.wait_for_threads(active_threads,timeout=30)
+
 
         break
 

@@ -292,8 +292,6 @@ void Print_And_Exit(void)
     //stop timer [throughput measurement]
     UTIL_Stopwatch_Stop(&throughput_sw);
 
-  
-
     //time elapsed [since first update sent to the final update being successfully being received]
     double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
 
@@ -318,30 +316,10 @@ void Print_And_Exit(void)
     /* calculate expected throughput = (1000/Avg Latency(ms)) * num_clients_to_emulate */
     double expected_throughput = (1000/avg)* num_clients_to_emulate;
 
-    /*
-      Print test results:
-        Number of Emulated Clients c with
-        Total Updates sent 
-        Throughput in updates/sec
-        Total number of Emulated Clients
-        Total updates sent
-    */
-
-    // HUMAN VERSION
-    // printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", 
-    //   num_clients_to_emulate, total_required_updates);
-    // printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
-    // printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
-    // printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
-    // printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
-    // printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
-
     // emulated clients, total updates, elapsed time, send stalls,
     // expected throughput, actual throughput, minimum latency, maximum latency,
     // average latency, start timestamp, end timestamp
-    printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f,%.9f,%.9f\n",
-        num_clients_to_emulate,
-        total_required_updates,
+    printf("RESULT,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f,%.9f,%.9f\n",
         time_elapsed,
         send_stalls,
         expected_throughput,

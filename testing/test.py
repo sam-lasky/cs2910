@@ -254,14 +254,17 @@ def print_replica_statuses(sessions: dict):
     for machine_id in sorted(sessions.keys()):
         process = sessions[machine_id]
 
+        # Request current status from the current aster machine 
         aster_common.write_to_aster(process, "CURRENT_STATUS")
 
-        thread, response = threads.create_thread(
+        # Create a separate thread that waits for a response 
+        threads.add_thread( 
+            active_threads, machine_id,
             aster_common.read_from_aster, process
         )
 
-        active_threads.append((machine_id, thread, response))
-
+    # Waits for all threads assigned to each subprocess & stores 
+    # results as results={machine_id:'Response'|None if none}
     results = threads.wait_for_threads(active_threads, timeout=3)
 
     for machine_id, response in sorted(results.items()):
@@ -297,8 +300,23 @@ def run_tests_aster():
         if len(sessions)<replica_count: 
             allocate_machines(replica_count, len(sessions), sessions)
 
-
+        # Output Status
         print_status(current_test, test_number,failures)
+
+        # Setup the test - send the configuration information to each replica 
+        active_threads=[]
+        command = f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
+        for machine_id, process in sorted(sessions.items()):
+            threads.send_and_create_thread(
+            active_threads,
+            machine_id,
+            process,
+            command,
+            aster_common.write_to_aster,
+            aster_common.read_from_aster
+        )
+                        
+
         break
 
 

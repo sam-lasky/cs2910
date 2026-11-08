@@ -65,7 +65,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
             #   For simplicity aster_id == replica_id
             replica_startup_command = (
                 'cd cs2910/aster && '
-                f'python3 -u aster_replica.py {machine_id} {len(machines_in_use)}'
+                f'python3 -u aster_replica.py {machine_id}'
             )
 
             # Start a new ssh subprocess & run the git and startup commands, store

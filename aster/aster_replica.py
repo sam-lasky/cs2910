@@ -74,25 +74,50 @@ def get_active_processes():
     active_processes = ""
     for process_name in ['spines', 'prime', 'driver']:
         result = subprocess.run(["pgrep", "-x", process_name], capture_output=True)
-        active_processes += f"{process_name.capitalize()}: {'Running' if result.returncode == 0 else 'None'}, "
+        active_processes += f"[{process_name.capitalize()}]: {'Running' if result.returncode == 0 else 'None'}, "
     return active_processes.rstrip(", ")
 
-def main(machine_id_arg: int, num_replicas_arg: int):
+
+'''
+    Sets up the environment for the testing
+'''
+def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
+    global max_po, num_replicas, encrypt, make_count_prime, make_count_spines
+    # Get old globals 
+    old_max_po = max_po
+    old_num_replicas = num_replicas
+    old_encrypt = encrypt
+    # Update them 
+    max_po = passed_po
+    num_replicas=passed_rep_count
+    encrypt=passed_encrypt
+
+    
+    # old_make_count_spines=make_count_spines
+    # old_make_count_prime = make_count_prime
+
+
+
+
+# build_id_to_ip_map
+
+    pass
+
+def main(machine_id_arg: int):
     '''
         Update globals. Replica & Machine id are set to the same value
         for simplicity. 
     '''
-    global replica_id, aster_machine_id, num_replicas
+    global replica_id, aster_machine_id
     replica_id = machine_id_arg
     aster_machine_id = machine_id_arg
-    num_replicas = num_replicas_arg
 
     '''
         [STEP 1] As soon as the replica launches, terminate 
         any leftover Driver/Spines/Prime processes from previous
         runs 
     '''
-    wait_time = 0 # time the kill method waits until it returns 
+    wait_time = 0.5 # time the kill method waits until it returns 
     kill_all(wait_time)
 
     '''
@@ -100,7 +125,9 @@ def main(machine_id_arg: int, num_replicas_arg: int):
 
         EXPECTED COMMANDS: 
         (1) 'STARTUP_STATUS':['READY']
-        (2) 
+        (2) 'CURRENT_STATUS': returns the replica's machine status 
+        (3) 'SETUP_FOR_TEST': gets passed all the info for the test & sets up
+        Prime and Spines accordingly
 
     '''
     for command in sys.stdin:
@@ -112,7 +139,7 @@ def main(machine_id_arg: int, num_replicas_arg: int):
         # STARTUP_STATUS
         if command == 'STARTUP_STATUS':
             response=EXPECTED_ASTER_RESPONSES[command][0]
-
+        # CURRENT_STATUS
         elif command == 'CURRENT_STATUS':
             '''
                 Gets replica id, aster machine id, total replicas, encryption setting,
@@ -128,18 +155,21 @@ def main(machine_id_arg: int, num_replicas_arg: int):
                 f"Active Processes: {get_active_processes().strip()} | "
                 f"Driver Output: {driver_out if assigned_driver else 'N/A'}"
             )
+        # Sets up the test environment (Spines/Prime)
+        elif command.startswith('SETUP_TEST:'):
+            set_up_test_env(*map(int, command.split(':', 1)[1].split()))
+
 
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)
 
     
-
 '''
     python aster_replica <machine_id:int> <num_replicas:int>
 '''
 if __name__ == "__main__":
     try:
-        main(int(sys.argv[1]), int(sys.argv[2]))
+        main(int(sys.argv[1]))
     finally:
         # << CLEANUP >> 
         # kills all active processes on this replica before exiting

@@ -86,7 +86,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
             # Create a thread that monitors the SSH subprocess associated with aster # machine id 
             # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
             # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)
-            machine[1] = threads.create_thread(target_fn=read_from_aster,ssh_process=sessions[machine_id],timeout=3,msg='STARTUP_STATUS')
+            machine[1] = bool(threads.create_thread(target_fn=read_from_aster,ssh_process=sessions[machine_id],timeout=3))
 
     # Check to see if all machines have successfully connected. If so return, otherwise print and 
     # raise a runtime error.

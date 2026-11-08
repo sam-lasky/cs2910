@@ -34,6 +34,9 @@ EXPECTED_ASTER_RESPONSES={
 '''
 def start_replicas(sessions: dict[int, subprocess.Popen]):
 
+    # Stores threads used to check on SSH subprocess statuses
+    active_threads=[]
+
     # Git command sent to the machine: Clone the repo if it is not in
     # the home directory, otherwise update the repo. 
     git_command = (
@@ -85,19 +88,21 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
 
             # Create a thread that monitors the SSH subprocess associated with aster # machine id 
             # Wait for the machine to respond with a 'READY' to indicate the connection was successful 
-            # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)
-            machine[1] = bool(threads.create_thread(target_fn=read_from_aster,ssh_process=sessions[machine_id],timeout=3))
+            # Otherwise TIMEOUT (3 secs)/FAILURE (returns T/F, respectively)      
+            thread, thread_response = threads.create_thread(read_from_aster, sessions[machine_id])
+            active_threads.append((machine_id, thread, thread_response))
 
     # Check to see if all machines have successfully connected. If so return, otherwise print and 
     # raise a runtime error.
     # RECALL machines_in_use = [aster_id:int, started:Bool]
-    err_msg = ''
-    for id,status in machines_in_use:
-        if not status:
-            err_msg+=f'Failed to connec to {id}\n'
+    results:dict = threads.wait_for_threads(active_threads, timeout=3)
+
+    err_msg=''
+    for machine_id, response in sorted(results.items()):
+        if not response:
+            err_msg+=f'{machine_id} failed to connect.\n'
     if err_msg:
         raise RuntimeError(err_msg)
-
 
 '''
     Writes a message to the aster replica 

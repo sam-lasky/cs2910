@@ -4,18 +4,37 @@ import subprocess
 from collections.abc import Callable
 
 
-def create_thread(target_fn:Callable,ssh_process:subprocess.Popen,timeout:int):
-    response=[]
-    thread =threading.Thread(
+# def create_thread(target_fn:Callable,ssh_process:subprocess.Popen,timeout:int):
+#     response=[]
+#     thread =threading.Thread(
+#         target=target_fn,
+#         args=(ssh_process,response),
+#         daemon=True
+#     )
+#     thread.start()
+#     thread.join(timeout=timeout)
+
+#     # Thread is dead && response is not empty: return response
+#     if not thread.is_alive() and response:
+#         return response[0]
+#     # Return None (thread still running (timeout) OR empty response list)
+#     else: return None
+
+def create_thread(target_fn, ssh_process):
+    response = []
+    thread = threading.Thread(
         target=target_fn,
-        args=(ssh_process,response),
+        args=(ssh_process, response),
         daemon=True
     )
     thread.start()
-    thread.join(timeout=timeout)
+    return thread, response
 
-    # Thread is dead && response is not empty: return response
-    if not thread.is_alive() and response:
-        return response[0]
-    # Return None (thread still running (timeout) OR empty response list)
-    else: return None
+# active threads = list where each element is a tuple in the form:
+#  (machine_id, thread, thread_response)
+def wait_for_threads(active_threads, timeout=3):
+    results = {}
+    for machine_id, thread, response in active_threads:
+        thread.join(timeout=timeout)
+        results[machine_id]=response[0] if not thread.is_alive() and response else None
+        

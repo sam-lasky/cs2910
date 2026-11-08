@@ -74,8 +74,8 @@ def get_active_processes():
     active_processes = ""
     for process_name in ['spines', 'prime', 'driver']:
         result = subprocess.run(["pgrep", "-x", process_name], capture_output=True)
-        active_processes += f"{process_name.capitalize()}: {'Running' if result.returncode == 0 else 'None'} | "
-    return active_processes.rstrip(" |")
+        active_processes += f"{process_name.capitalize()}: {'Running' if result.returncode == 0 else 'None'}, "
+    return active_processes.rstrip(", ")
 
 def main(machine_id_arg: int, num_replicas_arg: int):
     '''

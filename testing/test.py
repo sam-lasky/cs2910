@@ -498,13 +498,13 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
                     f"{max_po},{replica_count},{encryption_status},"
                     f"{distribution},{num_clients_to_Emulate}\n"
                 )
-    else:
-        # mark this trial as completed to avoid redundant trial runs 
-        with open("results/completed_trials.txt", "a", encoding="utf-8") as file:
-            file.write(
-                f"{max_po},{replica_count},{encryption_status},"
-                f"{distribution},{num_clients_to_Emulate},{trial_num}\n"
-            )
+    # else:
+    #     # mark this trial as completed to avoid redundant trial runs 
+    #     with open("results/completed_trials.txt", "a", encoding="utf-8") as file:
+    #         file.write(
+    #             f"{max_po},{replica_count},{encryption_status},"
+    #             f"{distribution},{num_clients_to_Emulate},{trial_num}\n"
+    #         )
 
     return True,None 
 

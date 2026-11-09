@@ -79,7 +79,14 @@ def start_spines(replica_ip:dict, replica_id:int):
 
     # Kill any active Spines processes on this replica
     kill_spines(wait_time=1)
-    
+
+
+    if os.path.isfile("spines_status.log"):
+        with open("spines_status.log", "rb") as status:
+            with open("spines_archive.log", "ab") as archive:
+                archive.write(status.read())
+
+        
     with open('spines_status.log', 'w') as spines_status_log:
         # Start the Spines Process, write stdout/err to spines_status_log
         spines = subprocess.Popen(

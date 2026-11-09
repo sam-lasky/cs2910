@@ -536,7 +536,7 @@ def load_completed():
 
 def print_status_and_reboot_if_needed(
     sessions, test_dir, current_test, test_number, failures,
-    trial_num, total_trials, updates_per_driver,
+    trial_num, total_trials, updates_per_driver,num_clients
 ):
     global reboot, reboot_msg
 
@@ -555,7 +555,8 @@ def print_status_and_reboot_if_needed(
             f"[FAILURE #{failures + 1}]\n"
             f"Test config: MAX PO={max_po}, replicas={replica_count}, "
             f"encryption={encryption_status}, distribution={distribution}, "
-            f"clients per driver={clients}\n"
+            f"clients per driver={clients}, "
+            f"num clients={num_clients}\n"
             f"{reboot_msg}\n"
         )
 
@@ -632,7 +633,7 @@ def run_tests_aster():
             
             if print_status_and_reboot_if_needed(
                 sessions, test_dir, current_test, test_number, failures,
-                trial_num, num_trials, dynamic_updates // distribution,
+                trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
             ):
                 failures += 1
                 continue     
@@ -659,7 +660,7 @@ def run_tests_aster():
             while True:
                 if print_status_and_reboot_if_needed(
                     sessions, test_dir, current_test, test_number, failures,
-                    trial_num, num_trials, dynamic_updates // distribution,
+                    trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
                 ):
                     failures += 1
                     test_sucessful[1] = "REBOOT"

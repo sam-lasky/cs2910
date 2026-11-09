@@ -131,13 +131,14 @@ def start_prime(replica_ip:dict, replica_id:int):
     # Kill any active Prime processes on this replica
     kill_prime(wait_time=1)
 
-    with open('prime_status.log', 'w') as prime_status_log:
+    with open('prime_status.log', 'w') as prime_status_log,\
+        open('prime_err.log','a') as prime_err_log:
         # Start the Prime Process, write stdout/err to prime_status_log
         prime = subprocess.Popen(
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
             cwd='../prime/bin',
             stdout=prime_status_log,
-            stderr= subprocess.PIPE,
+            stderr= prime_err_log,
             text=True
         )
 
@@ -155,7 +156,6 @@ def start_prime(replica_ip:dict, replica_id:int):
             # raise RuntimeError(f'Prime exited during startup: {prime.stderr.read()}')
             raise RuntimeError(
             f"Prime exited with code {prime.returncode}. "
-            f"STDERR: {prime.stderr.read()}"
         )
 
         else:

@@ -5,7 +5,7 @@ import csv
 import select
 import math
 import os
-from time import sleep,monotonic
+from time import sleep,monotonic,strftime
 from datetime import datetime
 from uuid import uuid4
 from colorama import just_fix_windows_console
@@ -553,9 +553,9 @@ def print_status_and_reboot_if_needed(
     with (test_dir / "failure_log.txt").open("a", encoding="utf-8") as file:
         file.write(
             f"[FAILURE #{failures + 1}]\n"
+            f"TIME: {strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"Test config: MAX PO={max_po}, replicas={replica_count}, "
             f"encryption={encryption_status}, distribution={distribution}, "
-            f"clients per driver={clients}, "
             f"num clients={num_clients}\n"
             f"{reboot_msg}\n"
         )

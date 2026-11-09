@@ -180,7 +180,7 @@ def read_driver_output(process, state):
 
 def main(machine_id_arg: int):
     # Update globals with passed args 
-    global aster_machine_id, assigned_driver
+    global aster_machine_id, assigned_driver,make_count_prime
     aster_machine_id = machine_id_arg
 
     '''
@@ -238,6 +238,7 @@ def main(machine_id_arg: int):
             # Reset driver data
             assigned_driver=False
             driver_state = {"progress": None, "result": None}
+            driver_process = None
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
             response='READY'
         # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>
@@ -252,8 +253,12 @@ def main(machine_id_arg: int):
                 daemon=True,
             ).start()
             response='DRIVER STARTED'
+        # A machine's prime/spines/driver process crashed, restart erythang
+        elif command.startswith('REBOOT'):
+            kill_all(1)
+            make_count_prime=0
+            response='READY'
 
-    
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)
 

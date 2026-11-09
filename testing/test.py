@@ -7,6 +7,8 @@ import math
 import os
 from time import sleep,monotonic
 from datetime import datetime
+from uuid import uuid4
+
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -169,7 +171,11 @@ all_test_configs = []
 # TOTAL TESTS TO BE PERFORMED
 all_test_count = 0
 
-    # Dictionary that holds all SSH subprocesses 
+# Name of the test 
+test_name = None
+# REBOOT ALL REPLICAS -- a crashed process was detected. Wipe the slate clean & restart evertyhing
+reboot = False
+reboot_msg=''
 
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
@@ -268,24 +274,9 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
     Prints replica status 
 '''
 def print_replica_statuses(sessions: dict,updates_per_driver):
-    active_threads = []
 
-    for machine_id in sorted(sessions.keys()):
-        process = sessions[machine_id]
-
-        # Request current status from the current aster machine 
-        aster_common.write_to_aster(process, "CURRENT_STATUS")
-
-        # Create a separate thread that waits for a response 
-        threads.add_thread( 
-            active_threads, machine_id,
-            aster_common.read_from_aster, process
-        )
-
-    # Waits for all threads assigned to each subprocess & stores 
-    # results as results={machine_id:'Response'|None if none}
-    results = threads.wait_for_threads(active_threads, timeout=3)
-
+    results = get_all_replica_statuses(sessions)
+    
     for machine_id, response in sorted(results.items()):
         if not response:
             print(f"ASTER {machine_id}: No response")
@@ -304,6 +295,61 @@ def print_replica_statuses(sessions: dict,updates_per_driver):
             completed = int(count.split()[0])
             print(f"  TEST STATUS = {completed:,}/{updates_per_driver:,} ({completed / updates_per_driver:.1%})")
         print()
+
+'''
+    Gets all the statuses of the active replicas & returns them in a 
+    results dict where key = machine_id, value = raw status info 
+
+    raw status info = replica ID, ASTER machine ID, total replicas, 
+    encryption setting, MAX PO, whether a driver is assigned, active processes, 
+    driver status, and the driver result if available.
+'''
+def get_all_replica_statuses(sessions):
+    global reboot, reboot_msg
+    results =  send_command_to_replicas(
+        sessions, "CURRENT_STATUS", timeout=3,
+        distribution=len(sessions), allow_missing=True,
+    )
+
+    # Go through every machine's out and check if a process has crashed.
+    # If so, mark the global reboot flag to true. 
+    for machine_id in sorted(results.keys()):
+        # Get the aster machine's status response 
+        response = results[machine_id]
+
+        # Trial fail check 1: empty response or none
+        if not response:
+            reboot_msg+=f'ASTER {machine_id} did not respond to the status update request\n'
+            reboot=True
+            continue
+
+        # Get the list of all active processes on this machine 
+        active_processes = response.split("Active Processes: ", 1)[1].split(" | ", 1)[0]
+        # bool - this machine assigned a driver
+        assigned_driver = "Assigned Driver: True | " in response
+        # bool - is the spines process running on this machine
+        spines_running = "[Spines]: Running" in active_processes
+        # bool - is the prime process running on this machine 
+        prime_running = "[Prime]: Running" in active_processes
+        # bool - is the driver process running on this machine 
+        driver_running = "[Driver]: Running" in active_processes
+
+        # Trial fail check 2
+        process_status =''
+        if not spines_running:
+            process_status+='(no spines process)'
+        if not prime_running:
+            process_status+='(no prime process)'
+        result = response.partition(" | Driver Result: ")[2].strip()
+        if assigned_driver and not driver_running and not result:
+            process_status+='(assigned driver but no driver process)'
+        if process_status:
+            reboot=True
+            reboot_msg+=f'Aster {machine_id}: '+ process_status+'\n'
+
+
+    
+    return results
 
 
 '''
@@ -373,7 +419,7 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
 
     latest_driver_endtime = 0
     earliest_driver_start_time = float("inf")
-    
+
     for machine_id in sorted(driver_results_by_machine.keys()):
         mean_elapsed_time_secs+=    driver_results_by_machine[machine_id]['elapsed_time']
         mean_send_stalls+=          driver_results_by_machine[machine_id]['send_stalls']
@@ -484,10 +530,48 @@ def load_completed():
 
     return completed_trials,completed_configs
 
+
+def print_status_and_reboot_if_needed(
+    sessions, test_dir, current_test, test_number, failures,
+    trial_num, total_trials, updates_per_driver,
+):
+    global reboot, reboot_msg
+
+    print_status(
+        current_test, test_number, failures, trial_num,
+        total_trials, updates_per_driver,
+    )
+
+    if not reboot:
+        return False
+
+    max_po, replica_count, encryption_status, distribution, clients = current_test
+
+    with (test_dir / "failure_log.txt").open("a", encoding="utf-8") as file:
+        file.write(
+            f"[FAILURE #{failures + 1}]\n"
+            f"Test config: MAX PO={max_po}, replicas={replica_count}, "
+            f"encryption={encryption_status}, distribution={distribution}, "
+            f"clients per driver={clients}\n"
+            f"{reboot_msg}\n"
+        )
+
+    send_command_to_replicas(
+        sessions, "REBOOT", timeout=45, distribution=len(sessions)
+    )
+    reboot_msg = ""
+    reboot = False
+    return True
+
 '''
     Runs each test configuration stored in all_test_configs
 '''
 def run_tests_aster():
+    global test_name
+    # CREATE A DIRECTORY FOR test_name IN results DIR
+    test_name = f"test_{uuid4().hex[:8]}"
+    test_dir = Path("results") / test_name
+    test_dir.mkdir(parents=True)
 
     completed_trials,completed_configs = load_completed()
 
@@ -537,13 +621,19 @@ def run_tests_aster():
             #     continue
             test_sucessful=[False, 'JUST STARTED'] #RESET
 
-            # Output Status
-            # print_status(current_test, test_number,failures)
+   
 
             # Setup the test - send the configuration information to each replica, print all replica statuses if successful
             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
-            print_status(current_test, test_number,failures,trial_num,num_trials,dynamic_updates//distribution)
+            
+            if print_status_and_reboot_if_needed(
+                sessions, test_dir, current_test, test_number, failures,
+                trial_num, num_trials, dynamic_updates // distribution,
+            ):
+                failures += 1
+                continue     
+
             print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
 
             '''
@@ -564,7 +654,14 @@ def run_tests_aster():
             # Print status of all replicas every 2 seconds during the test
             # 2 minute timeout, if exceeded break & repeat test 
             while True:
-                print_status(current_test, test_number,failures,trial_num,num_trials,dynamic_updates//distribution)
+                if print_status_and_reboot_if_needed(
+                    sessions, test_dir, current_test, test_number, failures,
+                    trial_num, num_trials, dynamic_updates // distribution,
+                ):
+                    failures += 1
+                    test_sucessful[1] = "REBOOT"
+                    break
+
                 if all(machine_id in driver_results for machine_id in driver_ids):
                     test_sucessful[0]=True
                     break
@@ -586,13 +683,14 @@ def run_tests_aster():
                     dynamic_updates = math.ceil(
                         dynamic_updates * min_test_time / test_time
                     )
+            elif test_sucessful[1]=='REBOOT':continue
 
 '''
     Send the command to the aster machine(s). Create a thread for each machine being sent to. Returned 
     value is a dictionary results where key=replica id, val=response. If there is no response then an error
     is raised and the program terminates 
 '''
-def send_command_to_replicas(sessions:dict,command:str,timeout:float, distribution=len(sessions.keys())):
+def send_command_to_replicas(sessions:dict,command:str,timeout:float, distribution=len(sessions.keys()),allow_missing=False):
     # Stores all active threads 
     active_threads=[]
 
@@ -612,12 +710,12 @@ def send_command_to_replicas(sessions:dict,command:str,timeout:float, distributi
             distribution-=1
         else: break
 
-    # wait for threads 
+    # Wait for threads 
     results = threads.wait_for_threads(active_threads,timeout=timeout)
 
     # check results & issue required errs 
     for machine_id, response in sorted(results.items()):
-        if not response:
+        if not response and not allow_missing:
             process = sessions[machine_id]
             if process.poll() is not None and process.stderr is not None:
                 print(f"ASTER {machine_id} STDERR:")
@@ -644,6 +742,7 @@ def main():
     global all_test_count
     generate_all_test_configurations()
     all_test_count = len(all_test_configs)*num_trials
+
 
     '''
         Run all test configurations in Aster

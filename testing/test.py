@@ -247,9 +247,9 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
     Prints the current test information & replica status
 '''
 def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver):
-    just_fix_windows_console()
-    print("\033[H", end="", flush=True)
-    print("Setting things up...\n")
+    # just_fix_windows_console()
+    print("\033[H\033[J", end="", flush=True)
+
     # # Windows: CLEAR TERMINAL 
     # if os.name=="nt":
     #     os.system("cls")
@@ -729,8 +729,9 @@ def send_command_to_replicas(sessions:dict,command:str,timeout:float, distributi
     return results
 
 def main():
-    print("\033[H", end="", flush=True)
-    print("Getting things setup....\n")
+    just_fix_windows_console()
+    print("\033[H\033[J", end="", flush=True)
+    print("Setting things up...\n")
 
     '''
         Get the most up to date CS2910 Github Repo. 

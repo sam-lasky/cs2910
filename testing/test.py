@@ -561,7 +561,7 @@ def print_status_and_reboot_if_needed(
         )
 
     send_command_to_replicas(
-        sessions, "REBOOT", timeout=45, distribution=len(sessions)
+        sessions, "REBOOT", timeout=60, distribution=len(sessions)
     )
     reboot_msg = ""
     reboot = False

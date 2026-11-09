@@ -4,6 +4,7 @@ import subprocess
 import csv
 import select
 import math
+import os
 from time import sleep,monotonic
 from datetime import datetime
 
@@ -229,8 +230,15 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 '''
     Prints the current test information & replica status
 '''
-def print_status(curr_test: tuple, test_number: int, failure_count: int):
-    print('\033[2J\033[H', end='')
+def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver):
+
+    # Windows: CLEAR TERMINAL 
+    if os.name=="nt":
+        os.system("cls")
+    # Mac/Linux: CLEAR TERMINAL
+    else:
+        print("\033[2J\033[H", end="", flush=True)
+    
     print('\n')
     print("=" * 48)
     print("              ASTER TESTING STATUS")
@@ -244,12 +252,13 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int):
     print(f"  Encryption       : {'ENABLED' if curr_test[2] else 'DISABLED'}")
     print(f"  Distribution     : {curr_test[3]}")
     print(f"  Emulated Clients : {curr_test[4]:,}")
+    print(f"  Current Trial:   : {trial_num}/{total_trials}")
     print("=" * 48)
-    print_replica_statuses(sessions)
+    print_replica_statuses(sessions,updates_per_driver)
 '''
     Prints replica status 
 '''
-def print_replica_statuses(sessions: dict):
+def print_replica_statuses(sessions: dict,updates_per_driver):
     active_threads = []
 
     for machine_id in sorted(sessions.keys()):
@@ -281,6 +290,10 @@ def print_replica_statuses(sessions: dict):
         print(f"ASTER {machine_id}: {' | '.join(parts[:5])}")
         print(f"  {parts[6]}")
         print(f"  {parts[5]} | Driver Status: {parts[7].split(': ', 1)[1]}")
+        _, _, count = parts[7].partition("Total Updates Processed=")
+        if count and updates_per_driver:
+            completed = int(count.split()[0])
+            print(f"  TEST STATUS = {completed:,}/{updates_per_driver:,} ({completed / updates_per_driver:.1%})")
         print()
 
 
@@ -336,6 +349,7 @@ def handle_output(test_config,min_test_time,total_num_trials):
 
     # Total number of participating drivers
     total_drivers = len(driver_results_by_machine.keys())
+
     # Total number of updates = passed updates 
     # Store final results 
     test_key = (max_po,replica_count, encryption_status,distribution,num_clients_to_Emulate)
@@ -504,20 +518,20 @@ def run_tests_aster():
 
 
         while trial_num<=num_trials or not test_sucessful[0]:
-            # trial ahs already executed, skip it and update trial num
-            if (*current_test, trial_num) in completed_trials:
-                trial_num += 1
-                continue
+            # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
+            # if (*current_test, trial_num) in completed_trials:
+            #     trial_num += 1
+            #     continue
             test_sucessful=[False, 'JUST STARTED'] #RESET
             driver_results.clear() # RESET
 
             # Output Status
-            print_status(current_test, test_number,failures)
+            # print_status(current_test, test_number,failures)
 
             # Setup the test - send the configuration information to each replica, print all replica statuses if successful
             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
-            print_status(current_test, test_number,failures)
+            print_status(current_test, test_number,failures,trial_num,num_trials,dynamic_updates//distribution)
             print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
 
             '''
@@ -537,7 +551,7 @@ def run_tests_aster():
             # Print status of all replicas every 2 seconds during the test
             # 2 minute timeout, if exceeded break & repeat test 
             while True:
-                print_status(current_test, test_number, failures)
+                print_status(current_test, test_number,failures,trial_num,num_trials,dynamic_updates//distribution)
                 if all(machine_id in driver_results for machine_id in driver_ids):
                     test_sucessful[0]=True
                     break

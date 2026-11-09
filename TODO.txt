@@ -1,0 +1,1 @@
+*IMPLEMENT: Save test configs per trial to a file so the loop can skip trials if already performed. 

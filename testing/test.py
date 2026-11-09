@@ -464,7 +464,7 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
             csv_row = [
                     *test_key,
                     sum(row["total_updates"] for row in trials.values()),
-                    sum(row["overall_elapsed_time"] for row in trials.values()),
+                    sum(row["overall_elapsed_time"] for row in trials.values()) / num_trials,
                     sum(row["overall_tp"] for row in trials.values()) / num_trials,
                     sum(row["mean_send_stalls"] for row in trials.values()) / num_trials,
                     sum(row["mean_min_lat"] for row in trials.values()) / num_trials,

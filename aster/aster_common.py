@@ -41,7 +41,8 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
     # the home directory, otherwise update the repo. 
     git_command = (
         '{ if [ -d cs2910/.git ]; then '
-        'git -C cs2910 pull; '
+        'git -C cs2910 fetch origin && '
+        'git -C cs2910 reset --hard origin/main; '
         'else git clone https://github.com/sam444555/cs2910.git; '
         'fi; } > /dev/null 2>&1 && '
     )
@@ -155,30 +156,3 @@ def generate_machine_list(num_replicas:int):
     if len(machines_in_use)<num_replicas:
         raise ValueError("Not enough machines available. Exiting.")
 
-
-
-    # git_command = (
-    #     '{ if [ -d cs2910/.git ]; then '
-    #     'git -C cs2910 pull; '
-    #     'else git clone https://github.com/sam444555/cs2910.git; '
-    #     'fi; } > /dev/null 2>&1 && '
-    # )
-    # for aster_machine_id in aster_machines_used:
-
-    #     # CD into aster dir and startup the replica startup script
-    #     replica_startup_command = (
-    #         'cd cs2910/aster && '
-    #         f'python3 -u aster_replica.py {id} {aster_machine_id} {args_str}'
-    #     )
-    #     # ssh to the aster machine, run the above command
-    #     sessions[aster_machine_id] = subprocess.Popen(
-    #         ['ssh', '-T', f'sjl79@aster{aster_machine_id}.cs.pitt.edu',
-    #         git_command + replica_startup_command],
-    #         stdin=subprocess.PIPE, #dont think we need this, used by removed functionality 
-    #         stdout=subprocess.PIPE, 
-    #         text=True,
-    #         bufsize=1
-    #     )
-    #     id += 1
-
-    # return sessions

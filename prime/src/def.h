@@ -405,10 +405,6 @@
 /* The maximum number of PO-Acks that can fit in a single packet, as a 
  * function of the maximum packet size and the number of Merkle tree 
  * digests that may be appended to the message. */
-/* #define MAX_ACK_PARTS  (PRIME_MAX_PACKET_SIZE - sizeof(signed_message) - sizeof(po_ack_message) - (MAX_MERKLE_DIGESTS * DIGEST_SIZE)) / sizeof(po_ack_part) */
-
-/* #define MAX_ACK_PARTS  ((PRIME_MAX_PACKET_SIZE - sizeof(signed_message) - sizeof(po_ack_message) - (MAX_MERKLE_DIGESTS * DIGEST_SIZE)) / (sizeof(signed_message) + sizeof(po_ack_part) + (MAX_MERKLE_DIGESTS * DIGEST_SIZE))) */
-
 #define MAX_ACK_PARTS  (PRIME_MAX_PACKET_SIZE - sizeof(signed_message) - sizeof(po_certificate_message) - (MAX_MERKLE_DIGESTS * DIGEST_SIZE) - sizeof(signed_message) - sizeof(po_request_message) - (MAX_MERKLE_DIGESTS * DIGEST_SIZE) - ((2*NUM_F + NUM_K + 1) * (sizeof(signed_message) + sizeof(po_ack_message) + (MAX_MERKLE_DIGESTS * DIGEST_SIZE)))) / ((2*NUM_F + NUM_K + 1) * sizeof(po_ack_part))
 
 /* After reading an event, we poll the socket to see if there are

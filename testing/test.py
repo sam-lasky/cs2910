@@ -459,7 +459,7 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
     trials = final_results[test_key]
 
     if len(trials) == num_trials:
-        with open(f"results/{replica_count}_results.csv", "a", newline="", encoding="utf-8") as file:
+        with open(f"results/{test_name}/results.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             csv_row = [
                     *test_key,

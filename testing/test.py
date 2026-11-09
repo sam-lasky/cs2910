@@ -463,7 +463,7 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
             writer = csv.writer(file)
             csv_row = [
                     *test_key,
-                    sum(row["total_updates"] for row in trials.values()),
+                    sum(row["total_updates"] for row in trials.values()) / num_trials,
                     sum(row["overall_elapsed_time"] for row in trials.values()) / num_trials,
                     sum(row["overall_tp"] for row in trials.values()) / num_trials,
                     sum(row["mean_send_stalls"] for row in trials.values()) / num_trials,
@@ -481,8 +481,8 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
                     "encryption_status",
                     "distribution",
                     "emulated_clients_per_driver",
-                    "total_updates",
-                    "total_elapsed_seconds",
+                    "mean_updates_per_trial",
+                    "mean_elapsed_seconds",
                     "mean_throughput_updates_per_sec",
                     "mean_send_stalls",
                     "mean_min_latency_ms",

@@ -130,6 +130,10 @@ def start_prime(replica_ip:dict, replica_id:int):
 
     # Kill any active Prime processes on this replica
     kill_prime(wait_time=1)
+    if os.path.isfile("prime_status.log"):
+        with open("prime_status.log", "rb") as status:
+            with open("prime_archive.log", "ab") as archive:
+                archive.write(status.read())
 
     with open('prime_status.log', 'w') as prime_status_log,\
         open('prime_err.log','a') as prime_err_log:
@@ -152,15 +156,12 @@ def start_prime(replica_ip:dict, replica_id:int):
         #           BUT PRIME ALSO RETURNS 0 FOR INVALID REPLICA ID SO DOUBLE CHECK!!!
         #       Nonzero int: Process exited w/ error
         if prime.poll() is not None:
-            message = f"Prime exited with code {prime.returncode}."
+            # raise RuntimeError(f'Prime exited during startup: {prime.stderr}')
+            # raise RuntimeError(f'Prime exited during startup: {prime.stderr.read()}')
+            raise RuntimeError(
+            f"Prime exited with code {prime.returncode}. "
+        )
 
-            with open("prime_archive.log", "a", encoding="utf-8") as archive:
-                archive.write(f"\n{message}\n")
-                with open("prime_status.log", encoding="utf-8", errors="replace") as status:
-                    archive.writelines(status)
-
-            raise RuntimeError(message)
-        
         else:
             # Check log file for handshake msgs
             with open('prime_status.log', 'r') as prime_status_log:

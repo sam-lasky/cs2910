@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 import csv
 import select
-from time import sleep
+from time import sleep,monotonic
 from datetime import datetime
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -174,6 +174,8 @@ all_test_count = 0
     KEY = machine id, VALUE  = reference to ssh subprocess associated with that machine
 '''
 sessions = {}
+driver_results={}
+final_results={}
 
 '''
 Generate all possible test configurations using the global variables:
@@ -269,43 +271,308 @@ def print_replica_statuses(sessions: dict):
         if not response:
             print(f"ASTER {machine_id}: No response")
             continue
+        status, _, result = response.partition(" | Driver Result: ")
+        result = result.strip()
+        if result:
+            driver_results[machine_id] = result
 
-        parts = response.strip().split(" | ")
+        parts = status.strip().split(" | ")
         print(f"ASTER {machine_id}: {' | '.join(parts[:5])}")
         print(f"  {parts[6]}")
         print(f"  {parts[5]} | Driver Status: {parts[7].split(': ', 1)[1]}")
         print()
+
+
+'''
+    Handles a given test config's output 
+    test_confgig =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,failures)
+
+    results = 
+        # [0] "RESULT",
+        # [1] Elapsed time (seconds),
+        # [2] Send stalls,
+        # [3] Expected throughput (updates/sec),
+        # [4] Actual throughput (updates/sec),
+        # [5] Minimum latency (ms),
+        # [6] Maximum latency (ms),
+        # [7] Average latency (ms),
+        # [8] Start timestamp,
+        # [9] End timestamp
+
+'''
+def handle_output(test_config,min_test_time,total_num_trials):
+    (max_po, 
+     replica_count,
+     encryption_status,distribution,
+     num_clients_to_Emulate,
+     trial_num,
+     updates)=test_config
+
+    # key = machine_id, val = dict{....}
+    driver_results_by_machine = {}
+
+    # Go through the results, parse each machines output and store it in driver_results_by_machine 
+    for machine_id, result in sorted(driver_results.items()):
+        fields = result.split(",")
+        elapsed_seconds = float(fields[1])
+
+        # test failed to exceed threshold 
+        if elapsed_seconds<min_test_time:
+            return False, elapsed_seconds
+
+        # store the driver results for each machine 
+        driver_results_by_machine[machine_id] = {
+            'elapsed_time':elapsed_seconds, 
+            'send_stalls':int(fields[2]),   
+            'expected_tp':float(fields[3]), 
+            'actual_tp':float(fields[4]),   
+            'min_lat':float(fields[5]),
+            'max_lat':float(fields[6]),
+            'avg_lat':float(fields[7]),
+            'start_ts':float(fields[8]),
+            'end_ts':float(fields[9])
+        }
+
+    # Total number of participating drivers
+    total_drivers = len(driver_results_by_machine.keys())
+    # Total number of updates = passed updates 
+    # Store final results 
+    test_key = (max_po,replica_count, encryption_status,distribution,num_clients_to_Emulate)
+    mean_elapsed_time_secs= 0 
+    mean_send_stalls = 0
+    actual_tp = 0
+    mean_min_lat = 0
+    mean_max_lat = 0
+    mean_avg_lat = 0
+    latest_driver_endtime = 0
+    earliest_driver_start_time = float("inf")
+    for machine_id in sorted(driver_results_by_machine.keys()):
+        mean_elapsed_time_secs+=    driver_results_by_machine[machine_id]['elapsed_time']
+        mean_send_stalls+=          driver_results_by_machine[machine_id]['send_stalls']
+        mean_min_lat +=             driver_results_by_machine[machine_id]['min_lat']
+        mean_max_lat +=             driver_results_by_machine[machine_id]['max_lat']
+        mean_avg_lat +=             driver_results_by_machine[machine_id]['avg_lat'] 
+
+        start_time = driver_results_by_machine[machine_id]['start_ts']
+        end_time = driver_results_by_machine[machine_id]['end_ts']
+
+        earliest_driver_start_time = min(earliest_driver_start_time, start_time)
+        latest_driver_endtime = max(latest_driver_endtime, end_time)
+
+
+    mean_elapsed_time_secs /= total_drivers
+    mean_send_stalls /= total_drivers
+    mean_min_lat /= total_drivers
+    mean_max_lat /= total_drivers
+    mean_avg_lat /= total_drivers
+
+    overall_elapsed_time = latest_driver_endtime - earliest_driver_start_time
+    overall_tp = updates / overall_elapsed_time
+
+    final_results.setdefault(test_key, {})[trial_num] = {
+        "total_updates": updates,
+        "overall_elapsed_time": overall_elapsed_time,
+        "overall_tp": overall_tp,
+        "mean_send_stalls": mean_send_stalls,
+        "mean_min_lat": mean_min_lat,
+        "mean_max_lat": mean_max_lat,
+        "mean_avg_lat": mean_avg_lat,
+    }
+        
+    trials = final_results[test_key]
+
+    if len(trials) == num_trials:
+        with open(f"results/{replica_count}_results.csv", "a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+
+            if file.tell() == 0:
+
+                csv_row = [
+                    *test_key,
+                    sum(row["total_updates"] for row in trials.values()),
+                    sum(row["overall_elapsed_time"] for row in trials.values()),
+                    sum(row["overall_tp"] for row in trials.values()) / num_trials,
+                    sum(row["mean_send_stalls"] for row in trials.values()) / num_trials,
+                    sum(row["mean_min_lat"] for row in trials.values()) / num_trials,
+                    sum(row["mean_max_lat"] for row in trials.values()) / num_trials,
+                    sum(row["mean_avg_lat"] for row in trials.values()) / num_trials,
+                ]
+                writer.writerow([
+                    "max_po",
+                    "replica_count",
+                    "encryption_status",
+                    "distribution",
+                    "emulated_clients_per_driver",
+                    "total_updates",
+                    "total_elapsed_seconds",
+                    "mean_throughput_updates_per_sec",
+                    "mean_send_stalls",
+                    "mean_min_latency_ms",
+                    "mean_max_latency_ms",
+                    "mean_avg_latency_ms",
+                ])
+
+            writer.writerow(csv_row)
+
+        # mark this config as completed to avoid redundant test configs 
+        with open("results/completed_configs.txt", "a", encoding="utf-8") as file:
+                file.write(
+                    f"{max_po},{replica_count},{encryption_status},"
+                    f"{distribution},{num_clients_to_Emulate}\n"
+                )
+    else:
+        # mark this trial as completed to avoid redundant trial runs 
+        with open("results/completed_trials.txt", "a", encoding="utf-8") as file:
+            file.write(
+                f"{max_po},{replica_count},{encryption_status},"
+                f"{distribution},{num_clients_to_Emulate},{trial_num}\n"
+            )
+
+
+def load_completed():
+    completed_configs = load_completed("results/completed_configs.txt")
+    completed_trials = load_completed("results/completed_trials.txt")
+
+    # all completed trials as a set 
+    try:
+        with open("results/completed_trials.txt", encoding="utf-8") as file:
+            completed_trials = {
+                tuple(map(int, line.strip().split(",")))
+                for line in file
+                if line.strip()
+            }
+    except FileNotFoundError:
+        completed_trials = set()
+
+    # all completed tests configs as a set 
+    try:
+        with open("results/completed_configs.txt", encoding="utf-8") as file:
+            completed_configs = {
+                tuple(map(int, line.strip().split(",")))
+                for line in file
+                if line.strip()
+            }
+    except FileNotFoundError:
+        completed_configs = set()
+
+    return completed_trials,completed_configs
 
 '''
     Runs each test configuration stored in all_test_configs
 '''
 def run_tests_aster():
 
-    # Holds the previous test tuple configuration
-    previous_test = None
+    completed_trials,completed_configs = load_completed()
+
+    # Minimum amount of time a test needs to take. If the test does not meet
+    # this threshold, dynamic_updates is adjusted & the test gets rerun
+    # using this update value until it meets the threshold. 
+    min_test_time = 15 #seconds
+
+    # Holds the test success results, if true ignore msg otherwise
+    # store the cause as the msg
+    test_sucessful = [False,'Failure_Msg if False']
 
     # Iterate through all test configurations & execute each one
     for test_number,current_test in enumerate(all_test_configs):
-        # Set test parameters 
-        max_po:int =                    current_test[0]
-        replica_count:int =             current_test[1]
-        encryption_status:int =         current_test[2]
-        distribution:int =              current_test[3]
-        num_clients_to_Emulate:int =    current_test[4]
-        failures = 0 # num times this test has failed (disconnects, crashes, etc.)
+        # Unpack the curr test tuple
+        (
+            max_po,
+            replica_count,
+            encryption_status,
+            distribution,
+            num_clients_to_Emulate
+        ) = current_test
+
+        # Test config already complete & test config written, skip 
+        if current_test in completed_configs:
+            continue
+
+        # The number of updates get scaled up if the current test configuration fails 
+        # to meet the time threshold 
+        dynamic_updates = updates
+
+        # Trial counter for current config
+        trial_num = 1
+
+        # Number of failures experienced by this config
+        failures = 0
 
         # Allocates more aster machines if sessions < replica_count
         if len(sessions)<replica_count: 
             allocate_machines(replica_count, len(sessions), sessions)
 
-        # Output Status
-        print_status(current_test, test_number,failures)
+
+        while trial_num<=num_trials or not test_sucessful[0]:
+            # trial ahs already executed, skip it and update trial num
+            if (*current_test, trial_num) in completed_trials:
+                trial_num += 1
+                continue
+            test_sucessful=[False, 'JUST STARTED'] #RESET
+            driver_results.clear() # RESET
+
+            # Output Status
+            print_status(current_test, test_number,failures)
+
+            # Setup the test - send the configuration information to each replica, print all replica statuses if successful
+            command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
+            send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
+            print_status(current_test, test_number,failures)
+
+            '''
+                EXECUTE: Starting at the aster machine number (ascending), distribute the update
+
+            '''
+            # Get the machines that will be assigned a driver prog 
+            driver_ids = sorted(sessions)[:distribution]
+            driver_sessions = {machine_id: sessions[machine_id] for machine_id in driver_ids}
+            # DRIVER <NUM_UPDATES> <NUM_CLIENTS_TO_EMULATE>
+            command=f"DRIVER {dynamic_updates//distribution} {num_clients_to_Emulate}"
+            send_command_to_replicas(driver_sessions,command,timeout=5)
+
+            # 2 min timeout 
+            deadline = monotonic() + 120
+
+            # Print status of all replicas every 2 seconds during the test
+            # 2 minute timeout, if exceeded break & repeat test 
+            while True:
+                print_replica_statuses(sessions)
+                if all(machine_id in driver_results for machine_id in driver_ids):
+                    test_sucessful[0]=True
+                    break
+                if monotonic() >=deadline:
+                    test_sucessful[1]='TIMEOUT'
+                    failures+=1
+                    break
+                sleep(2)    
+
+            # Test successful, handle the output
+            if test_sucessful[0]:
+                test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
+                # time threshold met 
+                test_time = 0
+                success, test_time = handle_output(test_config,test_time,min_test_time,num_trials)
+                if success: trial_num+=1
+                # time threshold not met, discard results & scale up dynamic updates 
+                else:
+                    test_sucessful[0]=False                    
+                    # dynamically adjust time 
 
 
-        # Setup the test - send the configuration information to each replica 
-        active_threads=[]
-        command = f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
-        for machine_id, process in sorted(sessions.items()):
+'''
+    Send the command to the aster machine(s). Create a thread for each machine being sent to. Returned 
+    value is a dictionary results where key=replica id, val=response. If there is no response then an error
+    is raised and the program terminates 
+'''
+def send_command_to_replicas(sessions:dict,command:str,timeout:float, distribution=len(sessions.keys())):
+    # Stores all active threads 
+    active_threads=[]
+
+    # where machine_id ==> aster_id && process ==> the ssh subprocess communicating with that machine
+    for machine_id, process in sorted(sessions.items()):
+        # only issue commands to distribution # of machines
+        if distribution:
+            # Create a thread for this machine & issue the command 
             threads.send_and_create_thread(
             active_threads,
             machine_id,
@@ -313,22 +580,24 @@ def run_tests_aster():
             command,
             aster_common.write_to_aster,
             aster_common.read_from_aster
-        )
+            )
+            distribution-=1
+        else: break
 
-        # Thread Results
-        results = threads.wait_for_threads(active_threads,timeout=30)
-        for machine_id, response in sorted(results.items()):
-            if not response:
-                process = sessions[machine_id]
+    # wait for threads 
+    results = threads.wait_for_threads(active_threads,timeout=timeout)
+
+    # check results & issue required errs 
+    for machine_id, response in sorted(results.items()):
+        if not response:
+            process = sessions[machine_id]
+            if process.poll() is not None and process.stderr is not None:
                 print(f"ASTER {machine_id} STDERR:")
                 print(process.stderr.read())
-                raise RuntimeError(f"ASTER {machine_id}: No response")
+            raise RuntimeError(f"ASTER {machine_id} failed to reply to {command!r}")
 
-        print_status(current_test, test_number,failures)
-        sleep(5)
-        # Handle Driver Assignment & execute test 
-
-        exit(0)
+    # ret
+    return results
 
 def main():
 

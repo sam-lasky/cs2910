@@ -3,6 +3,7 @@ import sys
 import subprocess
 import time
 import os
+import threading
 # local 
 sys.path.insert(0, "..")
 from common.spines_manager import *
@@ -103,7 +104,7 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     restart_prime = False
     restart_spines = False
 
-    if make_count_prime == 0:
+    if (make_count_prime ==0) or( num_replicas != old_num_replicas):
         rebuild_prime = True
         restart_prime = True
         configure_spines = True
@@ -112,12 +113,6 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     if max_po != old_max_po:
         rebuild_prime = True
         restart_prime = True
-
-    if num_replicas != old_num_replicas:
-        rebuild_prime = True
-        configure_spines = True
-        restart_prime = True
-        restart_spines = True
 
     if encrypt != old_encrypt:
         configure_spines = True
@@ -135,10 +130,52 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     # SETUP PRIME!
     if rebuild_prime:
         setup_and_build_prime(id_to_ip, num_replicas, max_po)
+        make_count_prime+=1
 
     # START PRIME! (start prime exits out the curr prime process & starts it up again)
     if restart_prime:
         start_prime(id_to_ip, local_replica_id)
+
+
+'''
+    Runs the driver process on this replica 
+  Alarm(PRINT, "Usage: ./client\n"
+      "\t -l IP (A.B.C.D)\n"
+      "\t -c count_of_transactions_to_benchmark\n"
+      "\t -i client_id, indexed base 1\n"
+      "\t[-s server_id, indexed base 1]\n"
+      "\t[-n num_clients_to_emulate]\n"
+      "\t[-r num_prime_replicas]\n"
+  );
+'''
+def run_driver(updates:int, num_clients:int):
+    kill_driver(wait_time=1)
+    my_ip = id_to_ip[local_replica_id]
+    driver_command =(
+        f"./driver -l {my_ip} "
+        f"-c {updates} "
+        f"-i {local_replica_id} "
+        f"-s {local_replica_id} "
+        f"-n {num_clients} "
+        f"-r {num_replicas}"
+    )
+    driver_subprocess = subprocess.Popen(
+        driver_command,
+        cwd="../prime/bin",
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+    return driver_subprocess
+
+# Reads the driver's output (thread)
+def read_driver_output(process, state):
+    for line in process.stdout:
+        if line.startswith("Highest SeqNo Processed="):
+            state["progress"] = line.strip()
+        elif line.startswith("RESULT,"):
+            state["result"] = line.strip()
 
 
 def main(machine_id_arg: int):
@@ -164,6 +201,11 @@ def main(machine_id_arg: int):
         Prime and Spines accordingly
 
     '''
+
+    # driver subprocess reference
+    driver_process = None
+    driver_state = None
+
     for command in sys.stdin:
         # remove whitespace
         command = command.strip()
@@ -179,6 +221,8 @@ def main(machine_id_arg: int):
                 Gets replica id, aster machine id, total replicas, encryption setting,
                 MAX_PO setting, assigned driver (Yes/No) ,all active processes, 
             '''
+            result = driver_state["result"]
+            driver_status = "FINISHED" if result else (driver_state["progress"] or "N/A")
             response = (
                 f"Replica ID: {local_replica_id} | "
                 f"Aster Machine: {aster_machine_id} | "
@@ -187,15 +231,29 @@ def main(machine_id_arg: int):
                 f"MAX PO: {max_po} | "
                 f"Assigned Driver: {assigned_driver} | "
                 f"Active Processes: {get_active_processes().strip()} | "
-                f"Driver Output: {driver_out if assigned_driver else 'N/A'}"
+                f"Driver Output: {driver_status} | Driver Result: {result or ''}"
             )
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
             response='READY'
+        # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>
+        elif command.startswith('DRIVER '):
+            assigned_driver=True # this rep was assigned a driver process 
+            _,updates,num_clients = command.split()
+            driver_process=run_driver(int(updates), int(num_clients))
+            driver_state = {"progress": None, "result": None}
+            threading.Thread(
+                target=read_driver_output,
+                args=(driver_process, driver_state),
+                daemon=True,
+            ).start()
+            response='DRIVER STARTED'
 
+    
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)
+
 
     
 '''
@@ -208,47 +266,3 @@ if __name__ == "__main__":
         # << CLEANUP >> 
         # kills all active processes on this replica before exiting
         kill_all(wait_time=0)
-
-
-
-
-
-  # # <--- Set up global variables --->
-    # global replica_id, aster_machine_id, aster_machines_used, env, max_po, encrypt
-    # # Integer (>0) that uniquely identifies the replica
-    # replica_id =                int(sys.argv[1])
-    # # Integer (1-->20) that uniquely identifies the aster machine
-    # aster_machine_id =          int(sys.argv[2])
-    # # List of aster ID's being used
-    # aster_machines_used =       list(map(int, sys.argv[3].split(',')))
-    # # Environment (aster LAN 1 | aster LAN 2)
-    # env =                       sys.argv[4]
-    # # Max preorder requests in flight (prime/src/def.h)
-    # max_po =                    int(sys.argv[5])
-    # # Spines encryption (enabled=1, disabled=0)
-    # encrypt =                   int(sys.argv[6])
-
-    # # Build the aster machine id <--> replica ip mapping
-    # build_id_to_ip_map()
-    # print("Setting up Spines...",flush=True)
-
-    # # Sets up Spines
-    # setup_spines(id_to_ip,encrypt)
-    # print("Setting up Prime...",flush=True)
-
-    # # Set up Prime
-    # setup_prime(id_to_ip,num_replicas=len(id_to_ip.keys()),max_po=max_po)
-    # print("Starting up Spines...",flush=True)
-
-    # # Start Spines
-    # start_spines(id_to_ip, replica_id)
-    # print("Starting up Prime...",flush=True)
-    
-    # # Start Prime
-    # start_prime(id_to_ip, replica_id)
-    # print("READY",flush=True)
-
-    # kill_prime()
-    # kill_spines()
-    # kill_driver()
-    # exit(0)

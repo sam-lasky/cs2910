@@ -176,7 +176,16 @@ all_test_count = 0
     KEY = machine id, VALUE  = reference to ssh subprocess associated with that machine
 '''
 sessions = {}
+'''
+    Stores the results for each replica running a driver program. 
+    driver_results[machine_id]['progress'] stores the most up to date progress output from the driver program
+    driver_results[machine_id]['results'] stores the results once the driver program concludes 
+'''
 driver_results={}
+'''
+    final_results[test_key][trial_num] stores all the results for the current trial (across all driver program result data)
+    and averages them out & stores them in the results file once trial_num == num_trials
+'''
 final_results={}
 
 '''
@@ -330,7 +339,7 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
         result = driver_results[machine_id]
         fields= result.split(",")
         print(f"Trial {trial_num} | ASTER {machine_id} | start={fields[8]} | end={fields[9]}")
-        input("Press enter to continue...")
+        # input("Press enter to continue...")
         elapsed_seconds = float(fields[1])
 
         # test failed to exceed threshold 
@@ -358,12 +367,13 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
     test_key = (max_po,replica_count, encryption_status,distribution,num_clients_to_Emulate)
     mean_elapsed_time_secs= 0 
     mean_send_stalls = 0
-    actual_tp = 0
     mean_min_lat = 0
     mean_max_lat = 0
     mean_avg_lat = 0
+
     latest_driver_endtime = 0
     earliest_driver_start_time = float("inf")
+    
     for machine_id in sorted(driver_results_by_machine.keys()):
         mean_elapsed_time_secs+=    driver_results_by_machine[machine_id]['elapsed_time']
         mean_send_stalls+=          driver_results_by_machine[machine_id]['send_stalls']

@@ -314,7 +314,7 @@ def print_replica_statuses(sessions: dict,updates_per_driver):
         # [9] End timestamp
 
 '''
-def handle_output(test_config,min_test_time,total_num_trials):
+def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
     (max_po, 
      replica_count,
      encryption_status,distribution,
@@ -326,8 +326,11 @@ def handle_output(test_config,min_test_time,total_num_trials):
     driver_results_by_machine = {}
 
     # Go through the results, parse each machines output and store it in driver_results_by_machine 
-    for machine_id, result in sorted(driver_results.items()):
-        fields = result.split(",")
+    for machine_id in driver_ids:
+        result = driver_results[machine_id]
+        fields= result.split(",")
+        print(f"Trial {trial_num} | ASTER {machine_id} | start={fields[8]} | end={fields[9]}")
+        input("Press enter to continue...")
         elapsed_seconds = float(fields[1])
 
         # test failed to exceed threshold 
@@ -523,7 +526,6 @@ def run_tests_aster():
             #     trial_num += 1
             #     continue
             test_sucessful=[False, 'JUST STARTED'] #RESET
-            driver_results.clear() # RESET
 
             # Output Status
             # print_status(current_test, test_number,failures)
@@ -544,6 +546,7 @@ def run_tests_aster():
             # DRIVER <NUM_UPDATES> <NUM_CLIENTS_TO_EMULATE>
             command=f"DRIVER {dynamic_updates//distribution} {num_clients_to_Emulate}"
             send_command_to_replicas(driver_sessions,command,timeout=5, distribution=len(driver_sessions))
+            driver_results.clear() # RESET
 
             # 2 min timeout 
             deadline = monotonic() + 120
@@ -565,7 +568,7 @@ def run_tests_aster():
             if test_sucessful[0]:
                 test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
                 # time threshold met 
-                success, test_time = handle_output(test_config, min_test_time, num_trials)
+                success, test_time = handle_output(test_config, min_test_time, num_trials,driver_ids)
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:

@@ -235,7 +235,9 @@ def main(machine_id_arg: int):
             )
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
+            # Reset driver data
             assigned_driver=False
+            driver_state = {"progress": None, "result": None}
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
             response='READY'
         # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>

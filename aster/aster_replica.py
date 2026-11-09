@@ -160,7 +160,7 @@ def run_driver(updates:int, num_clients:int):
         f"-r {num_replicas}"
     )
     driver_subprocess = subprocess.Popen(
-        driver_command,
+        driver_command.split(),
         cwd="../prime/bin",
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
@@ -204,7 +204,7 @@ def main(machine_id_arg: int):
 
     # driver subprocess reference
     driver_process = None
-    driver_state = None
+    driver_state = {"progress": None, "result": None}
 
     for command in sys.stdin:
         # remove whitespace

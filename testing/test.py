@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import csv
 import select
+import math
 from time import sleep,monotonic
 from datetime import datetime
 
@@ -150,7 +151,7 @@ emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 5 
+num_trials = 3 
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0,1]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 
@@ -428,11 +429,9 @@ def handle_output(test_config,min_test_time,total_num_trials):
                 f"{distribution},{num_clients_to_Emulate},{trial_num}\n"
             )
 
+    return True,None 
 
 def load_completed():
-    completed_configs = load_completed("results/completed_configs.txt")
-    completed_trials = load_completed("results/completed_trials.txt")
-
     # all completed trials as a set 
     try:
         with open("results/completed_trials.txt", encoding="utf-8") as file:
@@ -528,7 +527,7 @@ def run_tests_aster():
             driver_sessions = {machine_id: sessions[machine_id] for machine_id in driver_ids}
             # DRIVER <NUM_UPDATES> <NUM_CLIENTS_TO_EMULATE>
             command=f"DRIVER {dynamic_updates//distribution} {num_clients_to_Emulate}"
-            send_command_to_replicas(driver_sessions,command,timeout=5)
+            send_command_to_replicas(driver_sessions,command,timeout=5, distribution=len(driver_sessions))
 
             # 2 min timeout 
             deadline = monotonic() + 120
@@ -550,14 +549,14 @@ def run_tests_aster():
             if test_sucessful[0]:
                 test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
                 # time threshold met 
-                test_time = 0
-                success, test_time = handle_output(test_config,test_time,min_test_time,num_trials)
+                success, test_time = handle_output(test_config, min_test_time, num_trials)
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:
                     test_sucessful[0]=False                    
-                    # dynamically adjust time 
-
+                    dynamic_updates = math.ceil(
+                        dynamic_updates * min_test_time / test_time
+                    )
 
 '''
     Send the command to the aster machine(s). Create a thread for each machine being sent to. Returned 

@@ -472,7 +472,11 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
                     sum(row["mean_avg_lat"] for row in trials.values()) / num_trials,
                 ]
 
-            if file.tell() == 0:
+            if file.tell() > 0:
+                with open("results/completed_configs.txt", "rb") as check:
+                    check.seek(-1, 2)
+                    if check.read(1) != b"\n":
+                        file.write("\n")
 
      
                 writer.writerow([

@@ -180,7 +180,7 @@ def read_driver_output(process, state):
 
 def main(machine_id_arg: int):
     # Update globals with passed args 
-    global aster_machine_id
+    global aster_machine_id, assigned_driver
     aster_machine_id = machine_id_arg
 
     '''

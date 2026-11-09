@@ -536,7 +536,7 @@ def run_tests_aster():
             # Print status of all replicas every 2 seconds during the test
             # 2 minute timeout, if exceeded break & repeat test 
             while True:
-                print_replica_statuses(sessions)
+                print_status(current_test, test_number, failures)
                 if all(machine_id in driver_results for machine_id in driver_ids):
                     test_sucessful[0]=True
                     break

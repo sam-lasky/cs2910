@@ -385,10 +385,7 @@ def handle_output(test_config,min_test_time,total_num_trials):
     if len(trials) == num_trials:
         with open(f"results/{replica_count}_results.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-
-            if file.tell() == 0:
-
-                csv_row = [
+            csv_row = [
                     *test_key,
                     sum(row["total_updates"] for row in trials.values()),
                     sum(row["overall_elapsed_time"] for row in trials.values()),
@@ -398,6 +395,10 @@ def handle_output(test_config,min_test_time,total_num_trials):
                     sum(row["mean_max_lat"] for row in trials.values()) / num_trials,
                     sum(row["mean_avg_lat"] for row in trials.values()) / num_trials,
                 ]
+
+            if file.tell() == 0:
+
+     
                 writer.writerow([
                     "max_po",
                     "replica_count",

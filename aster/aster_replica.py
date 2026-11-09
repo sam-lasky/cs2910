@@ -22,7 +22,7 @@ aster_machine_id = None
 # Total # of replicas being used
 num_replicas = None
 # Assume Aster_1_LAN in all cases (for now, TODO: EXPAND TO ALL ENVs)
-env = 'Aster_1_LAN'
+env = 'aster_LAN_1'
 # MAX_PO_IN_FLIGHT (prime/src/def.h)
 max_po = None
 # Encrypted or Plain (prime/spines/daemon/spines.conf, IT_LinkCrypto, IT_LinkEncrypt)

@@ -8,6 +8,7 @@ import os
 from time import sleep,monotonic
 from datetime import datetime
 from uuid import uuid4
+from colorama import just_fix_windows_console
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -246,8 +247,9 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
     Prints the current test information & replica status
 '''
 def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver):
-
+    just_fix_windows_console()
     print("\033[H", end="", flush=True)
+    print("Setting things up...\n")
     # # Windows: CLEAR TERMINAL 
     # if os.name=="nt":
     #     os.system("cls")

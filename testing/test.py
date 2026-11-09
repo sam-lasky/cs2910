@@ -518,6 +518,7 @@ def run_tests_aster():
             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
             print_status(current_test, test_number,failures)
+            print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
 
             '''
                 EXECUTE: Starting at the aster machine number (ascending), distribute the update

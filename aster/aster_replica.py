@@ -122,7 +122,6 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     # SETUP SPINES!
     if configure_spines:
         setup_spines(id_to_ip, encrypt)
-
     # START SPINES! (start spines exits out the curr spines process & starts it up again)
     if restart_spines:
         start_spines(id_to_ip, local_replica_id)

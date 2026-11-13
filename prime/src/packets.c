@@ -1610,6 +1610,14 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
             Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u\n",
                 size, po_ack_specific->num_ack_parts);
         }
+        // Track the highest number of num ack parts seen
+        else
+        {
+            if (po_ack_specific->num_ack_parts > highest_ack_parts)
+            {
+                highest_ack_parts = po_ack_specific->num_ack_parts;
+            }
+        }
 
         memcpy(offset, slot->ack[i], size);
         pc->len += size;

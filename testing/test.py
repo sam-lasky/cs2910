@@ -699,7 +699,7 @@ def run_tests_aster():
             allocate_machines(replica_count, len(sessions), sessions)
 
 
-        while (trial_num<=num_trials or not test_sucessful[0]):
+        while (trial_num<=num_trials):
 
             # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
             # if (*current_test, trial_num) in completed_trials:

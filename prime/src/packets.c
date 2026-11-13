@@ -1547,6 +1547,9 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
     char                    *offset;
     int32u                   i, size, count;
 
+    // Tracks po acks w/ the highest num of ack parts 
+    static int32u highest_ack_parts = 0;
+
     /* Construct new message */
     pc          = UTIL_New_Signed_Message();
     pc_specific = (po_certificate_message *)(pc + 1);
@@ -1592,25 +1595,20 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
 
             pc = pointer to signed_message that represents the PO certificate being constructed
         */
-        if (offset + size - ((char *)(pc)) >= PRIME_MAX_PACKET_SIZE) {
-            
-            // Print to stderr for our debugging, msg identified by *PO_CERT in script
+        if (offset + size - ((char *)pc) >= PRIME_MAX_PACKET_SIZE) {
             fprintf(stderr,
-                "*PO_CERT too big: originator=%u seq=%u "
-                "current_bytes=%zu attempted_bytes=%zu limit=%zu "
-                "ack_sender=%u ack_bytes=%u ack_parts=%u max_ack_parts=%u "
-                "acks_copied=%u acks_required=%u\n",
-                rep, slot->seq.seq_num,
+                "*PO_CERT too big: current_bytes=%zu attempted_bytes=%zu "
+                "size_limit_bytes=%zu ack_bytes=%u ack_parts=%u "
+                "max_ack_parts=%u acks_included=%u acks_needed=%u\n",
                 (size_t)(offset - (char *)pc),
                 (size_t)(offset - (char *)pc) + size,
                 (size_t)PRIME_MAX_PACKET_SIZE,
-                i, size, po_ack_specific->num_ack_parts,
+                size, po_ack_specific->num_ack_parts,
                 (unsigned)MAX_ACK_PARTS,
                 count, 2 * VAR.F + VAR.K + 1);
-            
-            Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u \n", 
-                    size, po_ack_specific->num_ack_parts);
 
+            Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u\n",
+                size, po_ack_specific->num_ack_parts);
         }
 
         memcpy(offset, slot->ack[i], size);
@@ -1631,14 +1629,13 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
    
     if (successful_certs == 1 || successful_certs % 1000 == 0) {
         fprintf(stdout,
-            "$PO_CERT success: certificate_number=%lu request_originator=%u request_sequence=%u "
-            "certificate_bytes=%zu size_limit_bytes=%zu "
-            "max_ack_parts=%u acks_included=%u acks_needed=%u\n",
-            successful_certs,
-            rep, slot->seq.seq_num,
+            "$PO_CERT success: certificate_bytes=%zu size_limit_bytes=%zu "
+            "max_ack_parts=%u highest_ack_parts_seen=%u "
+            "acks_included=%u acks_needed=%u\n",
             (size_t)(offset - (char *)pc),
             (size_t)PRIME_MAX_PACKET_SIZE,
             (unsigned)MAX_ACK_PARTS,
+            highest_ack_parts,
             count, 2 * VAR.F + VAR.K + 1);
     }
 

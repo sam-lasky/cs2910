@@ -231,18 +231,10 @@ def main():
             result = driver_state["result"]
             driver_status = "FINISHED" if result else (driver_state["progress"] or "N/A")
 
+            # Gets response as JSON (cleaner this way)
             response = get_state(result, driver_status)
 
-            response = (
-                f"Replica ID: {local_replica_id} | "
-                f"Aster Machine: {aster_machine_id} | "
-                f"Total Replicas: {num_replicas} | "
-                f"Encryption: {encrypt} | "
-                f"MAX PO: {max_po} | "
-                f"Assigned Driver: {assigned_driver} | "
-                f"Active Processes: {get_active_processes().strip()} | "
-                f"Driver Output: {driver_status} | Driver Result: {result or ''}"
-            )
+    
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
             # Reset driver variables (new test)

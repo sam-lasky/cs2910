@@ -314,14 +314,13 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         f"Emulated Clients: {curr_test[4]}\n"
         )
 
-        with (log_dir / "out.log").open("a") as f:
-                f.write(log_entry_title+stdout+'\n')
+     
         if len(stderr)>0:
-            print('poopies')
-            exit(0)
-    
-        with (log_dir / "err.log").open("a") as f:
-                f.write(log_entry_title+stderr+'\n')
+           with (log_dir / "out.log").open("a") as f:
+                        f.write(log_entry_title+stdout+'\n')
+        if len(stdout)>0:
+            with (log_dir / "err.log").open("a") as f:
+                    f.write(log_entry_title+stderr+'\n')
 
 '''
     Gets all the statuses of the active replicas & returns them in a 

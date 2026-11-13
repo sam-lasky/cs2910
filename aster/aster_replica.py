@@ -40,6 +40,11 @@ make_count_prime = 0
 # Driver program output
 driver_out = None
 
+# Offset position of the stdout log 
+stdout_offset = 0
+# Offset position of the stderr log
+stderr_offset = 0
+
 # Populates the id_to_ip dictionary where the >> REPLICA ID<< is passed as the
 # key and its IP is assigned as the value 
 def build_id_to_ip_map():
@@ -183,7 +188,7 @@ def read_driver_output(process, state):
 
 def main():
     # Update globals with passed args 
-    global assigned_driver,make_count_prime
+    global assigned_driver,make_count_prime, stdout_offset
 
     '''
         [STEP 1] As soon as the replica launches, terminate 
@@ -203,6 +208,9 @@ def main():
     # Kill all processess associated w/ the replica & exit the replica script when timer expires. 
     exit_timer = Timer(300,timeout)
     exit_timer.start()
+
+    # Flag that indicates whether or not this is the first msg from the local controller
+    first_msg:bool = True
 
     for command in sys.stdin:
 
@@ -237,12 +245,22 @@ def main():
     
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
+
+  
             # Reset driver variables (new test)
             assigned_driver=False
             driver_state = {"progress": None, "result": None}
             driver_process = None
 
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
+            
+            # This is the first message, we want to skip all the setup messages written during initialization 
+            # by updating the stdout offset pointer
+            if first_msg: 
+                first_msg=False
+                stdout_offset = os.path.getsize("prime_status.log")
+
+
             response='READY'
         # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>
         elif command.startswith('DRIVER '):
@@ -285,13 +303,21 @@ def get_state(result, driver_status):
 
     return response
 
-# Get the prime_status log (stdout) and prime_err log (stderr) and return as a str 
-# TODO: Trim excessive messages 
+# Get Prime stdout/stderr since the last read
 def get_logs():
-    with open('prime_status.log', 'r') as status_log, \
-        open('prime_err.log','r') as err_log:
-        stdout = '>>>STDOUT<<<\n'+status_log.read()+'\n'
-        stderr = '>>>STDERR<<<\n'+err_log.read()+'\n'
+    global stdout_offset, stderr_offset
+
+    with open('prime_status.log', 'rb') as status_log, \
+         open('prime_err.log', 'rb') as err_log:
+
+        status_log.seek(stdout_offset)
+        stdout = '>>>STDOUT<<<\n' + status_log.read().decode('utf-8', errors='replace') + '\n'
+        stdout_offset = status_log.tell()
+
+        err_log.seek(stderr_offset)
+        stderr = '>>>STDERR<<<\n' + err_log.read().decode('utf-8', errors='replace') + '\n'
+        stderr_offset = err_log.tell()
+
         return stdout + stderr
 
 # TIMEOUT: Have not heard from the local controller in 5 minutes, assume process terminated. 

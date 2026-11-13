@@ -1631,7 +1631,7 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
    
     if (successful_certs == 1 || successful_certs % 1000 == 0) {
         fprintf(stdout,
-            "*PO_CERT success: sample=%lu originator=%u seq=%u "
+            "$PO_CERT success: sample=%lu originator=%u seq=%u "
             "cert_bytes=%zu limit=%zu "
             "max_ack_parts=%u acks_copied=%u acks_required=%u\n",
             successful_certs,

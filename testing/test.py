@@ -434,22 +434,23 @@ def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
      updates)=test_config
 
 
-    if failed and trial_num == num_trials:
-        with open("results/completed_configs.txt", "a", encoding="utf-8") as f:
-            f.write(
-                f"{max_po},{replica_count},{encryption_status},"
-                f"{distribution},{num_clients_to_Emulate}\n"
-            )
+    if failed: 
+        if trial_num == num_trials:
+            with open("results/completed_configs.txt", "a", encoding="utf-8") as f:
+                f.write(
+                    f"{max_po},{replica_count},{encryption_status},"
+                    f"{distribution},{num_clients_to_Emulate}\n"
+                )
 
-        with open("results/completed_configs_human_readable.txt",
-                "a", encoding="utf-8") as f:
-            f.write(
-                f"FAILED | FAILURES: {failures} | "
-                f"MAX PO: {max_po} | REPLICAS: {replica_count} | "
-                f"ENCRYPTION: {encryption_status} | "
-                f"DISTRIBUTION: {distribution} | "
-                f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
-            )
+            with open("results/completed_configs_human_readable.txt",
+                    "a", encoding="utf-8") as f:
+                f.write(
+                    f"FAILED | FAILURES: {failures} | "
+                    f"MAX PO: {max_po} | REPLICAS: {replica_count} | "
+                    f"ENCRYPTION: {encryption_status} | "
+                    f"DISTRIBUTION: {distribution} | "
+                    f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
+                )
 
         return True, None
 

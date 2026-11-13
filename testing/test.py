@@ -315,12 +315,12 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         )
 
      
-        if len(stderr)>0:
+        if stdout.strip():
            with (log_dir / "out.log").open("a") as f:
-                        f.write(log_entry_title+stdout+'\n')
-        if len(stdout)>0:
+                f.write(log_entry_title+stdout+'\n')
+        if stderr.strip():
             with (log_dir / "err.log").open("a") as f:
-                    f.write(log_entry_title+stderr+'\n')
+                f.write(log_entry_title+stderr+'\n')
 
 '''
     Gets all the statuses of the active replicas & returns them in a 

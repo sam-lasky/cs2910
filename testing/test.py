@@ -164,7 +164,7 @@ global total_replicas_used, spines_encryption_status, max_po_list, emulated_list
 # Total number of replicas being used in the test 
 total_replicas_used = [6]
 # Number of clients the driver program is emulating 
-emulated_list = [70,80,95,100,150,250,500,1000]
+emulated_list = [70,80,95,100,150,250,300,500]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration

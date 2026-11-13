@@ -244,7 +244,7 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 '''
     Prints the current test information & replica status
 '''
-def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver):
+def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver,num_clients=0):
     # just_fix_windows_console()
     print("\033[H\033[J", end="", flush=True)
     
@@ -263,11 +263,11 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
     print(f"  Emulated Clients : {curr_test[4]:,}")
     print(f"  Current Trial:   : {trial_num}/{total_trials}")
     print("=" * 48)
-    print_replica_statuses(sessions,updates_per_driver)
+    print_replica_statuses(sessions,updates_per_driver,num_clients)
 '''
     Prints replica status 
 '''
-def print_replica_statuses(sessions: dict, updates_per_driver):
+def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
 
     results = get_all_replica_statuses(sessions)
 
@@ -299,11 +299,18 @@ def print_replica_statuses(sessions: dict, updates_per_driver):
         log_dir = Path("results") / test_name / f"aster_{machine_id}"
         log_dir.mkdir(parents=True, exist_ok=True)
 
+        log_entry_title = (
+        f"ASTER: {machine_id} | Replica ID: {status['replica_id']}\n"
+        f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
+        f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
+        f"Emulated Clients: {curr_test[4]}\n"
+        )
+
         with (log_dir / "out.log").open("a") as f:
-            f.write(stdout)
+                f.write(log_entry_title+stdout+'\n')
 
         with (log_dir / "err.log").open("a") as f:
-            f.write(stderr)
+                f.write(log_entry_title+stderr+'\n')
 
 '''
     Gets all the statuses of the active replicas & returns them in a 
@@ -378,7 +385,9 @@ def get_all_replica_statuses(sessions):
         # [9] End timestamp
 
 '''
-def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
+def handle_output(test_config,min_test_time,driver_ids,failures):
+
+    # Extract local vars from passed test config 
     (max_po, 
      replica_count,
      encryption_status,distribution,
@@ -468,15 +477,15 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
         with open(f"results/{test_name}/results.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             csv_row = [
-                    *test_key,
-                    sum(row["total_updates"] for row in trials.values()) / num_trials,
-                    sum(row["overall_elapsed_time"] for row in trials.values()) / num_trials,
-                    sum(row["overall_tp"] for row in trials.values()) / num_trials,
-                    sum(row["mean_send_stalls"] for row in trials.values()) / num_trials,
-                    sum(row["mean_min_lat"] for row in trials.values()) / num_trials,
-                    sum(row["mean_max_lat"] for row in trials.values()) / num_trials,
-                    sum(row["mean_avg_lat"] for row in trials.values()) / num_trials,
-                ]
+                *test_key,
+                sum(row["total_updates"] for row in trials.values()) / num_trials,
+                f'{sum(row["overall_elapsed_time"] for row in trials.values()) / num_trials:.2f}',
+                f'{sum(row["overall_tp"] for row in trials.values()) / num_trials:.2f}',
+                round(sum(row["mean_send_stalls"] for row in trials.values()) / num_trials),
+                f'{sum(row["mean_min_lat"] for row in trials.values()) / num_trials:.2f}',
+                f'{sum(row["mean_max_lat"] for row in trials.values()) / num_trials:.2f}',
+                f'{sum(row["mean_avg_lat"] for row in trials.values()) / num_trials:.2f}',
+            ]
 
             if file.tell() > 0:
                 with open("results/completed_configs.txt", "rb") as check:
@@ -503,18 +512,22 @@ def handle_output(test_config,min_test_time,total_num_trials,driver_ids):
             writer.writerow(csv_row)
 
         # mark this config as completed to avoid redundant test configs 
-        with open("results/completed_configs.txt", "a", encoding="utf-8") as file:
-                file.write(
+        with open("results/completed_configs.txt", "a", encoding="utf-8") as file_computer_readable, \
+            open("results/completed_configs_human_readable.txt","a",encoding="utf-8") as file_human_readable:
+                # for the program 
+                file_computer_readable.write(
                     f"{max_po},{replica_count},{encryption_status},"
                     f"{distribution},{num_clients_to_Emulate}\n"
                 )
-    # else:
-    #     # mark this trial as completed to avoid redundant trial runs 
-    #     with open("results/completed_trials.txt", "a", encoding="utf-8") as file:
-    #         file.write(
-    #             f"{max_po},{replica_count},{encryption_status},"
-    #             f"{distribution},{num_clients_to_Emulate},{trial_num}\n"
-    #         )
+                # for me
+                file_human_readable.write(
+                    f"FAILURES: {failures} | "
+                    f"MAX PO: {max_po} | "
+                    f"REPLICAS: {replica_count} | "
+                    f"ENCRYPTION: {encryption_status} | "
+                    f"DISTRIBUTION: {distribution} | "
+                    f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
+                )                 
 
     return True,None 
 
@@ -552,7 +565,7 @@ def print_status_and_reboot_if_needed(
 
     print_status(
         current_test, test_number, failures, trial_num,
-        total_trials, updates_per_driver,
+        total_trials, updates_per_driver,num_clients
     )
 
     if not reboot:
@@ -631,7 +644,7 @@ def run_tests_aster():
             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
             
             if print_status_and_reboot_if_needed(
-                sessions, test_dir, current_test, test_number, failures,
+                sessions, current_test, test_number, failures,
                 trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
             ):
                 failures += 1
@@ -658,7 +671,7 @@ def run_tests_aster():
             # 2 minute timeout, if exceeded break & repeat test 
             while True:
                 if print_status_and_reboot_if_needed(
-                    sessions, test_dir, current_test, test_number, failures,
+                    sessions, current_test, test_number, failures,
                     trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
                 ):
                     failures += 1
@@ -678,7 +691,7 @@ def run_tests_aster():
             if test_sucessful[0]:
                 test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
                 # time threshold met 
-                success, test_time = handle_output(test_config, min_test_time, num_trials,driver_ids)
+                success, test_time = handle_output(test_config, min_test_time, num_trials,driver_ids,failures)
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:

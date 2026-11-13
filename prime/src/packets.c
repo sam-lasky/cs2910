@@ -1585,7 +1585,13 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
         }
 
         size = UTIL_Message_Size(po_ack);
+        
 
+        /*
+            THIS IS WHAT WE ARE CONCERNED WITH
+
+            pc = pointer to signed_message that represents the PO certificate being constructed
+        */
         if (offset + size - ((char *)(pc)) >= PRIME_MAX_PACKET_SIZE) {
             Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u \n", 
                     size, po_ack_specific->num_ack_parts);

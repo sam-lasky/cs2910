@@ -176,6 +176,8 @@ test_name = None
 # REBOOT ALL REPLICAS -- a crashed process was detected. Wipe the slate clean & restart evertyhing
 reboot = False
 reboot_msg=''
+# Tracks the total number of failures across all tests 
+toal_failures = 0
 
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
@@ -247,18 +249,19 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 '''
 def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver,num_clients=0):
     
-    if os.name == "nt":
-        os.system("cls")
-    else:
-        print("\033[2J\033[H", end="", flush=True)
-
+    # if os.name == "nt":
+    #     os.system("cls")
+    # else:
+    #     os.system("clear")
+        # print("\033[2J\033[H", end="", flush=True)
+    print("\033[2J\033[H", end="", flush=True)
     print('\n')
     print("=" * 48)
     print("              ASTER TESTING STATUS")
     print(f"                 TEST {test_number+1:,} OF {len(all_test_configs):,}")
-    print(f"                 FAILURES: {failure_count:,}")
+    print(f"                 Total failures across all tested configs: {toal_failures:,}")
     print("=" * 48)
-    print("  CURRENT CONFIGURATION")
+    print(f"  CURRENT CONFIGURATION (TOTAL FAILURES FOR THIS CONFIG = {failure_count})")
     print("-" * 48)
     print(f"  MAX PO           : {curr_test[0]:,}")
     print(f"  Replicas         : {curr_test[1]}")
@@ -610,6 +613,8 @@ def run_tests_aster():
     # store the cause as the msg
     test_sucessful = [False,'Failure_Msg if False']
 
+    global toal_failures
+    failures = 0
     # Iterate through all test configurations & execute each one
     for test_number,current_test in enumerate(all_test_configs):
         # Unpack the curr test tuple
@@ -632,7 +637,8 @@ def run_tests_aster():
         # Trial counter for current config
         trial_num = 1
 
-        # Number of failures experienced by this config
+        # Number of failures experienced by this config (reset per config)
+        toal_failures +=failures # update total b4 resetting failures 
         failures = 0
 
         # Allocates more aster machines if sessions < replica_count

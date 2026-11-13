@@ -316,7 +316,10 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
 
         with (log_dir / "out.log").open("a") as f:
                 f.write(log_entry_title+stdout+'\n')
-
+        if len(stderr)>0:
+            print('poopies')
+            exit(0)
+    
         with (log_dir / "err.log").open("a") as f:
                 f.write(log_entry_title+stderr+'\n')
 

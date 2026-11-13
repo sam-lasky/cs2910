@@ -188,14 +188,24 @@ def read_driver_output(process, state):
 
 def main():
     # Update globals with passed args 
-    global assigned_driver,make_count_prime, stdout_offset
+    global assigned_driver,make_count_prime, stdout_offset, stderr_offset
 
     '''
         [STEP 1] As soon as the replica launches, terminate 
         any leftover Driver/Spines/Prime processes from previous
-        runs
+        runs & purge the logs to avoid using stale data, reset offsets
+        to these logs to 0
     '''
     kill_all(wait_time=0.5)
+
+    # Wipe the prime_status/error logs 
+    for log in ("prime_status.log", "prime_err.log"):
+        open(log, "w").close()
+    # Reset offsets for both logs 
+    stdout_offset = 0
+    stderr_offset = 0
+
+
 
     '''
         [STEP 2] Listen for commands from test.py & respond accordingly (as described beneath)
@@ -216,9 +226,6 @@ def main():
 
         # reset timer 
         exit_timer.cancel()
-        exit_timer = Timer(300,timeout)
-        exit_timer.start()
-
         exit_timer = Timer(300,timeout)
         exit_timer.start()
 
@@ -259,7 +266,7 @@ def main():
             if first_msg: 
                 first_msg=False
                 stdout_offset = os.path.getsize("prime_status.log")
-
+                stderr_offset = os.path.getsize("prime_err.log")
 
             response='READY'
         # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>

@@ -164,11 +164,11 @@ global total_replicas_used, spines_encryption_status, max_po_list, emulated_list
 # Total number of replicas being used in the test 
 total_replicas_used = [6]
 # Number of clients the driver program is emulating 
-emulated_list = [70,80,95,100,150,250,300,500]
+emulated_list = [80,95,100,150,250,300]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 4
+num_trials = 3
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 
@@ -195,6 +195,9 @@ reboot_msg=''
 toal_failures = 0
 # logging tracking 
 most_recent_entry_titles = {}
+
+
+logs_simplified = {}
 
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
@@ -316,37 +319,48 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
             print(f"  TEST STATUS = {completed:,}/{updates_per_driver:,} ({completed / updates_per_driver:.1%})")
         print()
 
-        # Write Prime logs
-        logs = status["logs"]
-        stdout, stderr = logs.split(">>>STDERR<<<\n", 1)
-        stdout = stdout.removeprefix(">>>STDOUT<<<\n")
 
-        log_dir = Path("results") / test_name / f"aster_{machine_id}"
-        log_dir.mkdir(parents=True, exist_ok=True)
+    
+        # logs_simplified = {}
+        handle_logs(status,curr_test)
 
-        log_entry_title = (
-            f"$$$ ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
-            f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
-            f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
-            f"Emulated Clients: {curr_test[4]}$$$\n"
-        )
 
-        if stdout.strip():
-            out_dir = log_dir / "out"
-            out_dir.mkdir(parents=True, exist_ok=True)
+def handle_logs(status,curr_test):
+    # Write Prime logs
+    logs = status["logs"]
+    stdout, stderr = logs.split(">>>STDERR<<<\n", 1)
+    stdout = stdout.removeprefix(">>>STDOUT<<<\n")
 
-            filename = (
-                f"max_po_{curr_test[0]}_replicas_{curr_test[1]}_"
-                f"encryption_{curr_test[2]}_distribution_{curr_test[3]}_"
-                f"clients_{curr_test[4]}.log"
-            )
+    log_key = (f"MAX_PO: {curr_test[0]}", f"NUM_REPLICAS: {curr_test[1]}",
+            f"NUM_EMULATED: {curr_test[4]}", f"DISTRIBUTION: {curr_test[3]}")
 
-            with (out_dir / filename).open("a") as f:
-                f.write(stdout)
+    # Nonempty stdout
+    if stdout.strip():
+        for line in stdout.splitlines():
+            if not line.startswith("$PO_CERT success:"):
+                continue
 
-        if stderr.strip():
-            with (log_dir / "err.log").open("a") as f:
-                f.write(log_entry_title + stderr)
+            values = dict(item.split("=") for item in line.split(": ", 1)[1].split())
+
+            out = logs_simplified.setdefault(log_key, {}).setdefault("OUT", {})
+
+            for name, value in values.items():
+                out.setdefault(name, []).append(int(value))
+
+
+    # Nonempty stderr
+    if stderr.strip():
+        for line in stderr.splitlines():
+            if not line.startswith("*PO_CERT too big:"):
+                continue
+
+            values = dict(item.split("=") for item in line.split(": ", 1)[1].split())
+
+            err = logs_simplified.setdefault(log_key, {}).setdefault("ERR", {})
+
+            for name, value in values.items():
+                err.setdefault(name, []).append(int(value))
+  
 '''
     Gets all the statuses of the active replicas & returns them in a 
     results dict where key = machine_id, value = raw status info 
@@ -812,6 +826,103 @@ def send_command_to_replicas(sessions:dict,command:str,timeout:float, distributi
     # ret
     return results
 
+
+#  log_key = (f"MAX_PO: {curr_test[0]}", f"NUM_REPLICAS: {curr_test[1]}",
+#             f"NUM_EMULATED: {curr_test[4]}", f"DISTRIBUTION: {curr_test[3]}")
+
+# logs_simplified = {
+#     log_key: {
+#         "OUT": {
+#             "certificate_bytes": [],
+#             "size_limit_bytes": [],
+#             "max_ack_parts": [],
+#             "highest_ack_parts_seen": [],
+#             "acks_included": [],
+#             "acks_needed": []
+#         },
+#         "ERR": {
+#             "current_bytes": [],
+#             "attempted_bytes": [],
+#             "size_limit_bytes": [],
+#             "ack_bytes": [],
+#             "ack_parts": [],
+#             "max_ack_parts": [],
+#             "highest_ack_parts_seen": [],
+#             "acks_included": [],
+#             "acks_needed": []
+#         }
+#     }
+# }
+def write_logs_csv():
+    with open('out.csv', 'w', newline='') as out, open('err.csv', 'w', newline='') as err:
+        out_writer = csv.writer(out)
+        err_writer = csv.writer(err)
+
+        for max_po in max_po_list:
+            for num_replicas in total_replicas_used:
+                for dist in range(1, num_replicas + 1):
+
+                    out_writer.writerow([f"MAX_PO={max_po}", f"REPLICAS={num_replicas}", f"DIST={dist}"])
+                    out_writer.writerow([
+                        "NUM_EMULATED", "certificate_bytes", "size_limit_bytes",
+                        "size_remaining", "max_ack_parts", "highest_ack_parts_seen",
+                        "acks_included", "acks_needed"
+                    ])
+
+                    err_writer.writerow([f"MAX_PO={max_po}", f"REPLICAS={num_replicas}", f"DIST={dist}"])
+                    err_writer.writerow([
+                        "NUM_EMULATED", "current_bytes", "attempted_bytes",
+                        "size_limit_bytes", "ack_bytes", "ack_parts",
+                        "max_ack_parts", "highest_ack_parts_seen",
+                        "acks_included", "acks_needed"
+                    ])
+
+                    for num_emulated in emulated_list:
+                        log_key = (
+                            f"MAX_PO: {max_po}",
+                            f"NUM_REPLICAS: {num_replicas}",
+                            f"NUM_EMULATED: {num_emulated}",
+                            f"DISTRIBUTION: {dist}"
+                        )
+
+                        logs = logs_simplified.get(log_key, {})
+
+                        data = logs.get("OUT", {})
+                        if data:
+                            avg = {k: sum(v) / len(v) for k, v in data.items() if v}
+
+                            out_writer.writerow([
+                                num_emulated,
+                                avg["certificate_bytes"],
+                                avg["size_limit_bytes"],
+                                avg["size_limit_bytes"] - avg["certificate_bytes"],
+                                avg["max_ack_parts"],
+                                avg["highest_ack_parts_seen"],
+                                avg["acks_included"],
+                                avg["acks_needed"]
+                            ])
+
+                        data = logs.get("ERR", {})
+                        if data:
+                            avg = {k: sum(v) / len(v) for k, v in data.items() if v}
+
+                            err_writer.writerow([
+                                num_emulated,
+                                avg["current_bytes"],
+                                avg["attempted_bytes"],
+                                avg["size_limit_bytes"],
+                                avg["ack_bytes"],
+                                avg["ack_parts"],
+                                avg["max_ack_parts"],
+                                avg["highest_ack_parts_seen"],
+                                avg["acks_included"],
+                                avg["acks_needed"]
+                            ])
+
+                    out_writer.writerow([])
+                    err_writer.writerow([])
+
+
 def main():
     just_fix_windows_console()
     print("\033[H\033[J", end="", flush=True)
@@ -838,6 +949,11 @@ def main():
         Run all test configurations in Aster
     '''
     run_tests_aster()
+
+    '''
+        Write log results
+    '''
+    write_logs_csv()
 
 
 if __name__ == "__main__":

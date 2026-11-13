@@ -654,16 +654,16 @@ def run_tests_aster():
         failures = 0
 
         # Total allowed attempts to retry a test 
-        attemps = 0
+        attempts = 0
 
         # Allocates more aster machines if sessions < replica_count
         if len(sessions)<replica_count: 
             allocate_machines(replica_count, len(sessions), sessions)
 
 
-        while (trial_num<=num_trials or not test_sucessful[0]) and attemps < 3:
+        while (trial_num<=num_trials or not test_sucessful[0]) and attempts < 3:
             attempts+=1 # allowed 3 attempts then move on from this config 
-            
+
             # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
             # if (*current_test, trial_num) in completed_trials:
             #     trial_num += 1

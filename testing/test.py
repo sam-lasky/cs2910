@@ -310,30 +310,28 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_entry_title = (
-        f"$$$ ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
-        f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
-        f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
-        f"Emulated Clients: {curr_test[4]}$$$\n"
+            f"$$$ ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
+            f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
+            f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
+            f"Emulated Clients: {curr_test[4]}$$$\n"
         )
 
-
-        if not stdout.strip() and not stderr.strip():
-            continue
-        if machine_id in most_recent_entry_titles:
-            if most_recent_entry_titles[machine_id]!=log_entry_title:
-                most_recent_entry_titles[machine_id]=log_entry_title
-            else:
-                log_entry_title=''
-        else:
-            most_recent_entry_titles[machine_id]=log_entry_title
-     
         if stdout.strip():
-           with (log_dir / "out.log").open("a") as f:
-                f.write(log_entry_title+stdout)
+            out_dir = log_dir / "out"
+            out_dir.mkdir(parents=True, exist_ok=True)
+
+            filename = (
+                f"max_po_{curr_test[0]}_replicas_{curr_test[1]}_"
+                f"encryption_{curr_test[2]}_distribution_{curr_test[3]}_"
+                f"clients_{curr_test[4]}.log"
+            )
+
+            with (out_dir / filename).open("a") as f:
+                f.write(stdout)
+
         if stderr.strip():
             with (log_dir / "err.log").open("a") as f:
-                f.write(log_entry_title+stderr)
-
+                f.write(log_entry_title + stderr)
 '''
     Gets all the statuses of the active replicas & returns them in a 
     results dict where key = machine_id, value = raw status info 

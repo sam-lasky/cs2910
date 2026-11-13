@@ -1624,16 +1624,16 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
     assert(count == 2*VAR.F + VAR.K + 1); 
 
     /*
-        Used to gauge how successful PO certs typically look. To avoid flooding stdout, print the first & every subsequent 100 
+        Used to gauge how successful PO certs typically look. To avoid flooding stdout, print the first & every subsequent 1000 
     */
-   static unsigned int successful_certs=0;
+    static unsigned long successful_certs = 0;
    successful_certs++;
    
     if (successful_certs == 1 || successful_certs % 1000 == 0) {
         fprintf(stdout,
-            "$PO_CERT success: sample=%lu originator=%u seq=%u "
-            "cert_bytes=%zu limit=%zu "
-            "max_ack_parts=%u acks_copied=%u acks_required=%u\n",
+            "$PO_CERT success: certificate_number=%lu request_originator=%u request_sequence=%u "
+            "certificate_bytes=%zu size_limit_bytes=%zu "
+            "max_ack_parts=%u acks_included=%u acks_needed=%u\n",
             successful_certs,
             rep, slot->seq.seq_num,
             (size_t)(offset - (char *)pc),

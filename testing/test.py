@@ -178,6 +178,8 @@ reboot = False
 reboot_msg=''
 # Tracks the total number of failures across all tests 
 toal_failures = 0
+# logging tracking 
+most_recent_entry_titles = {}
 
 '''
     DICTIONARY WHICH HOLDS THE SSH SUBPROCESSES THAT COMMUNICATE WITH ALL THE ASTER REPLICAS
@@ -275,7 +277,7 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
     Prints replica status 
 '''
 def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
-
+    global most_recent_entry_titles
     results = get_all_replica_statuses(sessions)
 
     for machine_id, response in sorted(results.items()):
@@ -308,12 +310,19 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_entry_title = (
-        f"ASTER: {machine_id} | Replica ID: {status['replica_id']}\n"
+        f"ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
         f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
         f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
         f"Emulated Clients: {curr_test[4]}\n"
         )
 
+        if machine_id in most_recent_entry_titles:
+            if most_recent_entry_titles[machine_id]!=log_entry_title:
+                most_recent_entry_titles[machine_id]=log_entry_title
+            else:
+                log_entry_title=''
+        else:
+            most_recent_entry_titles[machine_id]=log_entry_title
      
         if stdout.strip():
            with (log_dir / "out.log").open("a") as f:

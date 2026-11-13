@@ -12,7 +12,7 @@ sys.path.insert(0, "..")
 from common.spines_manager import *
 from common.prime_manager import *
 from aster_common import EXPECTED_ASTER_RESPONSES, generate_machine_list
-from time import sleep,monotonic,strftime
+from threading import Timer
 
 # * * * ** * * ** * * * *
 # * * * * GLOBALS * * * *
@@ -199,7 +199,21 @@ def main():
     driver_process = None
     driver_state = {"progress": None, "result": None}
 
+    # If the replica does not hear from the local controller for 5 minutes, assume it has terminated.
+    # Kill all processess associated w/ the replica & exit the replica script when timer expires. 
+    exit_timer = Timer(300,timeout)
+    exit_timer.start()
+
     for command in sys.stdin:
+
+        # reset timer 
+        exit_timer.cancel()
+        exit_timer = Timer(300,timeout)
+        exit_timer.start()
+
+        exit_timer = Timer(300,timeout)
+        exit_timer.start()
+
         # remove whitespace
         command = command.strip()
         # response
@@ -287,6 +301,15 @@ def get_logs():
         stdout = '>>>STDOUT<<<\n'+status_log.read()+'\n'
         stderr = '>>>STDERR<<<\n'+err_log.read()+'\n'
         return stdout + stderr
+
+# TIMEOUT: Have not heard from the local controller in 5 minutes, assume process terminated. 
+# Kill all processes associated w/ aster replica on this machine & return 
+def timeout():
+    # Kill all processes
+    kill_all()
+    # Terminate aster_replica script
+    exit(0)
+
 
 
 '''

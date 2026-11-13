@@ -341,10 +341,13 @@ def get_all_replica_statuses(sessions):
             reboot=True
             continue
 
+        # Get status (its a json now!)
+        status = json.loads(response)
         # Get the list of all active processes on this machine 
-        active_processes = response.split("Active Processes: ", 1)[1].split(" | ", 1)[0]
+        active_processes = status["processes"]
         # bool - this machine assigned a driver
-        assigned_driver = "Assigned Driver: True | " in response
+        assigned_driver = status["assigned_driver"]
+
         # bool - is the spines process running on this machine
         spines_running = "[Spines]: Running" in active_processes
         # bool - is the prime process running on this machine 
@@ -358,7 +361,7 @@ def get_all_replica_statuses(sessions):
             process_status+='(no spines process)'
         if not prime_running:
             process_status+='(no prime process)'
-        result = response.partition(" | Driver Result: ")[2].strip()
+        result = status["driver_result"]           
         if assigned_driver and not driver_running and not result:
             process_status+='(assigned driver but no driver process)'
         if process_status:

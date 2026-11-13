@@ -726,6 +726,7 @@ def run_tests_aster():
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:
+                    attempts-=1 #decrement attempt (this test failed because it didnt meet time threshold so its not a failure)
                     test_sucessful[0]=False                    
                     dynamic_updates = math.ceil(
                         dynamic_updates * min_test_time / test_time

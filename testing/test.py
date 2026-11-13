@@ -147,18 +147,33 @@ HEADERS = [
 # # # # # # # # # # # # # #  
 global total_replicas_used, spines_encryption_status, max_po_list, emulated_list,updates
 
+# # Total number of replicas being used in the test 
+# total_replicas_used = [6,7,8]
+# # Number of clients the driver program is emulating 
+# emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+# # Number of updates each driver program sends
+# updates = 25000
+# # Number of trials per test configuration
+# num_trials = 3 
+# # Spines encryption <disabled = 0, enabled = 1>
+# spines_encryption_status = [0,1]
+# # Maximum number of preorder requests Prime allows to be in flight simultaneously 
+# max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+
+
 # Total number of replicas being used in the test 
-total_replicas_used = [6,7,8]
+total_replicas_used = [6]
 # Number of clients the driver program is emulating 
-emulated_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+emulated_list = [20,30,50,75,100,250,500, 1000, 2500, 5000, 25000]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 3 
+num_trials = 5
 # Spines encryption <disabled = 0, enabled = 1>
-spines_encryption_status = [0,1]
+spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 
-max_po_list = [20, 100, 500, 1000, 2500, 5000, 25000]
+max_po_list = [20]
+
 
 # List of all test configurations where each config is stored as a tuple
 # Each tuple has the following ordering:    

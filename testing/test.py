@@ -310,10 +310,10 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_entry_title = (
-        f"ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
+        f"$$$ ASTER: {machine_id} | Replica ID: {status['replica_id']} | "
         f"MAX PO: {curr_test[0]} | Replicas: {curr_test[1]} | "
         f"Encryption: {curr_test[2]} | Distribution: {curr_test[3]} | "
-        f"Emulated Clients: {curr_test[4]}\n"
+        f"Emulated Clients: {curr_test[4]}$$$\n"
         )
 
 

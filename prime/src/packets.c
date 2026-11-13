@@ -1593,8 +1593,24 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
             pc = pointer to signed_message that represents the PO certificate being constructed
         */
         if (offset + size - ((char *)(pc)) >= PRIME_MAX_PACKET_SIZE) {
+            
+            // Print to stderr for our debugging, msg identified by *PO_CERT in script
+            fprintf(stderr,
+                "*PO_CERT too big: originator=%u seq=%u "
+                "current_bytes=%zu attempted_bytes=%zu limit=%zu "
+                "ack_sender=%u ack_bytes=%u ack_parts=%u max_ack_parts=%u "
+                "acks_copied=%u acks_required=%u\n",
+                rep, slot->seq.seq_num,
+                (size_t)(offset - (char *)pc),
+                (size_t)(offset - (char *)pc) + size,
+                (size_t)PRIME_MAX_PACKET_SIZE,
+                i, size, po_ack_specific->num_ack_parts,
+                (unsigned)MAX_ACK_PARTS,
+                count, 2 * VAR.F + VAR.K + 1);
+            
             Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u \n", 
                     size, po_ack_specific->num_ack_parts);
+
         }
 
         memcpy(offset, slot->ack[i], size);
@@ -1606,6 +1622,27 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
 	Alarm(DEBUG,"CATCH_Construct_PO_Certificate: count=%d, f=%d, k=%d\n",count,VAR.F,VAR.K);
 	}   
     assert(count == 2*VAR.F + VAR.K + 1); 
+
+    /*
+        Used to gauge how successful PO certs typically look. To avoid flooding stdout, print the first & every subsequent 100 
+    */
+   static unsigned int successful_certs=0;
+   successful_certs++;
+   
+    if (successful_certs == 1 || successful_certs % 1000 == 0) {
+        fprintf(stdout,
+            "*PO_CERT success: sample=%lu originator=%u seq=%u "
+            "cert_bytes=%zu limit=%zu "
+            "max_ack_parts=%u acks_copied=%u acks_required=%u\n",
+            successful_certs,
+            rep, slot->seq.seq_num,
+            (size_t)(offset - (char *)pc),
+            (size_t)PRIME_MAX_PACKET_SIZE,
+            (unsigned)MAX_ACK_PARTS,
+            count, 2 * VAR.F + VAR.K + 1);
+    }
+
+
 
     return pc;
 }

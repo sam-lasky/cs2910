@@ -311,11 +311,32 @@ def get_logs():
          open('prime_err.log', 'rb') as err_log:
 
         status_log.seek(stdout_offset)
-        stdout = '>>>STDOUT<<<\n' + status_log.read().decode('utf-8', errors='replace') + '\n'
+        lines = []
+
+        while True:
+            line_start = status_log.tell()
+            line = status_log.readline()
+
+            if not line:
+                break
+
+            # Save incomplete lines for the next read.
+            if not line.endswith(b'\n'):
+                status_log.seek(line_start)
+                break
+
+            if line.startswith(b'$PO_CERT'):
+                lines.append(line.decode('utf-8', errors='replace'))
+
         stdout_offset = status_log.tell()
+        stdout = '>>>STDOUT<<<\n' + ''.join(lines) + '\n'
 
         err_log.seek(stderr_offset)
-        stderr = '>>>STDERR<<<\n' + err_log.read().decode('utf-8', errors='replace') + '\n'
+        stderr = (
+            '>>>STDERR<<<\n'
+            + err_log.read().decode('utf-8', errors='replace')
+            + '\n'
+        )
         stderr_offset = err_log.tell()
 
         return stdout + stderr

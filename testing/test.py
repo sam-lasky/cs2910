@@ -276,10 +276,9 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
             print(f"ASTER {machine_id}: No response")
             continue
 
+        print(f"ASTER {machine_id} RAW RESPONSE: {response!r}")
         status = json.loads(response)
-        print(json.dumps(status, indent=4))
-        exit(0)
-        
+
         result = status["driver_result"]
         if result:
             driver_results[machine_id] = result

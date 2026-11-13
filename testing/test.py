@@ -168,7 +168,7 @@ emulated_list = [70,80,95,100,150,250,300,500]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 3
+num_trials = 5
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 
@@ -423,7 +423,7 @@ def get_all_replica_statuses(sessions):
         # [9] End timestamp
 
 '''
-def handle_output(test_config,min_test_time,driver_ids,failures):
+def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
 
     # Extract local vars from passed test config 
     (max_po, 
@@ -432,6 +432,28 @@ def handle_output(test_config,min_test_time,driver_ids,failures):
      num_clients_to_Emulate,
      trial_num,
      updates)=test_config
+
+
+    if failed and trial_num == num_trials:
+        with open("results/completed_configs.txt", "a", encoding="utf-8") as f:
+            f.write(
+                f"{max_po},{replica_count},{encryption_status},"
+                f"{distribution},{num_clients_to_Emulate}\n"
+            )
+
+        with open("results/completed_configs_human_readable.txt",
+                "a", encoding="utf-8") as f:
+            f.write(
+                f"FAILED | FAILURES: {failures} | "
+                f"MAX PO: {max_po} | REPLICAS: {replica_count} | "
+                f"ENCRYPTION: {encryption_status} | "
+                f"DISTRIBUTION: {distribution} | "
+                f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
+            )
+
+        return True, None
+
+
 
     # key = machine_id, val = dict{....}
     driver_results_by_machine = {}
@@ -676,8 +698,7 @@ def run_tests_aster():
             allocate_machines(replica_count, len(sessions), sessions)
 
 
-        while (trial_num<=num_trials or not test_sucessful[0]) and attempts < 3:
-            attempts+=1 # allowed 3 attempts then move on from this config 
+        while (trial_num<=num_trials or not test_sucessful[0]):
 
             # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
             # if (*current_test, trial_num) in completed_trials:
@@ -732,21 +753,23 @@ def run_tests_aster():
                     failures+=1
                     break
                 sleep(2)    
-
+            
+            test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
             # Test successful, handle the output
-            if test_sucessful[0]:
-                test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
+            if test_sucessful[0]: 
                 # time threshold met 
-                success, test_time = handle_output(test_config, min_test_time, driver_ids, failures)
+                success, test_time = handle_output(test_config, min_test_time, driver_ids, failures,False)
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:
-                    attempts-=1 #decrement attempt (this test failed because it didnt meet time threshold so its not a failure)
                     test_sucessful[0]=False                    
                     dynamic_updates = math.ceil(
                         dynamic_updates * min_test_time / test_time
                     )
-            elif test_sucessful[1]=='REBOOT':continue
+            elif not test_sucessful[0]:
+                trial_num+=1
+                handle_output(test_config, min_test_time, driver_ids, failures,True)
+
 
 '''
     Send the command to the aster machine(s). Create a thread for each machine being sent to. Returned 

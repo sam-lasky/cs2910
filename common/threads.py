@@ -27,12 +27,6 @@ def add_thread(active_threads, machine_id, target_fn, ssh_process):
     thread, response = create_thread(target_fn, ssh_process)
     active_threads.append((machine_id, thread, response))
 
-'''
-    (1) Writes the command to the ssh_process associated with the aster machine w/ machine_id
-    (2) Calls add thread which:
-        (2.1) Calls create thread:
-            a)  
-'''
 def send_and_create_thread(active_threads, machine_id, ssh_process,
                            command, write_fn, read_fn):
     write_fn(ssh_process, command)

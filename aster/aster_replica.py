@@ -4,11 +4,15 @@ import subprocess
 import time
 import os
 import threading
+import socket
+import json
+
 # local 
 sys.path.insert(0, "..")
 from common.spines_manager import *
 from common.prime_manager import *
 from aster_common import EXPECTED_ASTER_RESPONSES, generate_machine_list
+from time import sleep,monotonic,strftime
 
 # * * * ** * * ** * * * *
 # * * * * GLOBALS * * * *
@@ -29,7 +33,7 @@ max_po = None
 encrypt = None
 # Assigned a driver (yes/no)
 assigned_driver=False
-# k,v = REPLICA id (int), replica ip (str)
+# k,v = (replica ID: int), (replica IP: string)
 id_to_ip={}
 # Tracks make counts (spines/prime) initialized to 0
 make_count_prime = 0
@@ -177,30 +181,20 @@ def read_driver_output(process, state):
             state["result"] = line.strip()
 
 
-def main(machine_id_arg: int):
+def main():
     # Update globals with passed args 
-    global aster_machine_id, assigned_driver,make_count_prime
-    aster_machine_id = machine_id_arg
+    global assigned_driver,make_count_prime
 
     '''
         [STEP 1] As soon as the replica launches, terminate 
         any leftover Driver/Spines/Prime processes from previous
-        runs 
+        runs
     '''
-    wait_time = 0.5 # time the kill method waits until it returns 
-    kill_all(wait_time)
+    kill_all(wait_time=0.5)
 
     '''
         [STEP 2] Listen for commands from test.py & respond accordingly (as described beneath)
-
-        EXPECTED COMMANDS: 
-        (1) 'STARTUP_STATUS':['READY']
-        (2) 'CURRENT_STATUS': returns the replica's machine status 
-        (3) 'SETUP_FOR_TEST': gets passed all the info for the test & sets up
-        Prime and Spines accordingly
-
     '''
-
     # driver subprocess reference
     driver_process = None
     driver_state = {"progress": None, "result": None}
@@ -222,6 +216,9 @@ def main(machine_id_arg: int):
             '''
             result = driver_state["result"]
             driver_status = "FINISHED" if result else (driver_state["progress"] or "N/A")
+
+            response = get_state(result, driver_status)
+
             response = (
                 f"Replica ID: {local_replica_id} | "
                 f"Aster Machine: {aster_machine_id} | "
@@ -234,10 +231,11 @@ def main(machine_id_arg: int):
             )
         # Sets up the test environment (Spines/Prime)
         elif command.startswith('SETUP_TEST:'):
-            # Reset driver data
+            # Reset driver variables (new test)
             assigned_driver=False
             driver_state = {"progress": None, "result": None}
             driver_process = None
+
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
             response='READY'
         # Run the driver program on this replica: passed as DRIVER <TOTAL_UPDATES>
@@ -254,21 +252,52 @@ def main(machine_id_arg: int):
             response='DRIVER STARTED'
         # A machine's prime/spines/driver process crashed, restart erythang
         elif command.startswith('REBOOT'):
+            # Generate response to the local controller
+            response = get_state(result, driver_status)
+            # Kill all active processes 
             kill_all(1)
+            # Reset make count prime (technically this is a hard 'reboot')
             make_count_prime=0
-            response='READY'
 
         # Print response (Written to stdout, read by SSH subprocess, flush so immediate)
         print(response,flush=True)
 
+# Get machine state 
+def get_state(result, driver_status):
+    response = json.dumps({
+        "replica_id": local_replica_id,
+        "machine_id": aster_machine_id,
+        "num_replicas": num_replicas,
+        "encryption": encrypt,
+        "max_po": max_po,
+        "assigned_driver": assigned_driver,
+        "processes": get_active_processes().strip(),
+        "driver_status": driver_status,
+        "driver_result": result or "",
+        "logs":get_logs()
+    })
 
-    
+    return response
+
+# Get the prime_status log (stdout) and prime_err log (stderr) and return as a str 
+# TODO: Trim excessive messages 
+def get_logs():
+    with open('prime_status.log', 'r') as status_log, \
+        open('prime_err.log','r') as err_log:
+        stdout = '>>>STDOUT<<<\n'+status_log.read()+'\n'
+        stderr = '>>>STDERR<<<\n'+err_log.read()+'\n'
+        return stdout + stderr
+
+
 '''
-    python aster_replica <machine_id:int> <num_replicas:int>
+    python aster_replica
+    NO ARGS
 '''
 if __name__ == "__main__":
     try:
-        main(int(sys.argv[1]))
+        # Retrieve & set the machine id
+        aster_machine_id = int(socket.gethostname().split('.')[0].removeprefix('aster'))
+        main()
     finally:
         # << CLEANUP >> 
         # kills all active processes on this replica before exiting

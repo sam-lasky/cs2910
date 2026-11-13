@@ -62,10 +62,9 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
 
             # cd into the aster directory and run the aster_replica script on the replica
             # which will run until the parent process issues a termination message.
-            #   aster_replica.py takes machine_id 
             replica_startup_command = (
                 'cd cs2910/aster && '
-                f'python3 -u aster_replica.py {machine_id}'
+                f'python3 -u aster_replica.py'
             )
 
             # Start a new ssh subprocess & run the git and startup commands, store

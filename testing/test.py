@@ -1,10 +1,8 @@
 import sys
 from pathlib import Path
-import subprocess
 import csv
-import select
 import math
-import os
+import json
 from time import sleep,monotonic,strftime
 from datetime import datetime
 from uuid import uuid4
@@ -249,13 +247,6 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
 def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver):
     # just_fix_windows_console()
     print("\033[H\033[J", end="", flush=True)
-
-    # # Windows: CLEAR TERMINAL 
-    # if os.name=="nt":
-    #     os.system("cls")
-    # # Mac/Linux: CLEAR TERMINAL
-    # else:
-    #     print("\033[2J\033[H", end="", flush=True)
     
     print('\n')
     print("=" * 48)
@@ -276,28 +267,43 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
 '''
     Prints replica status 
 '''
-def print_replica_statuses(sessions: dict,updates_per_driver):
+def print_replica_statuses(sessions: dict, updates_per_driver):
 
     results = get_all_replica_statuses(sessions)
-    
+
     for machine_id, response in sorted(results.items()):
         if not response:
             print(f"ASTER {machine_id}: No response")
             continue
-        status, _, result = response.partition(" | Driver Result: ")
-        result = result.strip()
+
+        status = json.loads(response)
+        result = status["driver_result"]
         if result:
             driver_results[machine_id] = result
 
-        parts = status.strip().split(" | ")
-        print(f"ASTER {machine_id}: {' | '.join(parts[:5])}")
-        print(f"  {parts[6]}")
-        print(f"  {parts[5]} | Driver Status: {parts[7].split(': ', 1)[1]}")
-        _, _, count = parts[7].partition("Total Updates Processed=")
+        print(f"ASTER {machine_id}: Replica ID: {status['replica_id']} | Aster Machine: {status['machine_id']} | Total Replicas: {status['num_replicas']} | Encryption: {status['encryption']} | MAX PO: {status['max_po']}")
+        print(f"  {status['processes']}")
+        print(f"  Assigned Driver: {status['assigned_driver']} | Driver Status: {status['driver_status']}")
+
+        _, _, count = status["driver_status"].partition("Total Updates Processed=")
         if count and updates_per_driver:
             completed = int(count.split()[0])
             print(f"  TEST STATUS = {completed:,}/{updates_per_driver:,} ({completed / updates_per_driver:.1%})")
         print()
+
+        # Write Prime logs
+        logs = status["logs"]
+        stdout, stderr = logs.split(">>>STDERR<<<\n", 1)
+        stdout = stdout.removeprefix(">>>STDOUT<<<\n")
+
+        log_dir = Path("results") / test_name / f"aster_{machine_id}"
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        with (log_dir / "out.log").open("a") as f:
+            f.write(stdout)
+
+        with (log_dir / "err.log").open("a") as f:
+            f.write(stderr)
 
 '''
     Gets all the statuses of the active replicas & returns them in a 
@@ -539,7 +545,7 @@ def load_completed():
 
 
 def print_status_and_reboot_if_needed(
-    sessions, test_dir, current_test, test_number, failures,
+    sessions, current_test, test_number, failures,
     trial_num, total_trials, updates_per_driver,num_clients
 ):
     global reboot, reboot_msg
@@ -552,23 +558,14 @@ def print_status_and_reboot_if_needed(
     if not reboot:
         return False
 
-    max_po, replica_count, encryption_status, distribution, clients = current_test
-
-    with (test_dir / "failure_log.txt").open("a", encoding="utf-8") as file:
-        file.write(
-            f"[FAILURE #{failures + 1}]\n"
-            f"TIME: {strftime('%Y-%m-%d %H:%M:%S')}\n"
-            f"Test config: MAX PO={max_po}, replicas={replica_count}, "
-            f"encryption={encryption_status}, distribution={distribution}, "
-            f"num clients={num_clients}\n"
-            f"{reboot_msg}\n"
-        )
-
     send_command_to_replicas(
         sessions, "REBOOT", timeout=60, distribution=len(sessions)
     )
+
+    # Reset reboot global variables 
     reboot_msg = ""
     reboot = False
+
     return True
 
 '''
@@ -628,8 +625,6 @@ def run_tests_aster():
             #     trial_num += 1
             #     continue
             test_sucessful=[False, 'JUST STARTED'] #RESET
-
-   
 
             # Setup the test - send the configuration information to each replica, print all replica statuses if successful
             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"

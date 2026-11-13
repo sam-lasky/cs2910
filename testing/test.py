@@ -263,7 +263,7 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
     print(f"  Emulated Clients : {curr_test[4]:,}")
     print(f"  Current Trial:   : {trial_num}/{total_trials}")
     print("=" * 48)
-    print_replica_statuses(sessions,updates_per_driver,num_clients)
+    print_replica_statuses(sessions,updates_per_driver,curr_test)
 '''
     Prints replica status 
 '''
@@ -276,7 +276,6 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
             print(f"ASTER {machine_id}: No response")
             continue
 
-        print(f"ASTER {machine_id} RAW RESPONSE: {response!r}")
         status = json.loads(response)
 
         result = status["driver_result"]
@@ -696,7 +695,7 @@ def run_tests_aster():
             if test_sucessful[0]:
                 test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
                 # time threshold met 
-                success, test_time = handle_output(test_config, min_test_time, num_trials,driver_ids,failures)
+                success, test_time = handle_output(test_config, min_test_time, driver_ids, failures)
                 if success: trial_num+=1
                 # time threshold not met, discard results & scale up dynamic updates 
                 else:

@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 import csv
@@ -245,9 +246,11 @@ def allocate_machines(replica_count:int, curr_sessions:int, sessions:dict):
     Prints the current test information & replica status
 '''
 def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_num:int,total_trials:int,updates_per_driver,num_clients=0):
-    # just_fix_windows_console()
-    # print("\033[H\033[J", end="", flush=True)
-    print("\033[H", end="")
+    
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        print("\033[2J\033[H", end="", flush=True)
 
     print('\n')
     print("=" * 48)
@@ -265,7 +268,6 @@ def print_status(curr_test: tuple, test_number: int, failure_count: int, trial_n
     print(f"  Current Trial:   : {trial_num}/{total_trials}")
     print("=" * 48)
     print_replica_statuses(sessions,updates_per_driver,curr_test)
-    print("\033[J", end="", flush=True)
 '''
     Prints replica status 
 '''

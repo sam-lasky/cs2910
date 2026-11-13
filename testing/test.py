@@ -316,6 +316,9 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         f"Emulated Clients: {curr_test[4]}\n"
         )
 
+
+        if not stdout.strip() and not stderr.strip():
+            continue
         if machine_id in most_recent_entry_titles:
             if most_recent_entry_titles[machine_id]!=log_entry_title:
                 most_recent_entry_titles[machine_id]=log_entry_title
@@ -326,10 +329,10 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
      
         if stdout.strip():
            with (log_dir / "out.log").open("a") as f:
-                f.write(log_entry_title+stdout+'\n')
+                f.write(log_entry_title+stdout)
         if stderr.strip():
             with (log_dir / "err.log").open("a") as f:
-                f.write(log_entry_title+stderr+'\n')
+                f.write(log_entry_title+stderr)
 
 '''
     Gets all the statuses of the active replicas & returns them in a 

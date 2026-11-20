@@ -255,13 +255,13 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   {
     highest_seq_num=response_specific->seq_num;
   }
-  if(response_specific->seq_num % PRINT_INTERVAL ==0)
+  if(response_specific->seq_num % 10 ==0)
   {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      printf("Highest SeqNo Processed=%u Total Updates Processed=%d Execution Time=%f sec\n",
-            highest_seq_num,response_specific->seq_num, elapsed_sec);
+      printf("Highest SeqNo Processed=%u Total Updates Processed=%d Execution Time=%f sec Send Stalls=%u\n",
+            highest_seq_num,response_specific->seq_num, elapsed_sec,send_stalls);
       fflush(stdout);
   }
 

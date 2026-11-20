@@ -695,6 +695,9 @@ def print_status_and_reboot_if_needed(
 '''
     Runs each test configuration stored in all_test_configs
 '''
+'''
+    Runs each test configuration stored in all_test_configs
+'''
 def run_tests_aster():
     global test_name
     # CREATE A DIRECTORY FOR test_name IN results DIR
@@ -706,7 +709,7 @@ def run_tests_aster():
 
     # Minimum amount of time a test needs to take. If the test does not meet
     # this threshold, dynamic_updates is adjusted & the test gets rerun
-    # using this update value until it meets the threshold. 
+    # using this update value until it meets the threshold.
     min_test_time = 15 #seconds
 
     # Holds the test success results, if true ignore msg otherwise
@@ -726,25 +729,26 @@ def run_tests_aster():
             num_clients_to_Emulate
         ) = current_test
 
-        # Test config already complete & test config written, skip 
+        # Test config already complete & test config written, skip
         if current_test in completed_configs:
             continue
 
-        # The number of updates get scaled up if the current test configuration fails 
-        # to meet the time threshold 
+        # The number of updates get scaled up if the current test configuration fails
+        # to meet the time threshold
         dynamic_updates = updates
 
         # Trial counter for current config
         trial_num = 1
 
         # Number of failures experienced by this config (reset per config)
-        toal_failures +=failures # update total b4 resetting failures 
+        toal_failures +=failures # update total b4 resetting failures
         failures = 0
 
         # Allocates more aster machines if sessions < replica_count
-        if len(sessions)<replica_count: 
+        if len(sessions)<replica_count:
             allocate_machines(replica_count, len(sessions), sessions)
 
+        retries = 0
 
         while (trial_num<=num_trials):
 
@@ -757,13 +761,19 @@ def run_tests_aster():
             # Setup the test - send the configuration information to each replica, print all replica statuses if successful
             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
-            
+
             if print_status_and_reboot_if_needed(
                 sessions, current_test, test_number, failures,
                 trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
             ):
                 failures += 1
-                continue     
+                retries += 1
+                if retries > 3:
+                    test_config = (*current_test, trial_num, dynamic_updates)
+                    handle_output(test_config, min_test_time, [], failures, True)
+                    trial_num += 1
+                    retries = 0
+                continue
 
             print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
 
@@ -771,7 +781,7 @@ def run_tests_aster():
                 EXECUTE: Starting at the aster machine number (ascending), distribute the update
 
             '''
-            # Get the machines that will be assigned a driver prog 
+            # Get the machines that will be assigned a driver prog
             driver_ids = sorted(sessions)[:distribution]
             driver_sessions = {machine_id: sessions[machine_id] for machine_id in driver_ids}
             # DRIVER <NUM_UPDATES> <NUM_CLIENTS_TO_EMULATE>
@@ -779,11 +789,11 @@ def run_tests_aster():
             send_command_to_replicas(driver_sessions,command,timeout=5, distribution=len(driver_sessions))
             driver_results.clear() # RESET
 
-            # 2 min timeout 
+            # 2 min timeout
             deadline = monotonic() + 120
 
             # Print status of all replicas every 2 seconds during the test
-            # 2 minute timeout, if exceeded break & repeat test 
+            # 2 minute timeout, if exceeded break & repeat test
             while True:
                 if print_status_and_reboot_if_needed(
                     sessions, current_test, test_number, failures,
@@ -800,23 +810,155 @@ def run_tests_aster():
                     test_sucessful[1]='TIMEOUT'
                     failures+=1
                     break
-                sleep(2)    
-            
+                sleep(2)
+
             test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
             # Test successful, handle the output
-            if test_sucessful[0]: 
-                # time threshold met 
+            if test_sucessful[0]:
+                # time threshold met
                 success, test_time = handle_output(test_config, min_test_time, driver_ids, failures,False)
-                if success: trial_num+=1
-                # time threshold not met, discard results & scale up dynamic updates 
+                if success:
+                    trial_num+=1
+                    retries = 0
+                # time threshold not met, discard results & scale up dynamic updates
                 else:
-                    test_sucessful[0]=False                    
+                    test_sucessful[0]=False
                     dynamic_updates = math.ceil(
                         dynamic_updates * min_test_time / test_time
                     )
             elif not test_sucessful[0]:
-                trial_num+=1
-                handle_output(test_config, min_test_time, driver_ids, failures,True)
+                retries += 1
+                if retries > 3:
+                    trial_num += 1
+                    retries = 0
+                    handle_output(test_config, min_test_time, driver_ids, failures, True)
+
+# def run_tests_aster():
+#     global test_name
+#     # CREATE A DIRECTORY FOR test_name IN results DIR
+#     test_name = f"test_{uuid4().hex[:8]}"
+#     test_dir = Path("results") / test_name
+#     test_dir.mkdir(parents=True)
+
+#     completed_trials,completed_configs = load_completed()
+
+#     # Minimum amount of time a test needs to take. If the test does not meet
+#     # this threshold, dynamic_updates is adjusted & the test gets rerun
+#     # using this update value until it meets the threshold. 
+#     min_test_time = 15 #seconds
+
+#     # Holds the test success results, if true ignore msg otherwise
+#     # store the cause as the msg
+#     test_sucessful = [False,'Failure_Msg if False']
+
+#     global toal_failures
+#     failures = 0
+#     # Iterate through all test configurations & execute each one
+#     for test_number,current_test in enumerate(all_test_configs):
+#         # Unpack the curr test tuple
+#         (
+#             max_po,
+#             replica_count,
+#             encryption_status,
+#             distribution,
+#             num_clients_to_Emulate
+#         ) = current_test
+
+#         # Test config already complete & test config written, skip 
+#         if current_test in completed_configs:
+#             continue
+
+#         # The number of updates get scaled up if the current test configuration fails 
+#         # to meet the time threshold 
+#         dynamic_updates = updates
+
+#         # Trial counter for current config
+#         trial_num = 1
+
+#         # Number of failures experienced by this config (reset per config)
+#         toal_failures +=failures # update total b4 resetting failures 
+#         failures = 0
+
+#         # Allocates more aster machines if sessions < replica_count
+#         if len(sessions)<replica_count: 
+#             allocate_machines(replica_count, len(sessions), sessions)
+
+#         retries = 0
+
+#         while (trial_num<=num_trials):
+
+#             # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
+#             # if (*current_test, trial_num) in completed_trials:
+#             #     trial_num += 1
+#             #     continue
+#             test_sucessful=[False, 'JUST STARTED'] #RESET
+
+#             # Setup the test - send the configuration information to each replica, print all replica statuses if successful
+#             command=f"SETUP_TEST: {max_po} {replica_count} {encryption_status}"
+#             send_command_to_replicas(sessions,command,timeout=30, distribution=len(sessions.keys()))
+            
+#             if print_status_and_reboot_if_needed(
+#                 sessions, current_test, test_number, failures,
+#                 trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
+#             ):
+#                 failures += 1
+#                 continue     
+
+#             print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
+
+#             '''
+#                 EXECUTE: Starting at the aster machine number (ascending), distribute the update
+
+#             '''
+#             # Get the machines that will be assigned a driver prog 
+#             driver_ids = sorted(sessions)[:distribution]
+#             driver_sessions = {machine_id: sessions[machine_id] for machine_id in driver_ids}
+#             # DRIVER <NUM_UPDATES> <NUM_CLIENTS_TO_EMULATE>
+#             command=f"DRIVER {dynamic_updates//distribution} {num_clients_to_Emulate}"
+#             send_command_to_replicas(driver_sessions,command,timeout=5, distribution=len(driver_sessions))
+#             driver_results.clear() # RESET
+
+#             # 2 min timeout 
+#             deadline = monotonic() + 120
+
+#             # Print status of all replicas every 2 seconds during the test
+#             # 2 minute timeout, if exceeded break & repeat test 
+#             while True:
+#                 if print_status_and_reboot_if_needed(
+#                     sessions, current_test, test_number, failures,
+#                     trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
+#                 ):
+#                     failures += 1
+#                     test_sucessful[1] = "REBOOT"
+#                     break
+
+#                 if all(machine_id in driver_results for machine_id in driver_ids):
+#                     test_sucessful[0]=True
+#                     break
+#                 if monotonic() >=deadline:
+#                     test_sucessful[1]='TIMEOUT'
+#                     failures+=1
+#                     break
+#                 sleep(2)    
+            
+#             test_config =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,dynamic_updates)
+#             # Test successful, handle the output
+#             if test_sucessful[0]: 
+#                 # time threshold met 
+#                 success, test_time = handle_output(test_config, min_test_time, driver_ids, failures,False)
+#                 if success: trial_num+=1
+#                 # time threshold not met, discard results & scale up dynamic updates 
+#                 else:
+#                     test_sucessful[0]=False                    
+#                     dynamic_updates = math.ceil(
+#                         dynamic_updates * min_test_time / test_time
+#                     )
+#             elif not test_sucessful[0]:
+#                 retries += 1
+#                 if retries > 3:
+#                     trial_num += 1
+#                     retries = 0
+#                     handle_output(test_config, min_test_time, driver_ids, failures, True)
 
 
 '''

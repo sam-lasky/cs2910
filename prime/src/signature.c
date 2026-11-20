@@ -178,7 +178,11 @@ void SIG_Make_Batch(int trigger, void *dummyp)
     if (ret != 0)
         Alarm(PRINT, "Batch Error: Failure to Dequeue PUSHBACK\n");
   } else {
-    Alarm(PRINT, "Make_Batch. Threshold reached\n");
+    // Maybe its the spammed messages?
+    static int count = 0;
+    if (++count % 1000 == 0)
+        Alarm(PRINT, "Make_Batch. Threshold reached (%d times)\n", count);
+    // Alarm(PRINT, "Make_Batch. Threshold reached\n");
     ret = E_dequeue(SIG_Make_Batch, BATCH_MAX_TRIGGER, NULL);
     if (ret != 0)
         Alarm(PRINT, "Thresh Error: Failure to Dequeue MAX\n");

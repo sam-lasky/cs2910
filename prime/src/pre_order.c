@@ -242,11 +242,6 @@ void PRE_ORDER_Send_PO_Request()
   int32u dest_bits;
   int32u counter = 0;
 
-  if(highest_sequence_number>=19995)
-  {
-    printf("In pre_order_send_po request, highest sequence number is %u\n",highest_sequence_number);
-  }
-
   /* If we send PO-Requests periodically, make sure it's been long
    * enough since we last sent one. */
   if(SEND_PO_REQUESTS_PERIODICALLY) {

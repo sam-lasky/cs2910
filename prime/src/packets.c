@@ -146,11 +146,6 @@ signed_message* PRE_ORDER_Construct_PO_Request()
 
       up = (update_message *)(mess + 1);
 
-    if (up->seq_num >= 19995)
-    {
-        printf("Client SeqNo %u added to PO Request\n");
-    }
-
 
       UTIL_DLL_Pop_Front(&DATA.PO.po_request_dll);
 

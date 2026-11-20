@@ -133,7 +133,7 @@ def start_prime(replica_ip:dict, replica_id:int):
 
     # Open as w so it doesn't become massive. 
     with    open('prime_status.log', 'w') as prime_status_log,\
-            open('prime_err.log','w') as prime_err_log:
+            open('prime_error.log','w') as prime_err_log:
         # Start the Prime Process, write stdout/err to prime_status_log
         prime = subprocess.Popen(
             ["./prime", "-i", str(replica_id), "-g", str(replica_id)],

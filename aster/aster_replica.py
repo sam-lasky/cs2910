@@ -262,7 +262,7 @@ def main():
             set_up_test_env(*map(int, command.split(':', 1)[1].split()))
             
             # This is the first message, we want to skip all the setup messages written during initialization 
-            # by updating the stdout offset pointer
+            # by updating the stdout/stderr offset pointers 
             if first_msg: 
                 first_msg=False
                 stdout_offset = os.path.getsize("prime_status.log")
@@ -310,43 +310,51 @@ def get_state(result, driver_status):
 
     return response
 
-# Get Prime stdout/stderr since the last read
+# Get Prime stdout/stderr starting in the position in each log where 
+# stdout/stderr_offset has last left off
 def get_logs():
     global stdout_offset, stderr_offset
+    logs = ['prime_status.log','prime_err.log']
+    offsets = [stdout_offset, stderr_offset]
+    std_out,std_err = '',''
+    for log,offset in zip(logs, offsets) :
+        with open(log, 'rb') as prime_log:
+            
+            prime_log.seek(offset)
 
-    with open('prime_status.log', 'rb') as status_log, \
-         open('prime_err.log', 'rb') as err_log:
 
-        status_log.seek(stdout_offset)
-        lines = []
+            # Starting at the line at the location given by the offest, 
+            while True: 
 
-        while True:
-            line_start = status_log.tell()
-            line = status_log.readline()
+                # Save the starting position in the event the line is not fully written
+                # (i.e. prime has started but not finished writing this specific line)
+                line_start = prime_log.tell()
+                line = prime_log.readline()
+                
+                # Case 1: No lines remain (EOF, line="")
+                if not line:
+                    break
+                # Case 2: Incomplete line (Prime still writing)
+                if not line.endswith(b'\n'):
+                    prime_log.seek(line_start)
+                    break
+                if log == 'prime_status.log':
+                    if line.startswith(b'***PO_CERT_SUCCESS'):
+                        std_out += line.decode('utf-8', errors='replace')
+                    stdout_offset = prime_log.tell()
+                else:
+                    std_err += line.decode('utf-8', errors='replace')
+                    stderr_offset = prime_log.tell()
 
-            if not line:
-                break
+    # std_out nonempty 
+    if std_out:
+        std_out = 'STDOUT,' + std_out
+    # std_err nonempty
+    if std_err:
+        std_err = 'STDERR,' +std_err
+    # returns stdout + stderr, stdout only if not stderr, stderr only if not stdout, empty string if neither
+    return std_out+std_err
 
-            # Save incomplete lines for the next read.
-            if not line.endswith(b'\n'):
-                status_log.seek(line_start)
-                break
-
-            if line.startswith(b'$PO_CERT'):
-                lines.append(line.decode('utf-8', errors='replace'))
-
-        stdout_offset = status_log.tell()
-        stdout = '>>>STDOUT<<<\n' + ''.join(lines) + '\n'
-
-        err_log.seek(stderr_offset)
-        stderr = (
-            '>>>STDERR<<<\n'
-            + err_log.read().decode('utf-8', errors='replace')
-            + '\n'
-        )
-        stderr_offset = err_log.tell()
-
-        return stdout + stderr
 
 # TIMEOUT: Have not heard from the local controller in 5 minutes, assume process terminated. 
 # Kill all processes associated w/ aster replica on this machine & return 

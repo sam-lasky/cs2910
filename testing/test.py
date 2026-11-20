@@ -164,11 +164,11 @@ global total_replicas_used, spines_encryption_status, max_po_list, emulated_list
 # Total number of replicas being used in the test 
 total_replicas_used = [6]
 # Number of clients the driver program is emulating 
-emulated_list = [80,95,100,150,250,300]
+emulated_list = [95,100,150,250]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 3
+num_trials = 5
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 
@@ -324,43 +324,66 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
         # logs_simplified = {}
         handle_logs(status,curr_test)
 
+'''
+    Parse stdout & stderr logs from the replicas 
 
+    STDERR,***PO_CERT_TOO_BIG,current_bytes=val,attempted_bytes=val,size_limit_bytes=val,ack_bytes=val,
+    ack_parts=val,max_ack_parts=val,highest_ack_parts_seen=val,acks_included=val,acks_needed=val 
+
+    STDOUT,***PO_CERT_SUCCESS,PO_CERT_SIZE=val,SIZE_LIMIT_BYTES=val,REMAINING_BYTES=val,max_ack_parts=val,
+    highest_ack_parts_seen=val,acks_included=val,acks_needed=val
+
+    logs is constructed as string stdout+stderr where stdout=='' if empty and stderr=='' if empty
+'''
 def handle_logs(status,curr_test):
+    
     # Write Prime logs
-    logs = status["logs"]
-    stdout, stderr = logs.split(">>>STDERR<<<\n", 1)
-    stdout = stdout.removeprefix(">>>STDOUT<<<\n")
+    logs:str = status["logs"]
 
-    log_key = (f"MAX_PO: {curr_test[0]}", f"NUM_REPLICAS: {curr_test[1]}",
-            f"NUM_EMULATED: {curr_test[4]}", f"DISTRIBUTION: {curr_test[3]}")
+    # Split on ,
+    logs = logs.split(',')
+    
+    stdout,stderr='',''
 
-    # Nonempty stdout
-    if stdout.strip():
-        for line in stdout.splitlines():
-            if not line.startswith("$PO_CERT success:"):
-                continue
+    i=0
+    # STDOUT
+    if i < len(logs) and logs[i]=='STDOUT':
+        i+=1
+        while i<len(logs) and logs[i]!='STDERR':
+            stdout+=logs[i] + ','
+            i+=1
+    # STDERR  
+    if i< len(logs) and logs[i]=='STDERR':
+        i+=1
+        while i<len(logs):
+            # PO_CERT_TOO_BIG err
+            if logs[i]=='***PO_CERT_TOO_BIG':
+                stderr+= ''.join(logs[i:i+10])
+                i+=10
+            # Other STDERR msg
+            else:
+                stderr+=logs[i]
+                i+=1
 
-            values = dict(item.split("=") for item in line.split(": ", 1)[1].split())
-
-            out = logs_simplified.setdefault(log_key, {}).setdefault("OUT", {})
-
-            for name, value in values.items():
-                out.setdefault(name, []).append(int(value))
-
-
-    # Nonempty stderr
-    if stderr.strip():
-        for line in stderr.splitlines():
-            if not line.startswith("*PO_CERT too big:"):
-                continue
-
-            values = dict(item.split("=") for item in line.split(": ", 1)[1].split())
-
-            err = logs_simplified.setdefault(log_key, {}).setdefault("ERR", {})
-
-            for name, value in values.items():
-                err.setdefault(name, []).append(int(value))
-  
+    # Store stdout/err in logs_simplified
+    # logs_simplified[curr_test]['stdout'] == complete stdout msg as str 
+    # logs_simplified[curr_test]['stderr'] == complete stderr msg as str 
+    # curr_test:tuple = (
+    #     max_po,                # [0]
+    #     replica_count,         # [1]
+    #     encryption_status,     # [2]
+    #     distribution,          # [3]
+    #     num_clients_to_Emulate # [4]
+    # )
+    if curr_test in logs_simplified: #entry exists 
+        logs_simplified[curr_test]['stdout']+=stdout
+        logs_simplified[curr_test]['stderr']+=stderr
+    else: #entry dne
+        logs_simplified[curr_test]={
+            'stdout': stdout,
+            'stderr': stderr
+        }
+        
 '''
     Gets all the statuses of the active replicas & returns them in a 
     results dict where key = machine_id, value = raw status info 
@@ -420,6 +443,23 @@ def get_all_replica_statuses(sessions):
     return results
 
 
+'''
+    Handles a given test config's output 
+    test_confgig =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,failures)
+
+    results = 
+        # [0] "RESULT",
+        # [1] Elapsed time (seconds),
+        # [2] Send stalls,
+        # [3] Expected throughput (updates/sec),
+        # [4] Actual throughput (updates/sec),
+        # [5] Minimum latency (ms),
+        # [6] Maximum latency (ms),
+        # [7] Average latency (ms),
+        # [8] Start timestamp,
+        # [9] End timestamp
+
+'''
 '''
     Handles a given test config's output 
     test_confgig =(max_po, replica_count,encryption_status,distribution,num_clients_to_Emulate,trial_num,failures)
@@ -562,12 +602,7 @@ def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
                 f'{sum(row["mean_avg_lat"] for row in trials.values()) / num_trials:.2f}',
             ]
 
-            if file.tell() > 0:
-                with open("results/completed_configs.txt", "rb") as check:
-                    check.seek(-1, 2)
-                    if check.read(1) != b"\n":
-                        file.write("\n")
-
+            if file.tell() == 0:
      
                 writer.writerow([
                     "max_po",
@@ -705,9 +740,6 @@ def run_tests_aster():
         toal_failures +=failures # update total b4 resetting failures 
         failures = 0
 
-        # Total allowed attempts to retry a test 
-        attempts = 0
-
         # Allocates more aster machines if sessions < replica_count
         if len(sessions)<replica_count: 
             allocate_machines(replica_count, len(sessions), sessions)
@@ -827,100 +859,193 @@ def send_command_to_replicas(sessions:dict,command:str,timeout:float, distributi
     return results
 
 
-#  log_key = (f"MAX_PO: {curr_test[0]}", f"NUM_REPLICAS: {curr_test[1]}",
-#             f"NUM_EMULATED: {curr_test[4]}", f"DISTRIBUTION: {curr_test[3]}")
+# STDERR,***PO_CERT_TOO_BIG,current_bytes=val,attempted_bytes=val,size_limit_bytes=val,ack_bytes=val,
+#     ack_parts=val,max_ack_parts=val,highest_ack_parts_seen=val,acks_included=val,acks_needed=val 
 
-# logs_simplified = {
-#     log_key: {
-#         "OUT": {
-#             "certificate_bytes": [],
-#             "size_limit_bytes": [],
-#             "max_ack_parts": [],
-#             "highest_ack_parts_seen": [],
-#             "acks_included": [],
-#             "acks_needed": []
-#         },
-#         "ERR": {
-#             "current_bytes": [],
-#             "attempted_bytes": [],
-#             "size_limit_bytes": [],
-#             "ack_bytes": [],
-#             "ack_parts": [],
-#             "max_ack_parts": [],
-#             "highest_ack_parts_seen": [],
-#             "acks_included": [],
-#             "acks_needed": []
-#         }
-#     }
-# }
+#     STDOUT,***PO_CERT_SUCCESS,PO_CERT_SIZE=val,SIZE_LIMIT_BYTES=val,REMAINING_BYTES=val,max_ack_parts=val,
+#     highest_ack_parts_seen=val,acks_included=val,acks_needed=val
+
+#     logs is constructed as string stdout+stderr where stdout=='' if empty and stderr=='' if empty
 def write_logs_csv():
-    with open('out.csv', 'w', newline='') as out, open('err.csv', 'w', newline='') as err:
-        out_writer = csv.writer(out)
-        err_writer = csv.writer(err)
+    with open(f"results/{test_name}/stdout.log", "w") as out_log, \
+        open(f"results/{test_name}/stderr.log", "w") as err_log, \
+        open(f"results/{test_name}/stderr_other.txt", "w") as err_other:
+            out_writer = csv.writer(out_log)
+            err_writer = csv.writer(err_log)
+            # test_config:tuple = (max_po, replica_count, encryption_status, distribution, num_clients_to_Emulate)
+            for test_config in logs_simplified.keys():
+                # writes row header: max_po, replica_count, distribution, num_clients_to_emulate
+                # encryption status not included cus it doesn't really matter here 
+                config_header: list = [
+                    f'max_po: {test_config[0]}',
+                    f'replica_count: {test_config[1]}',
+                    f'distribution: {test_config[3]}',
+                    f'num_clients_emulate: {test_config[4]}'
+                ]
 
-        for max_po in max_po_list:
-            for num_replicas in total_replicas_used:
-                for dist in range(1, num_replicas + 1):
+                # Handle stdout first cus its ez
+                stdout:str = logs_simplified[test_config]['stdout']
+                if stdout:
 
-                    out_writer.writerow([f"MAX_PO={max_po}", f"REPLICAS={num_replicas}", f"DIST={dist}"])
-                    out_writer.writerow([
-                        "NUM_EMULATED", "certificate_bytes", "size_limit_bytes",
-                        "size_remaining", "max_ack_parts", "highest_ack_parts_seen",
-                        "acks_included", "acks_needed"
-                    ])
+                    # min | max | avg PO_Cert size out of all
+                    min_cert,max_cert,avg_cert = 32001,0,0
+                    # free bytes remaining, lowest
+                    min_remaining = 32001
+                    # highest number of ack parts seen 
+                    max_ack_parts_seen = 0
+                    # largest po ack seen 
+                    largest_ack_overall=0
+  
+                    # Count
+                    cert_count = 0
 
-                    err_writer.writerow([f"MAX_PO={max_po}", f"REPLICAS={num_replicas}", f"DIST={dist}"])
-                    err_writer.writerow([
-                        "NUM_EMULATED", "current_bytes", "attempted_bytes",
-                        "size_limit_bytes", "ack_bytes", "ack_parts",
-                        "max_ack_parts", "highest_ack_parts_seen",
-                        "acks_included", "acks_needed"
-                    ])
+                    for entry in stdout.split('***PO_CERT_SUCCESS')[1:]:
+                        # PO_CERT_SIZE=val,SIZE_LIMIT_BYTES=val,REMAINING_BYTES=val,largest_po_ack_bytes=val,
+                        # max_ack_parts=val,highest_ack_parts_seen=val
+                        fields = entry.strip(',').split(',')
+                        '''
+                        [
+                            'PO_CERT_SIZE=val',           # [0]
+                            'SIZE_LIMIT_BYTES=val',       # [1]
+                            'REMAINING_BYTES=val',        # [2]
+                            'largest_po_ack_bytes=val',   # [3]
+                            'max_ack_parts=val',          # [4]
+                            'highest_ack_parts_seen=val'  # [5]
+                        ]
+                        '''
+                        cert_size = int(fields[0].split('=')[1])
+                        cert_size_limit = int(fields[1].split('=')[1])
+                        remaining_bytes = int(fields[2].split('=')[1])
+                        largest_po_ack_size = int(fields[3].split('=')[1])
+                        max_ack_parts = int(fields[4].split('=')[1])
+                        highest_ack_parts_seen = int(fields[5].split('=')[1])
 
-                    for num_emulated in emulated_list:
-                        log_key = (
-                            f"MAX_PO: {max_po}",
-                            f"NUM_REPLICAS: {num_replicas}",
-                            f"NUM_EMULATED: {num_emulated}",
-                            f"DISTRIBUTION: {dist}"
-                        )
-
-                        logs = logs_simplified.get(log_key, {})
-
-                        data = logs.get("OUT", {})
-                        if data:
-                            avg = {k: sum(v) / len(v) for k, v in data.items() if v}
-
+                        # Extend the config header with packet size limit, max ACK parts,
+                        # and largest PO_ACK size from the first entry
+                        if cert_count == 0:
+                            config_header.extend([
+                                f'pkt_size_limit: {cert_size_limit}',
+                                f'max_ack_parts: {max_ack_parts}'
+                            ])
+                            # Write config header, this identifies the curr config associated with the subsequent rows
+                            out_writer.writerow(config_header)
+                            # Write column headers for this config
                             out_writer.writerow([
-                                num_emulated,
-                                avg["certificate_bytes"],
-                                avg["size_limit_bytes"],
-                                avg["size_limit_bytes"] - avg["certificate_bytes"],
-                                avg["max_ack_parts"],
-                                avg["highest_ack_parts_seen"],
-                                avg["acks_included"],
-                                avg["acks_needed"]
+                                'PO_CERT_SIZE',
+                                'FREE_BYTES_REMAINING',
+                                'HIGHEST_ACK_PARTS_SEEN'
                             ])
 
-                        data = logs.get("ERR", {})
-                        if data:
-                            avg = {k: sum(v) / len(v) for k, v in data.items() if v}
+                        # Write this entry
+                        out_writer.writerow([
+                            cert_size,
+                            remaining_bytes,
+                            highest_ack_parts_seen
+                        ])
 
+                        # Final overall row tracking
+                        min_cert = min(min_cert, cert_size)
+                        max_cert = max(max_cert, cert_size)
+                        min_remaining = min(min_remaining, remaining_bytes)
+                        max_ack_parts_seen = max(max_ack_parts_seen, highest_ack_parts_seen)
+                        largest_ack_overall = max(largest_ack_overall, largest_po_ack_size)
+                        avg_cert += cert_size # avg cert size 
+
+                        # Number of certs
+                        cert_count += 1
+                    # Get the average
+                    avg_cert /= cert_count
+                    # write the 'overall' row
+                    out_writer.writerow([
+                        'OVERALL',
+                        min_cert,
+                        max_cert,
+                        round(avg_cert, 2),
+                        min_remaining,
+                        max_ack_parts_seen,
+                        largest_ack_overall,
+                        cert_count
+                    ])
+
+                # Handle stderr
+                stderr:str = logs_simplified[test_config]['stderr']
+                if stderr:
+                    config_header: list = [
+                        f'max_po: {test_config[0]}',
+                        f'replica_count: {test_config[1]}',
+                        f'distribution: {test_config[3]}',
+                        f'num_clients_emulate: {test_config[4]}'
+                    ]
+
+                    po_cert_err_count = 0
+                    max_exceeded,avg_exceeded = 0,0
+                    largest_po_ack_fail = 0
+                    highest_ack_parts_seen = 0
+                    
+                    for line in stderr.splitlines():
+                        # PO CERT TOO BIG failure
+                        # ***PO_CERT_TOO_BIG,current_bytes=12000,attempted_bytes=34000,size_limit_bytes=32000,
+                        # ack_bytes=22000,ack_parts=64,max_ack_parts=64,highest_ack_parts_seen=64,acks_included=2,acks_needed=4
+                        if '***PO_CERT_TOO_BIG' in line:
+                            fields = line.split('***PO_CERT_TOO_BIG,')[1].split(',')
+
+                            values = [int(field.split('=')[1]) for field in fields]
+
+                            # Write headers 
+                            if po_cert_err_count == 0:
+                                config_header.extend([
+                                    f'size_limit_bytes: {values[2]}',
+                                    f'max_ack_parts: {values[5]}'
+                                ])
+                                err_writer.writerow(config_header)
+                                err_writer.writerow([
+                                    'CURRENT_BYTES',
+                                    'ATTEMPTED_BYTES',
+                                    'AMOUNT_EXCEEDED',
+                                    'FAILED_PO_ACK_BYTES',
+                                    'FAILED_PO_ACK_ACK_PARTS',
+                                    'HIGHEST_ACK_PARTS_SEEN',
+                                    'ACKS_INCLUDED',
+                                    'ACKS_NEEDED'
+                                ])
+
+                            amount_exceeded = values[1] - values[2]
                             err_writer.writerow([
-                                num_emulated,
-                                avg["current_bytes"],
-                                avg["attempted_bytes"],
-                                avg["size_limit_bytes"],
-                                avg["ack_bytes"],
-                                avg["ack_parts"],
-                                avg["max_ack_parts"],
-                                avg["highest_ack_parts_seen"],
-                                avg["acks_included"],
-                                avg["acks_needed"]
+                                values[0],         # CURRENT_BYTES
+                                values[1],         # ATTEMPTED_BYTES
+                                amount_exceeded,   # AMOUNT_EXCEEDED
+                                values[3],         # FAILED_PO_ACK_BYTES
+                                values[4],         # FAILED_PO_ACK_ACK_PARTS
+                                values[6],         # HIGHEST_ACK_PARTS_SEEN
+                                values[7],         # ACKS_INCLUDED
+                                values[8]          # ACKS_NEEDED
                             ])
 
-                    out_writer.writerow([])
-                    err_writer.writerow([])
+                            max_exceeded = max(max_exceeded, amount_exceeded)
+                            avg_exceeded += amount_exceeded
+                            largest_po_ack_fail = max(largest_po_ack_fail, values[3])
+                            highest_ack_parts_seen = max(highest_ack_parts_seen,values[6])
+
+                            po_cert_err_count += 1
+                    
+                        else:
+                            if line.strip():
+                                err_other.write(f"\nCONFIG: {', '.join(config_header)}\n")
+                                err_other.write(line + '\n')
+
+                    if po_cert_err_count > 0:
+                        avg_exceeded /= po_cert_err_count
+
+                        err_writer.writerow([
+                            'OVERALL',
+                            po_cert_err_count,
+                            max_exceeded,
+                            round(avg_exceeded, 2),
+                            largest_po_ack_fail,
+                            highest_ack_parts_seen
+                        ])
+
+                
 
 
 def main():

@@ -1571,6 +1571,7 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
     offset += size;
 
     /* Next, grab the 2f+k+1 po_acks */
+    int32u largest_po_ack_size = 0;
     count = 0;
     for (i = 1; i <=  VAR.Num_Servers && count < 2*VAR.F + VAR.K + 1; i++) {
         if (slot->ack[i] == NULL)
@@ -1587,20 +1588,30 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
             continue;
         }
 
+        // size of the po_ack we are trying to add 
         size = UTIL_Message_Size(po_ack);
-        
+        // bookkeeping
+        if(size>largest_po_ack_size)
+            largest_po_ack_size = size;
 
         /*
-            THIS IS WHAT WE ARE CONCERNED WITH
+            THIS IS WHAT WE ARE CONCERNED WITH:
+            > Write to stderr. The original Alarm(EXIT,...) writes to stdout for some reason
 
             pc = pointer to signed_message that represents the PO certificate being constructed
+
+            prints to sdterr: 
+            ***PO_CERT_TOO_BIG,current_bytes=val, attempted_bytes=val,
+            size_limit_bytes=val,ack_bytes=val,ack_parts=val,max_ack_parts=val,highest_ack_parts_seen=val,
+            acks_included=val,acks_needed=val
+
         */
         if (offset + size - ((char *)pc) >= PRIME_MAX_PACKET_SIZE) {
                 fprintf(stderr,
-                    "*PO_CERT too big: current_bytes=%zu attempted_bytes=%zu "
-                    "size_limit_bytes=%zu ack_bytes=%u ack_parts=%u "
-                    "max_ack_parts=%u highest_ack_parts_seen=%u "
-                    "acks_included=%u acks_needed=%u\n",
+                    "***PO_CERT_TOO_BIG,current_bytes=%zu,attempted_bytes=%zu,"
+                    "size_limit_bytes=%zu,ack_bytes=%u,ack_parts=%u,"
+                    "max_ack_parts=%u,highest_ack_parts_seen=%u,"
+                    "acks_included=%u,acks_needed=%u\n",
                     (size_t)(offset - (char *)pc),
                     (size_t)(offset - (char *)pc) + size,
                     (size_t)PRIME_MAX_PACKET_SIZE,
@@ -1616,9 +1627,7 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
         else
         {
             if (po_ack_specific->num_ack_parts > highest_ack_parts)
-            {
                 highest_ack_parts = po_ack_specific->num_ack_parts;
-            }
         }
 
         memcpy(offset, slot->ack[i], size);
@@ -1632,21 +1641,25 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
     assert(count == 2*VAR.F + VAR.K + 1); 
 
     /*
-        Used to gauge how successful PO certs typically look. To avoid flooding stdout, print the first & every subsequent 1000 
+        Used to check how successful PO certs typically look. To avoid flooding stdout, print the first & every subsequent 1000 
+        successfully created PO_CERTs
     */
     static unsigned long successful_certs = 0;
    successful_certs++;
    
-    if (successful_certs == 1 || successful_certs % 1000 == 0) {
-        fprintf(stdout,
-            "$PO_CERT success: certificate_bytes=%zu size_limit_bytes=%zu "
-            "max_ack_parts=%u highest_ack_parts_seen=%u "
-            "acks_included=%u acks_needed=%u\n",
-            (size_t)(offset - (char *)pc),
-            (size_t)PRIME_MAX_PACKET_SIZE,
-            (unsigned)MAX_ACK_PARTS,
-            highest_ack_parts,
-            count, 2 * VAR.F + VAR.K + 1);
+    if (successful_certs == 1 || successful_certs % 1000 == 0) 
+    {
+    fprintf(stdout,
+        "***PO_CERT_SUCCESS,PO_CERT_SIZE=%zu,SIZE_LIMIT_BYTES=%zu,"
+        "REMAINING_BYTES=%zu,"
+        "largest_po_ack_bytes=%u,"
+        "max_ack_parts=%u,highest_ack_parts_seen=%u\n",
+        (size_t)(offset - (char *)pc),
+        (size_t)PRIME_MAX_PACKET_SIZE,
+        (size_t)PRIME_MAX_PACKET_SIZE - (offset - (char *)pc),
+        largest_po_ack_size,
+        (unsigned)MAX_ACK_PARTS,
+        highest_ack_parts);
     }
 
 

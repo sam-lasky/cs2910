@@ -966,18 +966,18 @@ def write_logs_csv():
                             # Write config header, this identifies the curr config associated with the subsequent rows
                             out_writer.writerow(config_header)
                             # Write column headers for this config
-                            out_writer.writerow([
-                                'PO_CERT_SIZE',
-                                'FREE_BYTES_REMAINING',
-                                'HIGHEST_ACK_PARTS_SEEN'
-                            ])
+                            # out_writer.writerow([
+                            #     'PO_CERT_SIZE',
+                            #     'FREE_BYTES_REMAINING',
+                            #     'HIGHEST_ACK_PARTS_SEEN'
+                            # ])
 
-                        # Write this entry
-                        out_writer.writerow([
-                            cert_size,
-                            remaining_bytes,
-                            highest_ack_parts_seen
-                        ])
+                        # # Write this entry
+                        # out_writer.writerow([
+                        #     cert_size,
+                        #     remaining_bytes,
+                        #     highest_ack_parts_seen
+                        # ])
 
                         # Final overall row tracking
                         min_cert = min(min_cert, cert_size)
@@ -993,14 +993,23 @@ def write_logs_csv():
                     avg_cert /= cert_count
                     # write the 'overall' row
                     out_writer.writerow([
+                        'TYPE',
+                        'MIN_CERT_SIZE',
+                        'MAX_CERT_SIZE',
+                        'AVG_CERT_SIZE',
+                        'MIN_BYTES_REMAINING',
+                        'MAX_ACK_PARTS_SEEN',
+                        'LARGEST_PO_ACK_BYTES',
+                        'TOTAL_CERTS'
+                    ])
+                    out_writer.writerow([
                         'OVERALL',
                         min_cert,
                         max_cert,
                         round(avg_cert, 2),
                         min_remaining,
                         max_ack_parts_seen,
-                        largest_ack_overall,
-                        cert_count # remove this 
+                        largest_ack_overall
                     ])
 
                 # Handle stderr

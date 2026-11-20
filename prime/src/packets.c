@@ -1647,7 +1647,7 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
     static unsigned long successful_certs = 0;
    successful_certs++;
    
-    if (successful_certs == 1 || successful_certs % 1000 == 0) 
+    if (successful_certs == 1 || successful_certs % 10000 == 0) 
     {
     fprintf(stdout,
         "***PO_CERT_SUCCESS,PO_CERT_SIZE=%zu,SIZE_LIMIT_BYTES=%zu,"

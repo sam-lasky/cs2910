@@ -164,11 +164,11 @@ global total_replicas_used, spines_encryption_status, max_po_list, emulated_list
 # Total number of replicas being used in the test 
 total_replicas_used = [6]
 # Number of clients the driver program is emulating 
-emulated_list = [95,100,150,250]
+emulated_list = [95,100,150,250,500]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 5
+num_trials = 3
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 

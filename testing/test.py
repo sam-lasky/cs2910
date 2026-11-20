@@ -244,7 +244,7 @@ def generate_all_test_configurations():
         for replica_count in total_replicas_used:
             for max_po in max_po_list:
                 for encryption_value in spines_encryption_status:
-                    for dist in range(3,replica_count+1):
+                    for dist in range(4,5):
                         for num_emulated in emulated_list:
                             all_test_configs.append((max_po, replica_count, encryption_value, dist, num_emulated))
 

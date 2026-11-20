@@ -241,7 +241,10 @@
 /* These flags control which PO messages are sent periodically.  Set
  * an entry to 0 to have it NOT be sent periodically. */ 
 #define SEND_PO_REQUESTS_PERIODICALLY  0
+
 #define SEND_PO_ACKS_PERIODICALLY      1 
+// #define SEND_PO_ACKS_PERIODICALLY      1 
+
 #define SEND_PO_ARU_PERIODICALLY       1
 #define SEND_PROOF_MATRIX_PERIODICALLY 1
 

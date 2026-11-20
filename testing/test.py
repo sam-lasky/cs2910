@@ -359,11 +359,11 @@ def handle_logs(status,curr_test):
         while i<len(logs):
             # PO_CERT_TOO_BIG err
             if logs[i]=='***PO_CERT_TOO_BIG':
-                stderr+= ''.join(logs[i:i+10])
+                stderr += ','.join(logs[i:i+10]) + '\n'
                 i+=10
             # Other STDERR msg
             else:
-                stderr+=logs[i]
+                stderr+=logs[i] + '\n'
                 i+=1
 
     # Store stdout/err in logs_simplified

@@ -135,30 +135,30 @@ def start_prime(replica_ip:dict, replica_id:int):
     with    open('prime_status.log', 'w') as prime_status_log,\
             open('prime_err.log','w') as prime_err_log:
         # Start the Prime Process, write stdout/err to prime_status_log
-        # prime = subprocess.Popen(
-        #     ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
-        #     cwd='../prime/bin',
-        #     stdout=prime_status_log,
-        #     stderr= prime_err_log,
-        #     text=True
-        # )
-
         prime = subprocess.Popen(
-        [
-            "gdb", "-q", "-batch",
-            "-ex", "set logging file /dev/stderr",
-            "-ex", "set logging redirect on",
-            "-ex", "set logging enabled on",
-            "-ex", "run",
-            "-ex", "thread apply all bt full",
-            "--args",
-            "./prime", "-i", str(replica_id), "-g", str(replica_id)
-        ],
-        cwd="../prime/bin",
-        stdout=prime_status_log,
-        stderr=prime_err_log,
-        text=True
-    )
+            ["./prime", "-i", str(replica_id), "-g", str(replica_id)],
+            cwd='../prime/bin',
+            stdout=prime_status_log,
+            stderr= prime_err_log,
+            text=True
+        )
+
+    #     prime = subprocess.Popen(
+    #     [
+    #         "gdb", "-q", "-batch",
+    #         "-ex", "set logging file /dev/stderr",
+    #         "-ex", "set logging redirect on",
+    #         "-ex", "set logging enabled on",
+    #         "-ex", "run",
+    #         "-ex", "thread apply all bt full",
+    #         "--args",
+    #         "./prime", "-i", str(replica_id), "-g", str(replica_id)
+    #     ],
+    #     cwd="../prime/bin",
+    #     stdout=prime_status_log,
+    #     stderr=prime_err_log,
+    #     text=True
+    # )
 
     # Loop until all handshakes are completed
     while True:

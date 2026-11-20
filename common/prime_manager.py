@@ -144,21 +144,21 @@ def start_prime(replica_ip:dict, replica_id:int):
         # )
 
         prime = subprocess.Popen(
-        [
-            "gdb", "-q", "-batch",
-            "-ex", "set logging file /dev/stderr",
-            "-ex", "set logging redirect on",
-            "-ex", "set logging enabled on",
-            "-ex", "run",
-            "-ex", "thread apply all bt full",
-            "--args",
-            "./prime", "-i", str(replica_id), "-g", str(replica_id)
-        ],
-        cwd="../prime/bin",
-        stdout=prime_status_log,
-        stderr=prime_err_log,
-        text=True
-    )
+            [
+                "gdb", "-q", "-batch",
+                "-ex", "set logging file gdb_backtrace.log",
+                "-ex", "set logging redirect on",
+                "-ex", "set logging enabled on",
+                "-ex", "run",
+                "-ex", "thread apply all bt full",
+                "--args",
+                "./prime", "-i", str(replica_id), "-g", str(replica_id)
+            ],
+            cwd="../prime/bin",
+            stdout=prime_status_log,
+            stderr=prime_err_log,
+            text=True
+        )
 
     # Loop until all handshakes are completed
     while True:

@@ -92,7 +92,7 @@ def get_active_processes():
     Sets up the environment for the current testing configuration
 '''
 def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
-    global max_po, num_replicas, encrypt, make_count_prime, make_count_spines
+    global max_po, num_replicas, encrypt, make_count_prime, stdout_offset, stderr_offset
     # Preserve old global values 
     old_max_po = max_po
     old_num_replicas = num_replicas
@@ -143,6 +143,8 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     # START PRIME! (start prime exits out the curr prime process & starts it up again)
     if restart_prime:
         start_prime(id_to_ip, local_replica_id)
+        stdout_offset = os.path.getsize("prime_status.log")
+        stderr_offset = os.path.getsize("prime_err.log")
 
 
 '''

@@ -898,7 +898,7 @@ def send_command_to_replicas(sessions:dict,command:str,timeout:float, distributi
 def write_logs_csv():
     with open(f"results/{test_name}/stdout.log", "w") as out_log, \
         open(f"results/{test_name}/stderr.log", "w") as err_log, \
-        open(f"results/{test_name}/stderr_other.txt", "w") as err_other:
+        open(f"results/{test_name}/stderr_other.txt", "w", encoding="utf-8", errors="replace") as err_other:
             out_writer = csv.writer(out_log)
             err_writer = csv.writer(err_log)
             # test_config:tuple = (max_po, replica_count, encryption_status, distribution, num_clients_to_Emulate)
@@ -994,7 +994,7 @@ def write_logs_csv():
                         min_remaining,
                         max_ack_parts_seen,
                         largest_ack_overall,
-                        cert_count
+                        cert_count # remove this 
                     ])
 
                 # Handle stderr

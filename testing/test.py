@@ -702,9 +702,15 @@ def print_status_and_reboot_if_needed(
     if not reboot:
         return False
 
-    send_command_to_replicas(
+
+    responses = send_command_to_replicas(
         sessions, "REBOOT", timeout=60, distribution=len(sessions)
     )
+
+    for response in responses.values():
+        if response:
+            handle_logs(json.loads(response), current_test)
+
 
     # Reset reboot global variables 
     reboot_msg = ""

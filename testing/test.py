@@ -336,35 +336,54 @@ def print_replica_statuses(sessions: dict, updates_per_driver, curr_test):
 
     logs is constructed as string stdout+stderr where stdout=='' if empty and stderr=='' if empty
 '''
-def handle_logs(status,curr_test):
-    
-    # Write Prime logs
-    logs:str = status["logs"]
+def handle_logs(status, curr_test):
+    logs = status["logs"]
 
-    # Split on ,
-    logs = logs.split(',')
-    
-    stdout,stderr='',''
+    stdout, stderr = '', ''
 
-    i=0
-    # STDOUT
-    if i < len(logs) and logs[i]=='STDOUT':
-        i+=1
-        while i<len(logs) and logs[i]!='STDERR':
-            stdout+=logs[i] + ','
-            i+=1
-    # STDERR  
-    if i< len(logs) and logs[i]=='STDERR':
-        i+=1
-        while i<len(logs):
-            # PO_CERT_TOO_BIG err
-            if logs[i]=='***PO_CERT_TOO_BIG':
-                stderr += ','.join(logs[i:i+10]) + '\n'
-                i+=10
-            # Other STDERR msg
-            else:
-                stderr+=logs[i] + '\n'
-                i+=1
+    if logs.startswith('STDOUT,'):
+        content = logs[len('STDOUT,'):]
+        if ',STDERR,' in content:
+            stdout, stderr = content.split(',STDERR,', 1)
+        else:
+            stdout = content
+    elif logs.startswith('STDERR,'):
+        stderr = logs[len('STDERR,'):]
+
+    if curr_test not in logs_simplified:
+        logs_simplified[curr_test] = {'stdout': '', 'stderr': ''}
+
+    logs_simplified[curr_test]['stdout'] += stdout
+    logs_simplified[curr_test]['stderr'] += stderr
+# def handle_logs(status,curr_test):
+    
+#     # Write Prime logs
+#     logs:str = status["logs"]
+
+#     # Split on ,
+#     logs = logs.split(',')
+    
+#     stdout,stderr='',''
+
+#     i=0
+#     # STDOUT
+#     if i < len(logs) and logs[i]=='STDOUT':
+#         i+=1
+#         while i<len(logs) and logs[i]!='STDERR':
+#             stdout+=logs[i] + ','
+#             i+=1
+#     # STDERR  
+#     if i< len(logs) and logs[i]=='STDERR':
+#         i+=1
+#         while i<len(logs):
+#             # PO_CERT_TOO_BIG err
+#             if logs[i]=='***PO_CERT_TOO_BIG':
+#                 stderr += ','.join(logs[i:i+10]) + '\n'
+#                 i+=10
+#             # Other STDERR msg
+#             else:
+#                 stderr+=logs[i] + '\n'
+#                 i+=1
 
     # Store stdout/err in logs_simplified
     # logs_simplified[curr_test]['stdout'] == complete stdout msg as str 
@@ -376,14 +395,14 @@ def handle_logs(status,curr_test):
     #     distribution,          # [3]
     #     num_clients_to_Emulate # [4]
     # )
-    if curr_test in logs_simplified: #entry exists 
-        logs_simplified[curr_test]['stdout']+=stdout
-        logs_simplified[curr_test]['stderr']+=stderr
-    else: #entry dne
-        logs_simplified[curr_test]={
-            'stdout': stdout,
-            'stderr': stderr
-        }
+    # if curr_test in logs_simplified: #entry exists 
+    #     logs_simplified[curr_test]['stdout']+=stdout
+    #     logs_simplified[curr_test]['stderr']+=stderr
+    # else: #entry dne
+    #     logs_simplified[curr_test]={
+    #         'stdout': stdout,
+    #         'stderr': stderr
+    #     }
         
 '''
     Gets all the statuses of the active replicas & returns them in a 
@@ -901,10 +920,11 @@ def write_logs_csv():
                     # Count
                     cert_count = 0
 
-                    for entry in stdout.split('***PO_CERT_SUCCESS')[1:]:
-                        # PO_CERT_SIZE=val,SIZE_LIMIT_BYTES=val,REMAINING_BYTES=val,largest_po_ack_bytes=val,
-                        # max_ack_parts=val,highest_ack_parts_seen=val
-                        fields = entry.strip(',').split(',')
+                    for entry in stdout.splitlines():
+                        if not entry.startswith('***PO_CERT_SUCCESS,'):
+                            continue
+
+                        fields = entry.split(',', 1)[1].split(',')
                         '''
                         [
                             'PO_CERT_SIZE=val',           # [0]

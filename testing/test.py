@@ -356,13 +356,22 @@ def handle_logs(status, curr_test):
     logs_simplified[curr_test]['stdout'] += stdout
     logs_simplified[curr_test]['stderr'] += stderr
 
-    # delete me
+    log_dir = Path("results") / test_name / "raw_logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    if stdout:
+        with open(log_dir / "stdout.txt", "a", encoding="utf-8") as f:
+            f.write(f"\n[{datetime.now()}] CONFIG: {curr_test}\n")
+            f.write(stdout)
+            f.write("\n")
+
     if stderr:
-        with open("stderr_debug.txt", "a", encoding="utf-8") as f:
-            f.write(f"\nCURRENT TEST: {curr_test}\n")
+        with open(log_dir / "stderr.txt", "a", encoding="utf-8") as f:
+            f.write(f"\n[{datetime.now()}] CONFIG: {curr_test}\n")
             f.write(stderr)
             f.write("\n")
 
+            
 # def handle_logs(status,curr_test):
     
 #     # Write Prime logs

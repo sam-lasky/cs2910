@@ -423,7 +423,7 @@ def handle_logs(status, curr_test):
 def get_all_replica_statuses(sessions):
     global reboot, reboot_msg
     results =  send_command_to_replicas(
-        sessions, "CURRENT_STATUS", timeout=3,
+        sessions, "CURRENT_STATUS", timeout=15,
         distribution=len(sessions), allow_missing=True,
     )
 

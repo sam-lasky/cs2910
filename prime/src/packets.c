@@ -1602,18 +1602,34 @@ signed_message *CATCH_Construct_PO_Certificate(int32u rep, struct dummy_po_slot 
 
         */
         if (offset + size - ((char *)pc) >= PRIME_MAX_PACKET_SIZE) {
+                // fprintf(stderr,
+                //     "***PO_CERT_TOO_BIG,current_bytes=%zu,attempted_bytes=%zu,"
+                //     "size_limit_bytes=%zu,ack_bytes=%u,ack_parts=%u,"
+                //     "max_ack_parts=%u,highest_ack_parts_seen=%u,"
+                //     "acks_included=%u,acks_needed=%u\n",
+                //     (size_t)(offset - (char *)pc),
+                //     (size_t)(offset - (char *)pc) + size,
+                //     (size_t)PRIME_MAX_PACKET_SIZE,
+                //     size, po_ack_specific->num_ack_parts,
+                //     (unsigned)MAX_ACK_PARTS,
+                //     highest_ack_parts,
+                //     count, 2 * VAR.F + VAR.K + 1);
+
+                
                 fprintf(stderr,
-                    "***PO_CERT_TOO_BIG,current_bytes=%zu,attempted_bytes=%zu,"
-                    "size_limit_bytes=%zu,ack_bytes=%u,ack_parts=%u,"
-                    "max_ack_parts=%u,highest_ack_parts_seen=%u,"
-                    "acks_included=%u,acks_needed=%u\n",
-                    (size_t)(offset - (char *)pc),
-                    (size_t)(offset - (char *)pc) + size,
-                    (size_t)PRIME_MAX_PACKET_SIZE,
-                    size, po_ack_specific->num_ack_parts,
-                    (unsigned)MAX_ACK_PARTS,
-                    highest_ack_parts,
-                    count, 2 * VAR.F + VAR.K + 1);
+                "$$$PO_CERT_TOO_BIG,current_bytes=%zu,attempted_bytes=%zu,"
+                "size_limit_bytes=%zu,ack_bytes=%u,largest_po_ack_bytes=%u,"
+                "largest_ack_part_bytes=%zu,ack_parts=%u,"
+                "max_ack_parts=%u,highest_ack_parts_seen=%u,"
+                "acks_included=%u,acks_needed=%u\n",
+                (size_t)(offset - (char *)pc),
+                (size_t)(offset - (char *)pc) + size,
+                (size_t)PRIME_MAX_PACKET_SIZE,
+                size, largest_po_ack_size,
+                sizeof(po_ack_part), po_ack_specific->num_ack_parts,
+                (unsigned)MAX_ACK_PARTS,
+                highest_ack_parts,
+                count, 2 * VAR.F + VAR.K + 1);
 
                 Alarm(EXIT, "PO CERT too big! Last part is %u. #parts = %u\n",
                     size, po_ack_specific->num_ack_parts);

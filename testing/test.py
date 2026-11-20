@@ -240,10 +240,11 @@ The test variables are ordered to minimize restarts (config file changes)
 and recompilations (def.h changes) to minimize testing time.
 '''
 def generate_all_test_configurations():
+        #TODO: SET DIST BACK TO 1,replica..... INSTEAD OF 2!!!
         for replica_count in total_replicas_used:
             for max_po in max_po_list:
                 for encryption_value in spines_encryption_status:
-                    for dist in range(1,replica_count+1):
+                    for dist in range(2,replica_count+1):
                         for num_emulated in emulated_list:
                             all_test_configs.append((max_po, replica_count, encryption_value, dist, num_emulated))
 

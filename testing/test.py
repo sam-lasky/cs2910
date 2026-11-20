@@ -691,6 +691,9 @@ def print_status_and_reboot_if_needed(
 '''
     Runs each test configuration stored in all_test_configs
 '''
+'''
+    Runs each test configuration stored in all_test_configs
+'''
 def run_tests_aster():
     global test_name
     # CREATE A DIRECTORY FOR test_name IN results DIR
@@ -741,8 +744,6 @@ def run_tests_aster():
         if len(sessions)<replica_count:
             allocate_machines(replica_count, len(sessions), sessions)
 
-        retries = 0
-
         while (trial_num<=num_trials):
 
             # TODO: IMPLEMENT THIS trial ahs already executed, skip it and update trial num
@@ -760,12 +761,9 @@ def run_tests_aster():
                 trial_num, num_trials, dynamic_updates // distribution,num_clients_to_Emulate
             ):
                 failures += 1
-                retries += 1
-                if retries > 3:
-                    test_config = (*current_test, trial_num, dynamic_updates)
-                    handle_output(test_config, min_test_time, [], failures, True)
-                    trial_num += 1
-                    retries = 0
+                test_config = (*current_test, trial_num, dynamic_updates)
+                handle_output(test_config, min_test_time, [], failures, True)
+                trial_num += 1
                 continue
 
             print("\nREPLICAS ARE CURRENTLY SETTING UP THE TEST ENVIRONMENT....")
@@ -812,7 +810,6 @@ def run_tests_aster():
                 success, test_time = handle_output(test_config, min_test_time, driver_ids, failures,False)
                 if success:
                     trial_num+=1
-                    retries = 0
                 # time threshold not met, discard results & scale up dynamic updates
                 else:
                     test_sucessful[0]=False
@@ -820,12 +817,8 @@ def run_tests_aster():
                         dynamic_updates * min_test_time / test_time
                     )
             elif not test_sucessful[0]:
-                retries += 1
-                if retries > 3:
-                    trial_num += 1
-                    retries = 0
-                    handle_output(test_config, min_test_time, driver_ids, failures, True)
-
+                trial_num += 1
+                handle_output(test_config, min_test_time, driver_ids, failures, True)
 # def run_tests_aster():
 #     global test_name
 #     # CREATE A DIRECTORY FOR test_name IN results DIR

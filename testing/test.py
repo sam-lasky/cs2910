@@ -168,7 +168,7 @@ emulated_list = [80, 100, 250, 500]
 # Number of updates each driver program sends
 updates = 25000
 # Number of trials per test configuration
-num_trials = 5
+num_trials = 3
 # Spines encryption <disabled = 0, enabled = 1>
 spines_encryption_status = [0]
 # Maximum number of preorder requests Prime allows to be in flight simultaneously 

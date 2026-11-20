@@ -143,8 +143,8 @@ def set_up_test_env(passed_po:int, passed_rep_count:int, passed_encrypt:int):
     # START PRIME! (start prime exits out the curr prime process & starts it up again)
     if restart_prime:
         start_prime(id_to_ip, local_replica_id)
-        stdout_offset = os.path.getsize("prime_status.log")
-        stderr_offset = os.path.getsize("prime_err.log")
+        stdout_offset = 0
+        stderr_offset = 0
 
 
 '''

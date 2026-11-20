@@ -43,7 +43,7 @@ def start_replicas(sessions: dict[int, subprocess.Popen]):
         '{ if [ -d cs2910/.git ]; then '
         'git -C cs2910 fetch origin && '
         'git -C cs2910 reset --hard origin/main; '
-        'else git clone https://github.com/sam444555/cs2910.git; '
+        'else git clone https://github.com/sam-lasky/cs2910.git; '
         'fi; } > /dev/null 2>&1 && '
     )
 

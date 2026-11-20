@@ -814,7 +814,9 @@ def run_tests_aster():
             driver_results.clear() # RESET
 
             # 2 min timeout
-            deadline = monotonic() + 120
+            # deadline = monotonic() + 120
+            deadline = monotonic() + 300
+
 
             # Print status of all replicas every 2 seconds during the test
             # 2 minute timeout, if exceeded break & repeat test

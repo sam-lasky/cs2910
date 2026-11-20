@@ -480,131 +480,118 @@ def get_all_replica_statuses(sessions):
 '''
 def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
 
-    # Extract local vars from passed test config 
-    (max_po, 
+    # Extract local vars from passed test config
+    (max_po,
      replica_count,
      encryption_status,distribution,
      num_clients_to_Emulate,
      trial_num,
      updates)=test_config
 
+    test_key = (max_po,replica_count,encryption_status,distribution,num_clients_to_Emulate)
 
-    if failed: 
-        if trial_num == num_trials:
-            with open("results/completed_configs.txt", "a", encoding="utf-8") as f:
-                f.write(
-                    f"{max_po},{replica_count},{encryption_status},"
-                    f"{distribution},{num_clients_to_Emulate}\n"
-                )
+    if not failed:
 
-            with open("results/completed_configs_human_readable.txt",
-                    "a", encoding="utf-8") as f:
-                f.write(
-                    f"FAILED | FAILURES: {failures} | "
-                    f"MAX PO: {max_po} | REPLICAS: {replica_count} | "
-                    f"ENCRYPTION: {encryption_status} | "
-                    f"DISTRIBUTION: {distribution} | "
-                    f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
-                )
+        # key = machine_id, val = dict{....}
+        driver_results_by_machine = {}
 
-        return True, None
+        # Go through the results, parse each machines output and store it in driver_results_by_machine
+        for machine_id in driver_ids:
+            result = driver_results[machine_id]
+            fields= result.split(",")
+            print(f"Trial {trial_num} | ASTER {machine_id} | start={fields[8]} | end={fields[9]}")
+            # input("Press enter to continue...")
+            elapsed_seconds = float(fields[1])
 
+            # test failed to exceed threshold
+            if elapsed_seconds<min_test_time:
+                return False, elapsed_seconds
 
+            # store the driver results for each machine
+            driver_results_by_machine[machine_id] = {
+                'elapsed_time':elapsed_seconds,
+                'send_stalls':int(fields[2]),
+                'expected_tp':float(fields[3]),
+                'actual_tp':float(fields[4]),
+                'min_lat':float(fields[5]),
+                'max_lat':float(fields[6]),
+                'avg_lat':float(fields[7]),
+                'start_ts':float(fields[8]),
+                'end_ts':float(fields[9])
+            }
 
-    # key = machine_id, val = dict{....}
-    driver_results_by_machine = {}
+        # Total number of participating drivers
+        total_drivers = len(driver_results_by_machine.keys())
 
-    # Go through the results, parse each machines output and store it in driver_results_by_machine 
-    for machine_id in driver_ids:
-        result = driver_results[machine_id]
-        fields= result.split(",")
-        print(f"Trial {trial_num} | ASTER {machine_id} | start={fields[8]} | end={fields[9]}")
-        # input("Press enter to continue...")
-        elapsed_seconds = float(fields[1])
+        # Total number of updates = passed updates
+        # Store final results
+        mean_elapsed_time_secs= 0
+        mean_send_stalls = 0
+        mean_min_lat = 0
+        mean_max_lat = 0
+        mean_avg_lat = 0
 
-        # test failed to exceed threshold 
-        if elapsed_seconds<min_test_time:
-            return False, elapsed_seconds
+        latest_driver_endtime = 0
+        earliest_driver_start_time = float("inf")
 
-        # store the driver results for each machine 
-        driver_results_by_machine[machine_id] = {
-            'elapsed_time':elapsed_seconds, 
-            'send_stalls':int(fields[2]),   
-            'expected_tp':float(fields[3]), 
-            'actual_tp':float(fields[4]),   
-            'min_lat':float(fields[5]),
-            'max_lat':float(fields[6]),
-            'avg_lat':float(fields[7]),
-            'start_ts':float(fields[8]),
-            'end_ts':float(fields[9])
+        for machine_id in sorted(driver_results_by_machine.keys()):
+            mean_elapsed_time_secs+=    driver_results_by_machine[machine_id]['elapsed_time']
+            mean_send_stalls+=          driver_results_by_machine[machine_id]['send_stalls']
+            mean_min_lat +=             driver_results_by_machine[machine_id]['min_lat']
+            mean_max_lat +=             driver_results_by_machine[machine_id]['max_lat']
+            mean_avg_lat +=             driver_results_by_machine[machine_id]['avg_lat']
+
+            start_time = driver_results_by_machine[machine_id]['start_ts']
+            end_time = driver_results_by_machine[machine_id]['end_ts']
+
+            earliest_driver_start_time = min(earliest_driver_start_time, start_time)
+            latest_driver_endtime = max(latest_driver_endtime, end_time)
+
+        mean_elapsed_time_secs /= total_drivers
+        mean_send_stalls /= total_drivers
+        mean_min_lat /= total_drivers
+        mean_max_lat /= total_drivers
+        mean_avg_lat /= total_drivers
+
+        overall_elapsed_time = latest_driver_endtime - earliest_driver_start_time
+        overall_tp = updates / overall_elapsed_time
+
+        final_results.setdefault(test_key, {})[trial_num] = {
+            "total_updates": updates,
+            "overall_elapsed_time": overall_elapsed_time,
+            "overall_tp": overall_tp,
+            "mean_send_stalls": mean_send_stalls,
+            "mean_min_lat": mean_min_lat,
+            "mean_max_lat": mean_max_lat,
+            "mean_avg_lat": mean_avg_lat,
         }
 
-    # Total number of participating drivers
-    total_drivers = len(driver_results_by_machine.keys())
+    trials = final_results.get(test_key, {})
 
-    # Total number of updates = passed updates 
-    # Store final results 
-    test_key = (max_po,replica_count, encryption_status,distribution,num_clients_to_Emulate)
-    mean_elapsed_time_secs= 0 
-    mean_send_stalls = 0
-    mean_min_lat = 0
-    mean_max_lat = 0
-    mean_avg_lat = 0
+    if trial_num == num_trials:
+        successful_trials = len(trials)
+        failed_trials = num_trials - successful_trials
 
-    latest_driver_endtime = 0
-    earliest_driver_start_time = float("inf")
-
-    for machine_id in sorted(driver_results_by_machine.keys()):
-        mean_elapsed_time_secs+=    driver_results_by_machine[machine_id]['elapsed_time']
-        mean_send_stalls+=          driver_results_by_machine[machine_id]['send_stalls']
-        mean_min_lat +=             driver_results_by_machine[machine_id]['min_lat']
-        mean_max_lat +=             driver_results_by_machine[machine_id]['max_lat']
-        mean_avg_lat +=             driver_results_by_machine[machine_id]['avg_lat'] 
-
-        start_time = driver_results_by_machine[machine_id]['start_ts']
-        end_time = driver_results_by_machine[machine_id]['end_ts']
-
-        earliest_driver_start_time = min(earliest_driver_start_time, start_time)
-        latest_driver_endtime = max(latest_driver_endtime, end_time)
-
-
-    mean_elapsed_time_secs /= total_drivers
-    mean_send_stalls /= total_drivers
-    mean_min_lat /= total_drivers
-    mean_max_lat /= total_drivers
-    mean_avg_lat /= total_drivers
-
-    overall_elapsed_time = latest_driver_endtime - earliest_driver_start_time
-    overall_tp = updates / overall_elapsed_time
-
-    final_results.setdefault(test_key, {})[trial_num] = {
-        "total_updates": updates,
-        "overall_elapsed_time": overall_elapsed_time,
-        "overall_tp": overall_tp,
-        "mean_send_stalls": mean_send_stalls,
-        "mean_min_lat": mean_min_lat,
-        "mean_max_lat": mean_max_lat,
-        "mean_avg_lat": mean_avg_lat,
-    }
-        
-    trials = final_results[test_key]
-
-    if len(trials) == num_trials:
         with open(f"results/{test_name}/results.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            csv_row = [
-                *test_key,
-                sum(row["total_updates"] for row in trials.values()) / num_trials,
-                f'{sum(row["overall_elapsed_time"] for row in trials.values()) / num_trials:.2f}',
-                f'{sum(row["overall_tp"] for row in trials.values()) / num_trials:.2f}',
-                round(sum(row["mean_send_stalls"] for row in trials.values()) / num_trials),
-                f'{sum(row["mean_min_lat"] for row in trials.values()) / num_trials:.2f}',
-                f'{sum(row["mean_max_lat"] for row in trials.values()) / num_trials:.2f}',
-                f'{sum(row["mean_avg_lat"] for row in trials.values()) / num_trials:.2f}',
-            ]
+
+            if successful_trials:
+                csv_row = [
+                    *test_key,
+                    sum(row["total_updates"] for row in trials.values()) / successful_trials,
+                    f'{sum(row["overall_elapsed_time"] for row in trials.values()) / successful_trials:.2f}',
+                    f'{sum(row["overall_tp"] for row in trials.values()) / successful_trials:.2f}',
+                    round(sum(row["mean_send_stalls"] for row in trials.values()) / successful_trials),
+                    f'{sum(row["mean_min_lat"] for row in trials.values()) / successful_trials:.2f}',
+                    f'{sum(row["mean_max_lat"] for row in trials.values()) / successful_trials:.2f}',
+                    f'{sum(row["mean_avg_lat"] for row in trials.values()) / successful_trials:.2f}',
+                    successful_trials,
+                    failed_trials,
+                ]
+            else:
+                csv_row = [*test_key, *(["N/A"] * 7), successful_trials, failed_trials]
 
             if file.tell() == 0:
-     
                 writer.writerow([
                     "max_po",
                     "replica_count",
@@ -618,14 +605,16 @@ def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
                     "mean_min_latency_ms",
                     "mean_max_latency_ms",
                     "mean_avg_latency_ms",
+                    "successful_trials",
+                    "failed_trials",
                 ])
 
             writer.writerow(csv_row)
 
-        # mark this config as completed to avoid redundant test configs 
+        # mark this config as completed to avoid redundant test configs
         with open("results/completed_configs.txt", "a", encoding="utf-8") as file_computer_readable, \
             open("results/completed_configs_human_readable.txt","a",encoding="utf-8") as file_human_readable:
-                # for the program 
+                # for the program
                 file_computer_readable.write(
                     f"{max_po},{replica_count},{encryption_status},"
                     f"{distribution},{num_clients_to_Emulate}\n"
@@ -638,9 +627,13 @@ def handle_output(test_config,min_test_time,driver_ids,failures,failed:bool):
                     f"ENCRYPTION: {encryption_status} | "
                     f"DISTRIBUTION: {distribution} | "
                     f"EMULATED CLIENTS: {num_clients_to_Emulate}\n"
-                )                 
+                )
 
-    return True,None 
+    return True,None
+
+
+
+
 
 def load_completed():
     # all completed trials as a set 

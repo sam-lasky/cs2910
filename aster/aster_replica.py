@@ -355,8 +355,7 @@ def get_logs():
     if std_err:
         std_err = 'STDERR,' +std_err
     # returns stdout + stderr, stdout only if not stderr, stderr only if not stdout, empty string if neither
-    return std_out+std_err
-
+    return std_out + (',' if std_out and std_err else '') + std_err
 
 # TIMEOUT: Have not heard from the local controller in 5 minutes, assume process terminated. 
 # Kill all processes associated w/ aster replica on this machine & return 
